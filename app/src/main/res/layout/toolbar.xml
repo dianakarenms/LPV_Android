@@ -17,9 +17,15 @@
         android:layout_height="match_parent"
         android:padding="5dp"
         android:layout_marginRight="10dp"
-        android:src="@drawable/icono"
+        android:src="@drawable/menu"
         android:adjustViewBounds="true"
         android:scaleType="centerInside"
         android:background="@null"
         android:layout_alignParentRight="true"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/toolbar_divider"
+        android:layout_alignParentBottom="true"/>
 </RelativeLayout>

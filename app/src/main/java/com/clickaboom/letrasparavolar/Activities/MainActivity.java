@@ -1,28 +1,27 @@
 package com.clickaboom.letrasparavolar.Activities;
 
 import android.graphics.Color;
+import android.media.Image;
 import android.os.Bundle;
-import android.support.annotation.IdRes;
-import android.support.annotation.NonNull;
-import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.view.menu.MenuView;
+import android.support.v7.widget.LinearLayoutCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.clickaboom.letrasparavolar.Fragments.CollectionsFragment;
 import com.clickaboom.letrasparavolar.Fragments.LegendsFragment;
 import com.clickaboom.letrasparavolar.R;
 
@@ -30,11 +29,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener,
+        View.OnClickListener {
 
-    private ImageButton legendsBtn, colectionsBtn, libraryBtn;
+    private ImageButton legendsBtn, collectionsBtn, libraryBtn;
     private ImageView image;
     private FragmentManager fm;
+    private ImageView bottomOrnament;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +45,11 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         fm = getSupportFragmentManager();
+
+        // Set toolbar_asistant title
+        ((TextView)findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.legends_title));
+        findViewById(R.id.left_btn).setVisibility(View.GONE);
+        findViewById(R.id.right_bnt).setVisibility(View.GONE);
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -65,7 +71,13 @@ public class MainActivity extends AppCompatActivity
         });
 
         legendsBtn = (ImageButton)findViewById(R.id.legends_btn);
-        legendsBtn.setOnClickListener(onClick(););
+        legendsBtn.setOnClickListener(this);
+
+        collectionsBtn = (ImageButton)findViewById(R.id.collections_btn);
+        collectionsBtn.setOnClickListener(this);
+
+        libraryBtn = (ImageButton)findViewById(R.id.library_btn);
+        libraryBtn.setOnClickListener(this);
 
     }
     
@@ -129,9 +141,19 @@ public class MainActivity extends AppCompatActivity
     }
     @Override
     public void onBackPressed() {
+        restoreBottonNavColors();
+        // Set toolbar_asistant title
+        ((TextView)findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.news_title));
+        findViewById(R.id.left_btn).setVisibility(View.GONE);
+        findViewById(R.id.right_bnt).setVisibility(View.GONE);
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.END)) {
             drawer.closeDrawer(GravityCompat.END);
+        } else if (getSupportFragmentManager().findFragmentByTag("FragmentC") != null) {
+            // I'm viewing Fragment C
+            getSupportFragmentManager().popBackStack("A_B_TAG",
+                    FragmentManager.POP_BACK_STACK_INCLUSIVE);
         } else {
             super.onBackPressed();
         }
@@ -184,34 +206,62 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+
+
+    private void restoreBottonNavColors() {
+        legendsBtn.setBackgroundColor(Color.TRANSPARENT);
+        collectionsBtn.setBackgroundColor(Color.TRANSPARENT);
+        libraryBtn.setBackgroundColor(Color.TRANSPARENT);
+    }
+
+    @Override
     public void onClick(View v) {
+        // Set selected button
         restoreBottonNavColors();
         v.setBackgroundColor(getResources().getColor(R.color.bottom_nav_pressed));
+
+        // show bottom greca
+        //bottomOrnament.setVisibility(View.VISIBLE);
+
         switch (v.getId()) {
             case R.id.legends_btn:
-                // show bottom greca
-                //findViewById(R.id.bottom_greca).setVisibility(View.VISIBLE);
-
-                Fragment fragment = fm.findFragmentById(R.id.fragment_container);
-                if(fragment == null) {
-                    fragment = new LegendsFragment();
-                    fm.beginTransaction()
-                            .add(R.id.fragment_container, fragment)
+                Fragment legFrag = fm.findFragmentById(R.id.fragment_container);
+                //if(legFrag == null) {
+                    legFrag = new LegendsFragment();
+                //}
+                    /*fm.beginTransaction()
+                            .replace(R.id.fragment_container, legFrag)
                             .addToBackStack("legends")
-                            .commit();
-
-                }
+                            .commit();*/
+                replaceFragment(legFrag);
                 break;
-            case R.id.colections_btn:
+            case R.id.collections_btn:
+                Fragment colFrag = fm.findFragmentById(R.id.fragment_container);
+                //if(colFrag == null) {
+                    colFrag = new CollectionsFragment();
+                //}
+                    /*fm.beginTransaction()
+                            .replace(R.id.fragment_container, colFrag)
+                            .addToBackStack("collections")
+                            .commit();*/
+                replaceFragment(colFrag);
                 break;
             case R.id.library_btn:
                 break;
         }
     }
 
-    private void restoreBottonNavColors() {
-        legendsBtn.setBackgroundColor(Color.TRANSPARENT);
-        colectionsBtn.setBackgroundColor(Color.TRANSPARENT);
-        libraryBtn.setBackgroundColor(Color.TRANSPARENT);
+    private void replaceFragment (Fragment fragment){
+        String backStateName = fragment.getClass().getName();
+
+        FragmentManager manager = getSupportFragmentManager();
+        boolean fragmentPopped = manager.popBackStackImmediate (backStateName, 0);
+
+        if (!fragmentPopped){ //fragment not in back stack, create it.
+            FragmentTransaction ft = manager.beginTransaction();
+            ft.replace(R.id.fragment_container, fragment);
+            ft.addToBackStack(backStateName);
+            ft.commit();
+        }
     }
 }

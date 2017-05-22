@@ -3,9 +3,14 @@
     <color name="colorPrimary">#202020</color>
     <color name="colorPrimaryDark">#000</color>
     <color name="colorAccent">#cf3683</color>
+    <color name="legends_nav">#bc478e</color>
+    <color name="white">#fff</color>
     <color name="toolbar">#f1dec0</color>
     <color name="divider">#b4b4b4</color>
+    <color name="collections_nav">#80b741</color>
     <color name="bottom_nav">#2fa5ff</color>
     <color name="bottom_nav_pressed">#0086da</color>
-    <color name="white">#fff</color>
+    <color name="toolbar_divider">#5c88df</color>
+    <color name="nav_back">#5b7ce7</color>
+    <color name="nav_back_border">#2d4fbf</color>
 </resources>

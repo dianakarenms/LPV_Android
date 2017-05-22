@@ -3,15 +3,13 @@
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
-              android:background="@drawable/pattern_fondo"
-              android:weightSum="10">
+              android:background="@drawable/pattern_fondo">
 
     <include layout="@layout/toolbar_asistant"/>
 
     <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="8.7">
+        android:layout_height="wrap_content">
         <android.support.v4.widget.NestedScrollView
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -22,37 +20,220 @@
                 android:orientation="vertical">
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1.7"
-                    android:background="@color/bottom_nav">
+                    android:layout_height="wrap_content"
+                    android:background="@color/legends_nav"
+                    android:weightSum="4">
 
-                    <ImageView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:src="@drawable/leyendas"
-                        android:adjustViewBounds="true"/>
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingTop="5dp"
+                            android:orientation="horizontal"
+                            android:weightSum="5"
+                            android:gravity="center">
+                            <com.clickaboom.letrasparavolar.Views.SquareImageButtonWidth
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="2"
+                                android:src="@drawable/prehispanico"
+                                android:adjustViewBounds="true"
+                                android:scaleType="centerInside"
+                                android:background="@null"/>
+                        </LinearLayout>
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="3dp"
+                            android:text="@string/prehispanico"
+                            android:textColor="@color/white"
+                            android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                            android:gravity="center"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingTop="5dp"
+                            android:orientation="horizontal"
+                            android:weightSum="5"
+                            android:gravity="center">
+                            <com.clickaboom.letrasparavolar.Views.SquareImageButtonWidth
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="2"
+                                android:src="@drawable/colonia"
+                                android:adjustViewBounds="true"
+                                android:scaleType="centerInside"
+                                android:background="@null"/>
+                        </LinearLayout>
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="3dp"
+                            android:text="@string/colonia"
+                            android:textColor="@color/white"
+                            android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                            android:gravity="center"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingTop="5dp"
+                            android:orientation="horizontal"
+                            android:weightSum="5"
+                            android:gravity="center">
+                            <com.clickaboom.letrasparavolar.Views.SquareImageButtonWidth
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="2"
+                                android:src="@drawable/revolucion"
+                                android:adjustViewBounds="true"
+                                android:scaleType="centerInside"
+                                android:background="@null"/>
+                        </LinearLayout>
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="3dp"
+                            android:text="@string/revolucion"
+                            android:textColor="@color/white"
+                            android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                            android:gravity="center"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:gravity="center">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:paddingTop="5dp"
+                            android:orientation="horizontal"
+                            android:weightSum="5"
+                            android:gravity="center">
+                            <com.clickaboom.letrasparavolar.Views.SquareImageButtonWidth
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="2"
+                                android:src="@drawable/horror"
+                                android:adjustViewBounds="true"
+                                android:scaleType="centerInside"
+                                android:background="@null"/>
+                        </LinearLayout>
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="2dp"
+                            android:text="@string/horror"
+                            android:textColor="@color/white"
+                            android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                            android:gravity="center"/>
+                    </LinearLayout>
 
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.3"
-                    android:background="@color/white">
-                    <TextView
-                        android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp">
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="@string/app_name"/>
+                        android:background="@color/white"
+                        android:weightSum="4"
+                        android:layout_marginBottom="5dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:paddingTop="7dp"
+                            android:paddingBottom="7dp"
+                            android:text="@string/nuevas"
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/mini_text"
+                            android:textStyle="bold"
+                            android:background="@drawable/nav_subcategories_button"
+                            android:gravity="center"
+                            android:textAllCaps="true"/>
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:paddingTop="7dp"
+                            android:paddingBottom="7dp"
+                            android:text="@string/populares"
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/mini_text"
+                            android:textStyle="bold"
+                            android:background="@drawable/nav_subcategories_button"
+                            android:gravity="center"
+                            android:textAllCaps="true"/>
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:paddingTop="7dp"
+                            android:paddingBottom="7dp"
+                            android:text="@string/tema_del_mes"
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/mini_text"
+                            android:textStyle="bold"
+                            android:background="@drawable/nav_subcategories_button"
+                            android:gravity="center"
+                            android:textAllCaps="true"/>
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:paddingTop="7dp"
+                            android:paddingBottom="7dp"
+                            android:text="@string/todos"
+                            android:textSize="@dimen/mini_text"
+                            android:textColor="@color/white"
+                            android:textStyle="bold"
+                            android:background="@drawable/nav_subcategories_button"
+                            android:gravity="center"
+                            android:textAllCaps="true"/>
+                    </LinearLayout>
 
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/legends_recycler"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:nestedScrollingEnabled="false"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp"/>
                 </LinearLayout>
-
-                <android.support.v7.widget.RecyclerView
-                    android:id="@+id/legends_recycler"
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="8"
-                    android:padding="7dp"
-                    android:nestedScrollingEnabled="false"/>
             </LinearLayout>
         </android.support.v4.widget.NestedScrollView>
     </android.support.design.widget.CoordinatorLayout>

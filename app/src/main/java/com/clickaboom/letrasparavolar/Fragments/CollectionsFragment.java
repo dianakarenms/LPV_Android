@@ -22,7 +22,7 @@ import java.util.List;
  * Created by Karencita on 15/05/2017.
  */
 
-public class LegendsFragment extends Fragment {
+public class CollectionsFragment extends Fragment {
 
     private Book mBook;
     private RecyclerView mRecyclerView;
@@ -30,7 +30,7 @@ public class LegendsFragment extends Fragment {
     private BooksAdapter mAdapter;
     private List<Book> mBooksList = new ArrayList<>();
 
-    public LegendsFragment() {
+    public CollectionsFragment() {
     }
 
     @Override
@@ -41,14 +41,14 @@ public class LegendsFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.fragment_legends, container, false);
-        mRecyclerView = (RecyclerView) v.findViewById(R.id.legends_recycler);
+        View v = inflater.inflate(R.layout.fragment_collections, container, false);
+        mRecyclerView = (RecyclerView) v.findViewById(R.id.collections_recycler);
 
         Toolbar toolbar = (Toolbar)v.findViewById(R.id.toolbar);
         ((MainActivity) getContext()).setSupportActionBar(toolbar);
 
         // Set toolbar_asistant title
-        ((TextView)v.findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.legends_title));
+        ((TextView)v.findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.collections_title));
         v.findViewById(R.id.left_btn).setVisibility(View.VISIBLE);
         v.findViewById(R.id.right_bnt).setVisibility(View.VISIBLE);
 

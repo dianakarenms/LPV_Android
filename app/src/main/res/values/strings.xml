@@ -11,4 +11,19 @@
     <string name="participate">Participa con nosotros</string>
     <string name="report">Gacetita</string>
     <string name="portal">Portal</string>
+    <string name="amigos">Amigos</string>
+    <string name="nuevas">Nuevas</string>
+    <string name="populares">Populares</string>
+    <string name="tema_del_mes">Tema del mes</string>
+    <string name="todos">Todos</string>
+    <string name="prehispanico">Prehispánico</string>
+    <string name="revolucion">Revolución</string>
+    <string name="horror">Horror</string>
+    <string name="colonia">Colonia</string>
+
+    <string name="legends_title">Leyendas</string>
+    <string name="mapa">Mapa</string>
+    <string name="buscar">Buscar</string>
+    <string name="news_title">Novedades</string>
+    <string name="collections_title">Colecciones</string>
 </resources>

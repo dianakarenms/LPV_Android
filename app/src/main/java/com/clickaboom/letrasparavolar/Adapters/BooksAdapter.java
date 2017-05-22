@@ -8,9 +8,9 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 import com.clickaboom.letrasparavolar.Models.Book;
 import com.clickaboom.letrasparavolar.R;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -51,9 +51,11 @@ public class BooksAdapter extends RecyclerView.Adapter<BooksAdapter.ViewHolder> 
     public void onBindViewHolder(BooksAdapter.ViewHolder holder, int position) {
         holder.mTitle.setText(mBookList.get(position).getTitle());
         holder.mSubtitle.setText(mBookList.get(position).getSubtitle());
-        Glide.with(mContext)
+        //holder.mImage.setImageResource(mBookList.get(position).getImage());
+        Picasso.with(mContext)
                 .load(mBookList.get(position).getImage())
-                .fitCenter()
+                .resize(400, 400)
+                .centerCrop()
                 .into(holder.mImage);
     }
 
