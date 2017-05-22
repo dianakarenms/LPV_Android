@@ -1,0 +1,57 @@
+<LinearLayout
+    android:id="@+id/bottom_nav_bar"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:layout_gravity="end"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--<ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:scaleType="fitXY"
+        android:src="@drawable/pattern_barra_azul"
+        android:layout_gravity="bottom"/>-->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        android:background="@color/bottom_nav"
+        android:weightSum="3">
+        <ImageButton
+            android:id="@+id/legends_btn"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:padding="7dp"
+            android:adjustViewBounds="true"
+            android:scaleType="centerInside"
+            android:src="@drawable/leyendas"
+            android:background="@null"
+            android:onClick="onClick"/>
+        <ImageButton
+            android:id="@+id/colections_btn"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:padding="7dp"
+            android:adjustViewBounds="true"
+            android:scaleType="centerInside"
+            android:src="@drawable/colecciones"
+            android:background="@null"
+            android:onClick="onClick"/>
+        <ImageButton
+            android:id="@+id/library_btn"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:padding="7dp"
+            android:adjustViewBounds="true"
+            android:scaleType="centerInside"
+            android:src="@drawable/biblioteca"
+            android:background="@null"
+            android:onClick="onClick"/>
+    </LinearLayout>
+</LinearLayout>

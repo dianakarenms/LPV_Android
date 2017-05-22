@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/header"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/toolbar"
+    android:background="@color/white">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:src="@drawable/pattern_subheader" />
+
+    <ImageButton
+        android:id="@+id/left_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:padding="5dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
+        android:src="@drawable/icono"
+        android:adjustViewBounds="true"
+        android:scaleType="centerInside"
+        android:background="@null"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:text="Colecciones"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+        android:textColor="@color/colorAccent"
+        android:layout_centerInParent="true"
+        android:gravity="center"/>
+
+    <ImageButton
+        android:id="@+id/right_bnt"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:padding="5dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginEnd="10dp"
+        android:src="@drawable/icono"
+        android:adjustViewBounds="true"
+        android:scaleType="centerInside"
+        android:background="@null"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"/>
+</RelativeLayout>

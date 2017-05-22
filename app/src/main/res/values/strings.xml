@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Letras para volar</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="program_info">Información del programa</string>
+    <string name="news">Noticias</string>
+    <string name="games">Juegos</string>
+    <string name="participate">Participa con nosotros</string>
+    <string name="report">Gacetita</string>
+    <string name="portal">Portal</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#202020</color>
+    <color name="colorPrimaryDark">#000</color>
+    <color name="colorAccent">#cf3683</color>
+    <color name="toolbar">#f1dec0</color>
+    <color name="divider">#b4b4b4</color>
+    <color name="bottom_nav">#2fa5ff</color>
+    <color name="bottom_nav_pressed">#0086da</color>
+    <color name="white">#fff</color>
+</resources>
