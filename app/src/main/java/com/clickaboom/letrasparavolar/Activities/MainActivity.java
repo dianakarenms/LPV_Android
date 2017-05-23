@@ -1,16 +1,17 @@
 package com.clickaboom.letrasparavolar.Activities;
 
 import android.graphics.Color;
-import android.media.Image;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutCompat;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -21,35 +22,38 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.clickaboom.letrasparavolar.Adapters.BannerPagerAdapter;
+import com.clickaboom.letrasparavolar.Adapters.BooksAdapter;
+import com.clickaboom.letrasparavolar.Adapters.BooksHomeAdapter;
 import com.clickaboom.letrasparavolar.Fragments.CollectionsFragment;
 import com.clickaboom.letrasparavolar.Fragments.LegendsFragment;
+import com.clickaboom.letrasparavolar.Models.Book;
 import com.clickaboom.letrasparavolar.R;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         View.OnClickListener {
 
     private ImageButton legendsBtn, collectionsBtn, libraryBtn;
+    private Book mBook;
+    private RecyclerView mRecyclerView, mRecyclerView2;
+    private LinearLayoutManager mLayoutManager;
+    private BooksHomeAdapter mAdapter;
+    private List<Book> mBooksList = new ArrayList<>();
+    private ViewPager view1;
+    private BannerPagerAdapter mBannerAdapter;
     private ImageView image;
-    private FragmentManager fm;
-    private ImageView bottomOrnament;
+    private LinearLayoutManager mLayoutManager2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-
-        fm = getSupportFragmentManager();
-
-        // Set toolbar_asistant title
-        ((TextView)findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.legends_title));
-        findViewById(R.id.left_btn).setVisibility(View.GONE);
-        findViewById(R.id.right_bnt).setVisibility(View.GONE);
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -62,14 +66,6 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        image = (ImageView)findViewById(R.id.mi_barquitoo);
-        image.post(new Runnable() {
-            @Override
-            public void run() {
-                animateBarquito(image);
-            }
-        });
-
         legendsBtn = (ImageButton)findViewById(R.id.legends_btn);
         legendsBtn.setOnClickListener(this);
 
@@ -79,6 +75,48 @@ public class MainActivity extends AppCompatActivity
         libraryBtn = (ImageButton)findViewById(R.id.library_btn);
         libraryBtn.setOnClickListener(this);
 
+        mRecyclerView = (RecyclerView)findViewById(R.id.home_recycler);
+        mRecyclerView2 = (RecyclerView)findViewById(R.id.home_recycler2);
+
+        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        // Set toolbar_asistant title
+        ((TextView)findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.news_title));
+        findViewById(R.id.left_btn).setVisibility(View.GONE);
+        findViewById(R.id.right_bnt).setVisibility(View.GONE);
+
+        image = (ImageView)findViewById(R.id.mi_barquitoo);
+        image.post(new Runnable() {
+            @Override
+            public void run() {
+                animateBarquito(image);
+            }
+        });
+
+        // use a linear layout manager
+        mLayoutManager = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        // use a linear layout manager
+        mLayoutManager2 = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
+        mRecyclerView2.setLayoutManager(mLayoutManager2);
+
+        // specify an adapter (see also next example)
+        mAdapter = new BooksHomeAdapter(mBooksList, getApplicationContext());
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView2.setAdapter(mAdapter);
+
+        loadBooks();
+
+        view1 = (ViewPager)findViewById(R.id.banner);
+
+        List<String> bannerItems = new ArrayList<>();
+        bannerItems.add("http://letrasparavolar.org/wp-content/themes/nuevas_letras/slider/images/cajadeletras-01.png");
+        bannerItems.add("http://letrasparavolar.org/wp-content/themes/nuevas_letras/slider/images/app.png");
+        bannerItems.add("http://letrasparavolar.org/wp-content/themes/nuevas_letras/slider/images/RED_1000x250.jpg");
+
+        mBannerAdapter = new BannerPagerAdapter(getApplicationContext(), bannerItems);
+        view1.setAdapter(mBannerAdapter);
     }
     
     @Override
@@ -86,66 +124,9 @@ public class MainActivity extends AppCompatActivity
         super.onStart();
     }
 
-    private void animateBarquito(final ImageView image) {
-        final float startX = 0; //start position
-        final float endX = windowWidth() - image.getWidth(); //end position - right edge of the parent
-        image.animate().translationX(endX).withEndAction(new Runnable() {
-            @Override
-            public void run() {
-                image.animate().translationX(startX).withEndAction(new Runnable() {
-                    @Override
-                    public void run() {
-                        animateBarquito(image);
-                    }
-                }).start();
-            }
-        }).setDuration(6000).start();
-    }
-
-    private int windowWidth() {
-        int width = 0, height = 0;
-        final DisplayMetrics metrics = new DisplayMetrics();
-        Display display = getWindowManager().getDefaultDisplay();
-        Method mGetRawH = null, mGetRawW = null;
-
-        try {
-            // For JellyBean 4.2 (API 17) and onward
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                display.getRealMetrics(metrics);
-
-                width = metrics.widthPixels;
-                height = metrics.heightPixels;
-            } else {
-                mGetRawH = Display.class.getMethod("getRawHeight");
-                mGetRawW = Display.class.getMethod("getRawWidth");
-
-                try {
-                    width = (Integer) mGetRawW.invoke(display);
-                    height = (Integer) mGetRawH.invoke(display);
-                } catch (IllegalArgumentException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
-        } catch (NoSuchMethodException e3) {
-            e3.printStackTrace();
-        }
-
-        return width;
-    }
     @Override
     public void onBackPressed() {
         restoreBottonNavColors();
-        // Set toolbar_asistant title
-        ((TextView)findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.news_title));
-        findViewById(R.id.left_btn).setVisibility(View.GONE);
-        findViewById(R.id.right_bnt).setVisibility(View.GONE);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.END)) {
@@ -225,25 +206,11 @@ public class MainActivity extends AppCompatActivity
 
         switch (v.getId()) {
             case R.id.legends_btn:
-                Fragment legFrag = fm.findFragmentById(R.id.fragment_container);
-                //if(legFrag == null) {
-                    legFrag = new LegendsFragment();
-                //}
-                    /*fm.beginTransaction()
-                            .replace(R.id.fragment_container, legFrag)
-                            .addToBackStack("legends")
-                            .commit();*/
+                Fragment legFrag = new LegendsFragment();
                 replaceFragment(legFrag);
                 break;
             case R.id.collections_btn:
-                Fragment colFrag = fm.findFragmentById(R.id.fragment_container);
-                //if(colFrag == null) {
-                    colFrag = new CollectionsFragment();
-                //}
-                    /*fm.beginTransaction()
-                            .replace(R.id.fragment_container, colFrag)
-                            .addToBackStack("collections")
-                            .commit();*/
+                Fragment colFrag = new CollectionsFragment();
                 replaceFragment(colFrag);
                 break;
             case R.id.library_btn:
@@ -263,5 +230,66 @@ public class MainActivity extends AppCompatActivity
             ft.addToBackStack(backStateName);
             ft.commit();
         }
+    }
+
+    public int windowWidth() {
+        int width = 0, height = 0;
+        final DisplayMetrics metrics = new DisplayMetrics();
+        Display display = getWindowManager().getDefaultDisplay();
+        Method mGetRawH = null, mGetRawW = null;
+
+        try {
+            // For JellyBean 4.2 (API 17) and onward
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                display.getRealMetrics(metrics);
+
+                width = metrics.widthPixels;
+                height = metrics.heightPixels;
+            } else {
+                mGetRawH = Display.class.getMethod("getRawHeight");
+                mGetRawW = Display.class.getMethod("getRawWidth");
+
+                try {
+                    width = (Integer) mGetRawW.invoke(display);
+                    height = (Integer) mGetRawH.invoke(display);
+                } catch (IllegalArgumentException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (IllegalAccessException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
+        } catch (NoSuchMethodException e3) {
+            e3.printStackTrace();
+        }
+
+        return width;
+    }
+
+    private void loadBooks() {
+        for(int i=0; i<4; i ++) {
+            mBooksList.add(new Book("Los primeros dioses" + i, "Leyenda popular " + i, R.drawable.test_1));
+            mAdapter.notifyItemInserted(i);
+        }
+    }
+
+    private void animateBarquito(final ImageView image) {
+        final float startX = 0; //start position
+        final float endX = windowWidth() - image.getWidth(); //end position - right edge of the parent
+        image.animate().translationX(endX).withEndAction(new Runnable() {
+            @Override
+            public void run() {
+                image.animate().translationX(startX).withEndAction(new Runnable() {
+                    @Override
+                    public void run() {
+                        animateBarquito(image);
+                    }
+                }).start();
+            }
+        }).setDuration(6000).start();
     }
 }

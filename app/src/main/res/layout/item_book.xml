@@ -7,7 +7,7 @@
     <com.clickaboom.letrasparavolar.Views.SquareImageButtonWidth
         android:id="@+id/book_img"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="20dp"
         android:src="@drawable/test_1"
         android:background="@null"
         android:adjustViewBounds="true"
