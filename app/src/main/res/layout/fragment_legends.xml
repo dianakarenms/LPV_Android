@@ -38,7 +38,7 @@
                             android:orientation="horizontal"
                             android:weightSum="5"
                             android:gravity="center">
-                            <com.clickaboom.letrasparavolar.Views.SquareImageButtonWidth
+                            <com.clickaboom.letrasparavolar.views.SquareImageButtonWidth
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="2"
@@ -71,7 +71,7 @@
                             android:orientation="horizontal"
                             android:weightSum="5"
                             android:gravity="center">
-                            <com.clickaboom.letrasparavolar.Views.SquareImageButtonWidth
+                            <com.clickaboom.letrasparavolar.views.SquareImageButtonWidth
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="2"
@@ -104,7 +104,7 @@
                             android:orientation="horizontal"
                             android:weightSum="5"
                             android:gravity="center">
-                            <com.clickaboom.letrasparavolar.Views.SquareImageButtonWidth
+                            <com.clickaboom.letrasparavolar.views.SquareImageButtonWidth
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="2"
@@ -137,7 +137,7 @@
                             android:orientation="horizontal"
                             android:weightSum="5"
                             android:gravity="center">
-                            <com.clickaboom.letrasparavolar.Views.SquareImageButtonWidth
+                            <com.clickaboom.letrasparavolar.views.SquareImageButtonWidth
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="2"

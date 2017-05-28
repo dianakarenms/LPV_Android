@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Letras para volar</string>
+    <string name="app_name">Native_LPV</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -26,4 +26,22 @@
     <string name="buscar">Buscar</string>
     <string name="news_title">Novedades</string>
     <string name="collections_title">Colecciones</string>
+    <string name="poesia">Poesía</string>
+    <string name="ensayo">Ensayo</string>
+    <string name="narrativa">Narrativa</string>
+    <string name="library_title">Biblitoeca</string>
+    <string name="download">Descargar</string>
+    <string name="description">Descripción:</string>
+    <string name="lorem_ipsum">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</string>
+    <string name="more">más...</string>
+    <string name="idiom">Idioma:</string>
+    <string name="category">Categoría:</string>
+    <string name="publisher">Editorial:</string>
+    <string name="published">Publicado:</string>
+    <string name="information">Información:</string>
+    <string name="size">Tamaño:</string>
+    <string name="pages">Páginas:</string>
+    <string name="tags">Etiquetas:</string>
+    <string name="requirements">Requisitos:</string>
+    <string name="related">Relacionados:</string>
 </resources>

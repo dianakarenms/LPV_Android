@@ -1,4 +1,4 @@
-package com.clickaboom.letrasparavolar.Views;
+package com.clickaboom.letrasparavolar.views;
 
 import android.content.Context;
 import android.util.AttributeSet;

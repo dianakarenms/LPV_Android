@@ -2,16 +2,18 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="5dp">
+    android:padding="5dp"
+    android:descendantFocusability="blocksDescendants">
 
-    <com.clickaboom.letrasparavolar.Views.SquareImageButtonWidth
+    <com.clickaboom.letrasparavolar.views.SquareImageButtonWidth
         android:id="@+id/book_img"
         android:layout_width="match_parent"
         android:layout_height="20dp"
         android:src="@drawable/test_1"
         android:background="@null"
         android:adjustViewBounds="true"
-        android:scaleType="centerInside"/>
+        android:scaleType="centerInside"
+        android:clickable="false"/>
     <TextView
         android:id="@+id/title_txt"
         android:layout_width="match_parent"

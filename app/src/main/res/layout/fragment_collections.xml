@@ -38,11 +38,11 @@
                             android:orientation="horizontal"
                             android:weightSum="5"
                             android:gravity="center">
-                            <com.clickaboom.letrasparavolar.Views.SquareImageButtonWidth
+                            <com.clickaboom.letrasparavolar.views.SquareImageButtonWidth
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="2"
-                                android:src="@drawable/prehispanico"
+                                android:src="@drawable/poesia"
                                 android:adjustViewBounds="true"
                                 android:scaleType="centerInside"
                                 android:background="@null"/>
@@ -51,7 +51,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_margin="3dp"
-                            android:text="@string/prehispanico"
+                            android:text="@string/poesia"
                             android:textColor="@color/white"
                             android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
                             android:gravity="center"/>
@@ -71,11 +71,11 @@
                             android:orientation="horizontal"
                             android:weightSum="5"
                             android:gravity="center">
-                            <com.clickaboom.letrasparavolar.Views.SquareImageButtonWidth
+                            <com.clickaboom.letrasparavolar.views.SquareImageButtonWidth
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="2"
-                                android:src="@drawable/colonia"
+                                android:src="@drawable/ensayo"
                                 android:adjustViewBounds="true"
                                 android:scaleType="centerInside"
                                 android:background="@null"/>
@@ -84,7 +84,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_margin="3dp"
-                            android:text="@string/colonia"
+                            android:text="@string/ensayo"
                             android:textColor="@color/white"
                             android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
                             android:gravity="center"/>
@@ -104,11 +104,11 @@
                             android:orientation="horizontal"
                             android:weightSum="5"
                             android:gravity="center">
-                            <com.clickaboom.letrasparavolar.Views.SquareImageButtonWidth
+                            <com.clickaboom.letrasparavolar.views.SquareImageButtonWidth
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="2"
-                                android:src="@drawable/revolucion"
+                                android:src="@drawable/narrativa"
                                 android:adjustViewBounds="true"
                                 android:scaleType="centerInside"
                                 android:background="@null"/>
@@ -117,7 +117,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_margin="3dp"
-                            android:text="@string/revolucion"
+                            android:text="@string/narrativa"
                             android:textColor="@color/white"
                             android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
                             android:gravity="center"/>
@@ -137,11 +137,11 @@
                             android:orientation="horizontal"
                             android:weightSum="5"
                             android:gravity="center">
-                            <com.clickaboom.letrasparavolar.Views.SquareImageButtonWidth
+                            <com.clickaboom.letrasparavolar.views.SquareImageButtonWidth
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="2"
-                                android:src="@drawable/horror"
+                                android:src="@drawable/amigos"
                                 android:adjustViewBounds="true"
                                 android:scaleType="centerInside"
                                 android:background="@null"/>
@@ -150,7 +150,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_margin="2dp"
-                            android:text="@string/horror"
+                            android:text="@string/amigos"
                             android:textColor="@color/white"
                             android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
                             android:gravity="center"/>

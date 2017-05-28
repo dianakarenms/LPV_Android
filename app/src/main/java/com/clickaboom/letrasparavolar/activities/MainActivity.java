@@ -1,9 +1,10 @@
-package com.clickaboom.letrasparavolar.Activities;
+package com.clickaboom.letrasparavolar.activities;
 
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
@@ -18,17 +19,16 @@ import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.clickaboom.letrasparavolar.Adapters.BannerPagerAdapter;
-import com.clickaboom.letrasparavolar.Adapters.BooksAdapter;
-import com.clickaboom.letrasparavolar.Adapters.BooksHomeAdapter;
-import com.clickaboom.letrasparavolar.Fragments.CollectionsFragment;
-import com.clickaboom.letrasparavolar.Fragments.LegendsFragment;
-import com.clickaboom.letrasparavolar.Models.Book;
 import com.clickaboom.letrasparavolar.R;
+import com.clickaboom.letrasparavolar.adapters.BannerPagerAdapter;
+import com.clickaboom.letrasparavolar.adapters.BooksHomeAdapter;
+import com.clickaboom.letrasparavolar.fragments.CollectionsFragment;
+import com.clickaboom.letrasparavolar.fragments.LegendsFragment;
+import com.clickaboom.letrasparavolar.models.Book;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -39,7 +39,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         View.OnClickListener {
 
-    private ImageButton legendsBtn, collectionsBtn, libraryBtn;
+    private RelativeLayout legendsBtn, collectionsBtn, libraryBtn;
     private Book mBook;
     private RecyclerView mRecyclerView, mRecyclerView2;
     private LinearLayoutManager mLayoutManager;
@@ -66,13 +66,13 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        legendsBtn = (ImageButton)findViewById(R.id.legends_btn);
+        legendsBtn = (RelativeLayout)findViewById(R.id.legends_btn);
         legendsBtn.setOnClickListener(this);
 
-        collectionsBtn = (ImageButton)findViewById(R.id.collections_btn);
+        collectionsBtn = (RelativeLayout)findViewById(R.id.collections_btn);
         collectionsBtn.setOnClickListener(this);
 
-        libraryBtn = (ImageButton)findViewById(R.id.library_btn);
+        libraryBtn = (RelativeLayout)findViewById(R.id.library_btn);
         libraryBtn.setOnClickListener(this);
 
         mRecyclerView = (RecyclerView)findViewById(R.id.home_recycler);
@@ -207,21 +207,21 @@ public class MainActivity extends AppCompatActivity
         switch (v.getId()) {
             case R.id.legends_btn:
                 Fragment legFrag = new LegendsFragment();
-                replaceFragment(legFrag);
+                replaceFragment(legFrag, MainActivity.this);
                 break;
             case R.id.collections_btn:
                 Fragment colFrag = new CollectionsFragment();
-                replaceFragment(colFrag);
+                replaceFragment(colFrag, MainActivity.this);
                 break;
             case R.id.library_btn:
                 break;
         }
     }
 
-    private void replaceFragment (Fragment fragment){
+    public static void replaceFragment (Fragment fragment, FragmentActivity activity){
         String backStateName = fragment.getClass().getName();
 
-        FragmentManager manager = getSupportFragmentManager();
+        FragmentManager manager = activity.getSupportFragmentManager();
         boolean fragmentPopped = manager.popBackStackImmediate (backStateName, 0);
 
         if (!fragmentPopped){ //fragment not in back stack, create it.

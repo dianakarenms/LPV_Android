@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:layout_gravity="end"
+    android:gravity="center"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <LinearLayout
@@ -12,38 +12,80 @@
         android:orientation="horizontal"
         android:background="@color/bottom_nav"
         android:weightSum="3">
-        <ImageButton
+        <RelativeLayout
             android:id="@+id/legends_btn"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:padding="7dp"
-            android:adjustViewBounds="true"
-            android:scaleType="centerInside"
-            android:src="@drawable/leyendas"
-            android:background="@null"
-            android:onClick="onClick"/>
-        <ImageButton
+            android:clickable="true">
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="7dp"
+                android:layout_above="@+id/legends_txt"
+                android:adjustViewBounds="true"
+                android:scaleType="centerInside"
+                android:src="@drawable/leyendas"
+                android:background="@null"/>
+            <TextView
+                android:id="@+id/legends_txt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:text="@string/legends_title"
+                android:textColor="@color/white"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                android:gravity="center"/>
+        </RelativeLayout>
+        <RelativeLayout
             android:id="@+id/collections_btn"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:padding="7dp"
-            android:adjustViewBounds="true"
-            android:scaleType="centerInside"
-            android:src="@drawable/colecciones"
-            android:background="@null"
-            android:onClick="onClick"/>
-        <ImageButton
+            android:onClick="onClick">
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="7dp"
+                android:layout_above="@+id/collections_txt"
+                android:adjustViewBounds="true"
+                android:scaleType="centerInside"
+                android:src="@drawable/colecciones"
+                android:background="@null"/>
+            <TextView
+                android:id="@+id/collections_txt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:text="@string/collections_title"
+                android:textColor="@color/white"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                android:gravity="center"/>
+        </RelativeLayout>
+        <RelativeLayout
             android:id="@+id/library_btn"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:padding="7dp"
-            android:adjustViewBounds="true"
-            android:scaleType="centerInside"
-            android:src="@drawable/biblioteca"
-            android:background="@null"
-            android:onClick="onClick"/>
+            android:onClick="onClick">
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="7dp"
+                android:layout_above="@+id/library_txt"
+                android:adjustViewBounds="true"
+                android:scaleType="centerInside"
+                android:src="@drawable/biblioteca"
+                android:background="@null"/>
+            <TextView
+                android:id="@+id/library_txt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:text="@string/library_title"
+                android:textColor="@color/white"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                android:gravity="center"/>
+        </RelativeLayout>
     </LinearLayout>
 </LinearLayout>

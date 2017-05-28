@@ -1,4 +1,4 @@
-package com.clickaboom.letrasparavolar.Models;
+package com.clickaboom.letrasparavolar.models;
 
 import java.util.UUID;
 
