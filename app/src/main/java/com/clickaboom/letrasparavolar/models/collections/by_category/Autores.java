@@ -1,4 +1,4 @@
-package com.clickaboom.letrasparavolar.models;
+package com.clickaboom.letrasparavolar.models.collections.by_category;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

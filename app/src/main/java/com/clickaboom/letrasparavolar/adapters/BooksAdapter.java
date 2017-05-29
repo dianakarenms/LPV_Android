@@ -13,7 +13,6 @@ import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.activities.MainActivity;
 import com.clickaboom.letrasparavolar.fragments.BookDetailsFragment;
 import com.clickaboom.letrasparavolar.models.Book;
-import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -62,11 +61,11 @@ public class BooksAdapter extends RecyclerView.Adapter<BooksAdapter.ViewHolder> 
         holder.mTitle.setText(mBookList.get(position).getTitle());
         holder.mSubtitle.setText(mBookList.get(position).getSubtitle());
         //holder.mImage.setImageResource(mBookList.get(position).getImage());
-        Picasso.with(mContext)
-                .load(mBookList.get(position).getImage())
-                .resize(400, 400)
-                .centerCrop()
-                .into(holder.mImage);
+//        Picasso.with(mContext)
+//                .load(mBookList.get(position).getImage())
+//                .resize(400, 400)
+//                .centerCrop()
+//                .into(holder.mImage);
     }
 
     @Override

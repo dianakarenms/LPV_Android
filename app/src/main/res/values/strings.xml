@@ -44,4 +44,5 @@
     <string name="tags">Etiquetas:</string>
     <string name="requirements">Requisitos:</string>
     <string name="related">Relacionados:</string>
+    <string name="add_to_favorites">Marcar como favorito</string>
 </resources>

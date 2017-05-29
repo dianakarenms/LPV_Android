@@ -5,18 +5,29 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.clickaboom.letrasparavolar.activities.MainActivity;
-import com.clickaboom.letrasparavolar.adapters.BooksAdapter;
-import com.clickaboom.letrasparavolar.models.Book;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.clickaboom.letrasparavolar.R;
+import com.clickaboom.letrasparavolar.activities.MainActivity;
+import com.clickaboom.letrasparavolar.adapters.CollectionsAdapter;
+import com.clickaboom.letrasparavolar.models.Book;
+import com.clickaboom.letrasparavolar.models.collections.by_category.Collections;
+import com.clickaboom.letrasparavolar.models.collections.by_category.ResCollections;
+import com.clickaboom.letrasparavolar.network.ApiConfig;
+import com.clickaboom.letrasparavolar.network.ApiSingleton;
+import com.clickaboom.letrasparavolar.network.GsonRequest;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by Karencita on 15/05/2017.
@@ -24,11 +35,12 @@ import java.util.List;
 
 public class LegendsFragment extends Fragment {
 
+    private static final String TAG = "com.lpv.legends";
     private Book mBook;
     private RecyclerView mRecyclerView;
     private GridLayoutManager mGridLayoutManager;
-    private BooksAdapter mAdapter;
-    private List<Book> mBooksList = new ArrayList<>();
+    private CollectionsAdapter mAdapter;
+    private List<Collections> mBooksList = new ArrayList<>();
 
     public LegendsFragment() {
     }
@@ -57,17 +69,41 @@ public class LegendsFragment extends Fragment {
         mRecyclerView.setLayoutManager(mGridLayoutManager);
 
         // specify an adapter (see also next example)
-        mAdapter = new BooksAdapter(mBooksList, getContext());
+        mAdapter = new CollectionsAdapter(mBooksList, getContext());
         mRecyclerView.setAdapter(mAdapter);
 
-        loadBooks();
+        if(mBooksList.isEmpty())
+            loadBooks();
         return v;
     }
 
     private void loadBooks() {
-        for(int i=0; i<20; i ++) {
-            mBooksList.add(new Book("Los primeros dioses " + i, "Leyenda popular " + i, R.drawable.test_1));
-            mAdapter.notifyItemInserted(i);
-        }
+        Map<String, String> params = new HashMap<>();
+        //params.put("order", "nuevas");
+
+        // Access the RequestQueue through your singleton class.
+        ApiSingleton.getInstance(getActivity())
+                .addToRequestQueue(new GsonRequest(ApiConfig.collecByOrder,
+                        ResCollections.class,
+                        Request.Method.GET,
+                        null, params,
+                        new Response.Listener() {
+                            @Override
+                            public void onResponse(Object response) {
+                                Log.d(TAG, response.toString());
+                                List<List<Collections>> res = ((ResCollections) response).data;
+                                //for(int i = 0; i<res.size(); i ++) {
+                                    mBooksList.addAll(res.get(0));
+                                //}
+
+                                mAdapter.notifyDataSetChanged();
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d(TAG, error.toString());
+                    }
+                }));
+
     }
 }

@@ -18,21 +18,18 @@
                 android:layout_height="match_parent"
                 android:weightSum="10"
                 android:orientation="vertical">
-                <!--<LinearLayout
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/collections_nav"
+                    android:background="@color/legends_nav"
                     android:weightSum="4">
 
                     <LinearLayout
-                        android:id="@+id/poesia_llay"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:orientation="vertical"
-                        android:gravity="center"
-                        android:clickable="true"
-                        android:descendantFocusability="blocksDescendants">
+                        android:gravity="center">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -45,30 +42,27 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="2"
-                                android:src="@drawable/poesia"
+                                android:src="@drawable/prehispanico"
                                 android:adjustViewBounds="true"
                                 android:scaleType="centerInside"
-                                android:background="@null"
-                                android:clickable="false"/>
+                                android:background="@null"/>
                         </LinearLayout>
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_margin="3dp"
-                            android:text="@string/poesia"
+                            android:text="@string/prehispanico"
                             android:textColor="@color/white"
                             android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
                             android:gravity="center"/>
                     </LinearLayout>
+
                     <LinearLayout
-                        android:id="@+id/ensayo_llay"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:orientation="vertical"
-                        android:gravity="center"
-                        android:clickable="true"
-                        android:descendantFocusability="blocksDescendants">
+                        android:gravity="center">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -81,30 +75,27 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="2"
-                                android:src="@drawable/ensayo"
+                                android:src="@drawable/colonia"
                                 android:adjustViewBounds="true"
                                 android:scaleType="centerInside"
-                                android:background="@null"
-                                android:clickable="false"/>
+                                android:background="@null"/>
                         </LinearLayout>
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_margin="3dp"
-                            android:text="@string/ensayo"
+                            android:text="@string/colonia"
                             android:textColor="@color/white"
                             android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
                             android:gravity="center"/>
                     </LinearLayout>
+
                     <LinearLayout
-                        android:id="@+id/narrativa_llay"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:orientation="vertical"
-                        android:gravity="center"
-                        android:clickable="true"
-                        android:descendantFocusability="blocksDescendants">
+                        android:gravity="center">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -117,30 +108,27 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="2"
-                                android:src="@drawable/narrativa"
+                                android:src="@drawable/revolucion"
                                 android:adjustViewBounds="true"
                                 android:scaleType="centerInside"
-                                android:background="@null"
-                                android:clickable="false"/>
+                                android:background="@null"/>
                         </LinearLayout>
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_margin="3dp"
-                            android:text="@string/narrativa"
+                            android:text="@string/revolucion"
                             android:textColor="@color/white"
                             android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
                             android:gravity="center"/>
                     </LinearLayout>
+
                     <LinearLayout
-                        android:id="@+id/amigos_llay"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:orientation="vertical"
-                        android:gravity="center"
-                        android:clickable="true"
-                        android:descendantFocusability="blocksDescendants">
+                        android:gravity="center">
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -153,30 +141,23 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="2"
-                                android:src="@drawable/amigos"
+                                android:src="@drawable/horror"
                                 android:adjustViewBounds="true"
                                 android:scaleType="centerInside"
-                                android:background="@null"
-                                android:clickable="false"/>
+                                android:background="@null"/>
                         </LinearLayout>
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_margin="2dp"
-                            android:text="@string/amigos"
+                            android:text="@string/horror"
                             android:textColor="@color/white"
                             android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
                             android:gravity="center"/>
                     </LinearLayout>
 
-                </LinearLayout>-->
-                <android.support.v7.widget.RecyclerView
-                    android:id="@+id/categories_recycler"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:nestedScrollingEnabled="false"
-                    android:overScrollMode="never"
-                    android:background="@color/collections_nav"/>
+                </LinearLayout>
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -192,7 +173,6 @@
                         android:layout_marginLeft="10dp"
                         android:layout_marginRight="10dp">
                         <TextView
-                            android:id="@+id/news_txt"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
@@ -204,10 +184,8 @@
                             android:textStyle="bold"
                             android:background="@drawable/nav_subcategories_button"
                             android:gravity="center"
-                            android:textAllCaps="true"
-                            android:clickable="true"/>
+                            android:textAllCaps="true"/>
                         <TextView
-                            android:id="@+id/top_txt"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
@@ -219,10 +197,8 @@
                             android:textStyle="bold"
                             android:background="@drawable/nav_subcategories_button"
                             android:gravity="center"
-                            android:textAllCaps="true"
-                            android:clickable="true"/>
+                            android:textAllCaps="true"/>
                         <TextView
-                            android:id="@+id/month_theme_txt"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
@@ -234,10 +210,8 @@
                             android:textStyle="bold"
                             android:background="@drawable/nav_subcategories_button"
                             android:gravity="center"
-                            android:textAllCaps="true"
-                            android:clickable="true"/>
+                            android:textAllCaps="true"/>
                         <TextView
-                            android:id="@+id/all_txt"
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
@@ -249,17 +223,16 @@
                             android:textStyle="bold"
                             android:background="@drawable/nav_subcategories_button"
                             android:gravity="center"
-                            android:textAllCaps="true"
-                            android:clickable="true"/>
+                            android:textAllCaps="true"/>
                     </LinearLayout>
 
                     <android.support.v7.widget.RecyclerView
-                        android:id="@+id/collections_recycler"
+                        android:id="@+id/legends_recycler"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:nestedScrollingEnabled="false"
-                        android:layout_marginLeft="@dimen/small_padding"
-                        android:layout_marginRight="@dimen/small_padding"/>
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp"/>
                 </LinearLayout>
             </LinearLayout>
         </android.support.v4.widget.NestedScrollView>

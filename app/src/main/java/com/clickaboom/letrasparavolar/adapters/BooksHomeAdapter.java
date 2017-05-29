@@ -10,7 +10,6 @@ import android.widget.TextView;
 
 import com.clickaboom.letrasparavolar.models.Book;
 import com.clickaboom.letrasparavolar.R;
-import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -52,11 +51,11 @@ public class BooksHomeAdapter extends RecyclerView.Adapter<BooksHomeAdapter.View
         holder.mTitle.setText(mBookList.get(position).getTitle());
         holder.mSubtitle.setText(mBookList.get(position).getSubtitle());
         //holder.mImage.setImageResource(mBookList.get(position).getImage());
-        Picasso.with(mContext)
-                .load(mBookList.get(position).getImage())
-                .resize(400, 400)
-                .centerCrop()
-                .into(holder.mImage);
+//        Picasso.with(mContext)
+//                .load(mBookList.get(position).getImage())
+//                .resize(400, 400)
+//                .centerCrop()
+//                .into(holder.mImage);
     }
 
     @Override
