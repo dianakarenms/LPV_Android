@@ -23,6 +23,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -32,6 +33,8 @@ import com.clickaboom.letrasparavolar.adapters.BannerPagerAdapter;
 import com.clickaboom.letrasparavolar.adapters.BooksHomeAdapter;
 import com.clickaboom.letrasparavolar.fragments.CollectionsFragment;
 import com.clickaboom.letrasparavolar.fragments.LegendsFragment;
+import com.clickaboom.letrasparavolar.fragments.LibraryFragment;
+import com.clickaboom.letrasparavolar.fragments.ProgramInfoFragment;
 import com.clickaboom.letrasparavolar.models.Book;
 import com.clickaboom.letrasparavolar.models.banners.Banner;
 import com.clickaboom.letrasparavolar.models.banners.ResBanners;
@@ -157,11 +160,6 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-    /*    List<String> bannerItems = new ArrayList<>();
-        bannerItems.add("http://letrasparavolar.org/wp-content/themes/nuevas_letras/slider/images/cajadeletras-01.png");
-        bannerItems.add("http://letrasparavolar.org/wp-content/themes/nuevas_letras/slider/images/app.png");
-        bannerItems.add("http://letrasparavolar.org/wp-content/themes/nuevas_letras/slider/images/RED_1000x250.jpg");*/
-
         mBannerAdapter = new BannerPagerAdapter(getApplicationContext(), mBannerItems);
         view1.setAdapter(mBannerAdapter);
         loadBanners();
@@ -179,11 +177,11 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.END)) {
             drawer.closeDrawer(GravityCompat.END);
-        } else if (getSupportFragmentManager().findFragmentByTag("FragmentC") != null) {
+        } /*else if (getSupportFragmentManager().findFragmentByTag("FragmentC") != null) {
             // I'm viewing Fragment C
             getSupportFragmentManager().popBackStack("A_B_TAG",
                     FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        } else {
+        } */else {
             super.onBackPressed();
         }
     }
@@ -249,9 +247,6 @@ public class MainActivity extends AppCompatActivity
         restoreBottonNavColors();
         v.setBackgroundColor(getResources().getColor(R.color.bottom_nav_pressed));
 
-        // show bottom greca
-        //bottomOrnament.setVisibility(View.VISIBLE);
-
         switch (v.getId()) {
             case R.id.legends_btn:
                 Fragment legFrag = new LegendsFragment();
@@ -262,6 +257,37 @@ public class MainActivity extends AppCompatActivity
                 replaceFragment(colFrag, MainActivity.this);
                 break;
             case R.id.library_btn:
+                Fragment libFrag = new LibraryFragment();
+                replaceFragment(libFrag, MainActivity.this);
+                break;
+        }
+    }
+
+    public void navOnClick(View v) {
+        switch (v.getId()) {
+            case R.id.info_btn:
+                Toast.makeText(getApplicationContext(), "info_btn", Toast.LENGTH_SHORT).show();
+                Fragment programInfoFragmentFrag = new ProgramInfoFragment();
+                replaceFragment(programInfoFragmentFrag, MainActivity.this);
+                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+                drawer.closeDrawer(GravityCompat.END);
+                break;
+            case R.id.news_btn:
+                Toast.makeText(getApplicationContext(), "news_btn", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.games_btn:
+                Toast.makeText(getApplicationContext(), "games_btn", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.participate_btn:
+                Toast.makeText(getApplicationContext(), "participate_btn", Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.portal_btn:
+                startActivity(WebviewActivity.newIntent(
+                        getApplicationContext(),
+                        "http://letrasparavolar.org/"));
+                break;
+            case R.id.magazine_btn:
+                Toast.makeText(getApplicationContext(), "magazine_btn", Toast.LENGTH_SHORT).show();
                 break;
         }
     }
@@ -326,7 +352,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void loadBanners() {
-
         // Access the RequestQueue through your singleton class.
         ApiSingleton.getInstance(getApplicationContext())
                 .addToRequestQueue(new GsonRequest(ApiConfig.banners,

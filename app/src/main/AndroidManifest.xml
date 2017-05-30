@@ -24,7 +24,11 @@
         <activity
             android:name=".activities.SearchActivity"
             android:theme="@style/Theme.Transparent"
-            android:windowSoftInputMode="adjustPan|stateVisible"/>
+            android:windowSoftInputMode="adjustPan|stateVisible" />
+
+        <activity
+            android:name=".activities.WebviewActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>

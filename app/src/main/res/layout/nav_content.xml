@@ -58,7 +58,9 @@
                 android:layout_weight="1"
                 android:orientation="vertical"
                 android:weightSum="5"
-                android:gravity="center">
+                android:gravity="center"
+                android:clickable="true"
+                android:onClick="navOnClick">
                 <com.clickaboom.letrasparavolar.views.SquareImageButtonHeight
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
@@ -66,7 +68,8 @@
                     android:src="@drawable/menu_info"
                     android:adjustViewBounds="true"
                     android:scaleType="centerInside"
-                    android:background="@null"/>
+                    android:background="@null"
+                    android:clickable="false"/>
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -87,7 +90,9 @@
                 android:layout_weight="1"
                 android:orientation="vertical"
                 android:weightSum="5"
-                android:gravity="center">
+                android:gravity="center"
+                android:clickable="true"
+                android:onClick="navOnClick">
                 <com.clickaboom.letrasparavolar.views.SquareImageButtonHeight
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
@@ -95,7 +100,8 @@
                     android:src="@drawable/menu_noticias"
                     android:adjustViewBounds="true"
                     android:scaleType="centerInside"
-                    android:background="@null"/>
+                    android:background="@null"
+                    android:clickable="false"/>
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -119,7 +125,9 @@
                 android:layout_weight="1"
                 android:orientation="vertical"
                 android:weightSum="5"
-                android:gravity="center">
+                android:gravity="center"
+                android:clickable="true"
+                android:onClick="navOnClick">
                 <com.clickaboom.letrasparavolar.views.SquareImageButtonHeight
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
@@ -127,7 +135,8 @@
                     android:src="@drawable/menu_juegos"
                     android:adjustViewBounds="true"
                     android:scaleType="centerInside"
-                    android:background="@null"/>
+                    android:background="@null"
+                    android:clickable="false"/>
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -148,7 +157,9 @@
                 android:layout_weight="1"
                 android:orientation="vertical"
                 android:weightSum="5"
-                android:gravity="center">
+                android:gravity="center"
+                android:clickable="true"
+                android:onClick="navOnClick">
                 <com.clickaboom.letrasparavolar.views.SquareImageButtonHeight
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
@@ -156,7 +167,8 @@
                     android:src="@drawable/menu_participa"
                     android:adjustViewBounds="true"
                     android:scaleType="centerInside"
-                    android:background="@null"/>
+                    android:background="@null"
+                    android:clickable="false"/>
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -180,7 +192,9 @@
                 android:layout_weight="1"
                 android:orientation="vertical"
                 android:weightSum="5"
-                android:gravity="center">
+                android:gravity="center"
+                android:clickable="true"
+                android:onClick="navOnClick">
                 <com.clickaboom.letrasparavolar.views.SquareImageButtonHeight
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
@@ -188,7 +202,8 @@
                     android:src="@drawable/menu_portal"
                     android:adjustViewBounds="true"
                     android:scaleType="centerInside"
-                    android:background="@null"/>
+                    android:background="@null"
+                    android:clickable="false"/>
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -209,7 +224,9 @@
                 android:layout_weight="1"
                 android:orientation="vertical"
                 android:weightSum="5"
-                android:gravity="center">
+                android:gravity="center"
+                android:clickable="true"
+                android:onClick="navOnClick">
                 <com.clickaboom.letrasparavolar.views.SquareImageButtonHeight
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
@@ -217,7 +234,8 @@
                     android:src="@drawable/menu_noticias"
                     android:adjustViewBounds="true"
                     android:scaleType="centerInside"
-                    android:background="@null"/>
+                    android:background="@null"
+                    android:clickable="false"/>
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
