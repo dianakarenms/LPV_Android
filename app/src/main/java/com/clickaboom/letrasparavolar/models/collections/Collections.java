@@ -1,4 +1,4 @@
-package com.clickaboom.letrasparavolar.models.collections.by_category;
+package com.clickaboom.letrasparavolar.models.collections;
 
 import com.clickaboom.letrasparavolar.models.collections.categories.Categoria;
 import com.clickaboom.letrasparavolar.models.Imagen;

@@ -7,8 +7,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.clickaboom.letrasparavolar.R;
+import com.clickaboom.letrasparavolar.models.banners.Banner;
+import com.clickaboom.letrasparavolar.network.ApiConfig;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -18,12 +22,14 @@ import java.util.List;
 
 public class BannerPagerAdapter extends PagerAdapter
 {
+    private static final String TARGET_URL = "URL";
+    private static final String TARGET_COLECCION = "COLECCION";
     public static int LOOPS_COUNT = 1000;
-    private List<String> data = null;
+    private List<Banner> data = null;
     private Context mContext;
     private LayoutInflater mLayoutInflater;
 
-    public BannerPagerAdapter(Context context, List<String> data) {
+    public BannerPagerAdapter(Context context, List<Banner> data) {
         super();
         this.mContext = context;
         this.data = data;
@@ -44,16 +50,25 @@ public class BannerPagerAdapter extends PagerAdapter
     public Object instantiateItem(ViewGroup container, int position) {
         View itemView = mLayoutInflater.inflate(R.layout.item_banner, container, false);
 
+        final Banner banner = data.get(position);
         ImageView imgIcon = (ImageView)itemView.findViewById(R.id.banner_img);
-        imgIcon.setImageResource(R.drawable.test_banner);
-        /*Picasso.with(mContext)
-                .load(data.get(position))
-                .resize(50, 50)
-                .centerInside()
-                .into(imgIcon);*/
+//        imgIcon.setImageResource(R.drawable.test_banner);
+        Picasso.with(mContext)
+                .load(ApiConfig.baseUrl + "/" + banner.imagen)
+                .fit()
+                .into(imgIcon);
 
+        itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(banner.target.equals(TARGET_URL)) {
+                    Toast.makeText(mContext, banner.url, Toast.LENGTH_SHORT).show();
+                } else if(banner.target.equals(TARGET_COLECCION)) {
+
+                }
+            }
+        });
         container.addView(itemView);
-
         return itemView;
     }
 

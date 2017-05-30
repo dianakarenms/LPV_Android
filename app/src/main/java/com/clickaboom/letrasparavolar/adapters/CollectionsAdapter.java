@@ -6,16 +6,16 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.NetworkImageView;
 import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.activities.MainActivity;
 import com.clickaboom.letrasparavolar.fragments.BookDetailsFragment;
-import com.clickaboom.letrasparavolar.models.collections.by_category.Collections;
+import com.clickaboom.letrasparavolar.models.collections.Collections;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
-import com.clickaboom.letrasparavolar.network.ApiSingleton;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,13 +37,15 @@ public class CollectionsAdapter extends RecyclerView.Adapter<CollectionsAdapter.
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         public TextView mTitle, mSubtitle;
-        public NetworkImageView mImage;
+        //public NetworkImageView mImage;
+        public ImageButton mImage;
         public ViewHolder(View v) {
             super(v);
             v.setOnClickListener(this);
             mTitle = (TextView) v.findViewById(R.id.title_txt);
             mSubtitle = (TextView) v.findViewById(R.id.subtitle_id);
-            mImage = (NetworkImageView)v.findViewById(R.id.book_img);
+            mImage = (ImageButton)v.findViewById(R.id.book_img);
+            //mImage = (NetworkImageView)v.findViewById(R.id.book_img);
         }
 
         @Override
@@ -75,9 +77,16 @@ public class CollectionsAdapter extends RecyclerView.Adapter<CollectionsAdapter.
 
         // Image
         String imgUrl = ApiConfig.collectionsImg + mBookList.get(position).imagen;
+        Picasso.with(mContext)
+                .load(imgUrl)
+                .resize(200,200)
+                .centerInside()
+                //.memoryPolicy(MemoryPolicy.NO_CACHE)
+                .into(holder.mImage);
+        /*
         imageLoader = ApiSingleton.getInstance(mContext).getImageLoader();
         imageLoader.get(imgUrl, ImageLoader.getImageListener(holder.mImage, R.drawable.book_placeholder, android.R.drawable.ic_dialog_alert));
-        holder.mImage.setImageUrl(imgUrl, imageLoader);
+        holder.mImage.setImageUrl(imgUrl, imageLoader);*/
     }
 
     @Override

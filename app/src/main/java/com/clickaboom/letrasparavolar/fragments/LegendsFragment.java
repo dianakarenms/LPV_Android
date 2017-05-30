@@ -18,8 +18,8 @@ import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.activities.MainActivity;
 import com.clickaboom.letrasparavolar.adapters.CollectionsAdapter;
 import com.clickaboom.letrasparavolar.models.Book;
-import com.clickaboom.letrasparavolar.models.collections.by_category.Collections;
-import com.clickaboom.letrasparavolar.models.collections.by_category.ResCollections;
+import com.clickaboom.letrasparavolar.models.collections.Collections;
+import com.clickaboom.letrasparavolar.models.collections.ResCollections;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
 import com.clickaboom.letrasparavolar.network.ApiSingleton;
 import com.clickaboom.letrasparavolar.network.GsonRequest;
@@ -62,7 +62,7 @@ public class LegendsFragment extends Fragment {
         // Set toolbar_asistant title
         ((TextView)v.findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.legends_title));
         v.findViewById(R.id.left_btn).setVisibility(View.VISIBLE);
-        v.findViewById(R.id.right_bnt).setVisibility(View.VISIBLE);
+        v.findViewById(R.id.right_btn).setVisibility(View.VISIBLE);
 
         // use a linear layout manager
         mGridLayoutManager = new GridLayoutManager(getContext(), 3);

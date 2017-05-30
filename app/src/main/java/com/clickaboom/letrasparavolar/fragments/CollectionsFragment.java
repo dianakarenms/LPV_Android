@@ -1,5 +1,6 @@
 package com.clickaboom.letrasparavolar.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
@@ -17,11 +18,12 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.activities.MainActivity;
+import com.clickaboom.letrasparavolar.activities.SearchActivity;
 import com.clickaboom.letrasparavolar.adapters.CategoriesAdapter;
 import com.clickaboom.letrasparavolar.adapters.CollectionsAdapter;
 import com.clickaboom.letrasparavolar.models.Book;
-import com.clickaboom.letrasparavolar.models.collections.by_category.Collections;
-import com.clickaboom.letrasparavolar.models.collections.by_category.ResCollections;
+import com.clickaboom.letrasparavolar.models.collections.Collections;
+import com.clickaboom.letrasparavolar.models.collections.ResCollections;
 import com.clickaboom.letrasparavolar.models.collections.categories.Categoria;
 import com.clickaboom.letrasparavolar.models.collections.categories.ResCategories;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
@@ -32,6 +34,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.app.Activity.RESULT_OK;
+
 /**
  * Created by Karencita on 15/05/2017.
  */
@@ -39,6 +43,8 @@ import java.util.List;
 public class CollectionsFragment extends Fragment implements View.OnClickListener {
 
     private static final String TAG = "com.lpv.collecByOrder";
+    public static final int REQUEST_SEARCH = 0;
+    public static final String RESULT_SEARCH = "searchText";
     private Book mBook;
     private RecyclerView mCategoriesRV, mCollectionsRV;
     private CollectionsAdapter mCollectionsAdapter;
@@ -85,14 +91,28 @@ public class CollectionsFragment extends Fragment implements View.OnClickListene
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         v = inflater.inflate(R.layout.fragment_collections, container, false);
-
+        // Set Suppor Toolbar
         Toolbar toolbar = (Toolbar)v.findViewById(R.id.toolbar);
         ((MainActivity) getContext()).setSupportActionBar(toolbar);
 
         // Set toolbar_asistant title
         ((TextView)v.findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.collections_title));
         v.findViewById(R.id.left_btn).setVisibility(View.VISIBLE);
-        v.findViewById(R.id.right_bnt).setVisibility(View.VISIBLE);
+        v.findViewById(R.id.right_btn).setVisibility(View.VISIBLE);
+        v.findViewById(R.id.right_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivityForResult(
+                        SearchActivity.newIntent(getContext()),
+                        REQUEST_SEARCH);
+            }
+        });
+
+        // Order collecByOrder
+        v.findViewById(R.id.news_txt).setOnClickListener(this);
+        v.findViewById(R.id.top_txt).setOnClickListener(this);
+        v.findViewById(R.id.month_theme_txt).setOnClickListener(this);
+        v.findViewById(R.id.all_txt).setOnClickListener(this);
 
         // Categories Recycler View
         mCategoriesRV = (RecyclerView) v.findViewById(R.id.categories_recycler);
@@ -103,7 +123,7 @@ public class CollectionsFragment extends Fragment implements View.OnClickListene
             public void recyclerViewListClicked(String categoryId) {
                 url = ApiConfig.collectionByCategory;
                 params = "?categoria=" + categoryId;
-                loadCollecByCategory();
+                loadCollections(url, params);
                 restoreOrderColors();
             }
         });
@@ -123,14 +143,8 @@ public class CollectionsFragment extends Fragment implements View.OnClickListene
         if(mCollectionsList.isEmpty()) {
             url = ApiConfig.collecByOrder;
             params = "?order=nuevas";
-            loadCollecByCategory();
+            loadCollections(url, params);
         }
-
-        // Order collecByOrder
-        v.findViewById(R.id.news_txt).setOnClickListener(this);
-        v.findViewById(R.id.top_txt).setOnClickListener(this);
-        v.findViewById(R.id.month_theme_txt).setOnClickListener(this);
-        v.findViewById(R.id.all_txt).setOnClickListener(this);
 
         return v;
     }
@@ -164,7 +178,7 @@ public class CollectionsFragment extends Fragment implements View.OnClickListene
 
     }
 
-    private void loadCollecByCategory() {
+    private void loadCollections(String url, String params) {
 
         // Access the RequestQueue through your singleton class.
         ApiSingleton.getInstance(getActivity())
@@ -212,15 +226,27 @@ public class CollectionsFragment extends Fragment implements View.OnClickListene
 
         }
         v.setBackgroundColor(getResources().getColor(R.color.order_back_pressed));
-        loadCollecByCategory();
+        loadCollections(url, params);
         mCategoriesAdapter.clearActive();
         mCategoriesAdapter.notifyDataSetChanged();
     }
 
     private void restoreOrderColors() {
-        v.findViewById(R.id.news_txt).setBackgroundColor(getResources().getColor(R.color.order_back));
-        v.findViewById(R.id.top_txt).setBackgroundColor(getResources().getColor(R.color.order_back));
-        v.findViewById(R.id.month_theme_txt).setBackgroundColor(getResources().getColor(R.color.order_back));
-        v.findViewById(R.id.all_txt).setBackgroundColor(getResources().getColor(R.color.order_back));
+        v.findViewById(R.id.news_txt).setBackground(getResources().getDrawable(R.drawable.nav_subcategories_button));
+        v.findViewById(R.id.top_txt).setBackground(getResources().getDrawable(R.drawable.nav_subcategories_button));
+        v.findViewById(R.id.month_theme_txt).setBackground(getResources().getDrawable(R.drawable.nav_subcategories_button));
+        v.findViewById(R.id.all_txt).setBackground(getResources().getDrawable(R.drawable.nav_subcategories_button));
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case REQUEST_SEARCH:
+                if(resultCode == RESULT_OK) {
+                    loadCollections(ApiConfig.searchCollections, "?q=" + data.getStringExtra(RESULT_SEARCH));
+                }
+                break;
+        }
     }
 }

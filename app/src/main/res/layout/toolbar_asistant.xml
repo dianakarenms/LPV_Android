@@ -16,10 +16,13 @@
         android:id="@+id/left_btn"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:paddingRight="@dimen/large_padding"
         android:orientation="horizontal"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true">
-        <ImageButton
+        android:layout_alignParentStart="true"
+        android:clickable="true"
+        android:descendantFocusability="blocksDescendants">
+        <ImageView
             android:layout_width="40dp"
             android:layout_height="match_parent"
             android:padding="5dp"
@@ -47,19 +50,22 @@
         android:gravity="center"/>
 
     <LinearLayout
-        android:id="@+id/right_bnt"
+        android:id="@+id/right_btn"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
+        android:paddingLeft="@dimen/large_padding"
         android:orientation="horizontal"
         android:layout_alignParentRight="true"
-        android:layout_alignParentEnd="true">
+        android:layout_alignParentEnd="true"
+        android:clickable="true"
+        android:descendantFocusability="blocksDescendants">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:text="@string/buscar"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
             android:gravity="center"/>
-        <ImageButton
+        <ImageView
             android:layout_width="40dp"
             android:layout_height="match_parent"
             android:padding="5dp"

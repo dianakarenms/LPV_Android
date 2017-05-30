@@ -173,7 +173,7 @@
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/categories_recycler"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="@dimen/nav_categories_height"
                     android:nestedScrollingEnabled="false"
                     android:overScrollMode="never"
                     android:background="@color/collections_nav"/>
@@ -258,8 +258,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:nestedScrollingEnabled="false"
-                        android:layout_marginLeft="@dimen/small_padding"
-                        android:layout_marginRight="@dimen/small_padding"/>
+                        android:layout_marginLeft="@dimen/extra_small_padding"
+                        android:layout_marginRight="@dimen/extra_small_padding"/>
                 </LinearLayout>
             </LinearLayout>
         </android.support.v4.widget.NestedScrollView>

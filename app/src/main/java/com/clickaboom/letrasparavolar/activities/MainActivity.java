@@ -15,6 +15,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,12 +24,20 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.adapters.BannerPagerAdapter;
 import com.clickaboom.letrasparavolar.adapters.BooksHomeAdapter;
 import com.clickaboom.letrasparavolar.fragments.CollectionsFragment;
 import com.clickaboom.letrasparavolar.fragments.LegendsFragment;
 import com.clickaboom.letrasparavolar.models.Book;
+import com.clickaboom.letrasparavolar.models.banners.Banner;
+import com.clickaboom.letrasparavolar.models.banners.ResBanners;
+import com.clickaboom.letrasparavolar.network.ApiConfig;
+import com.clickaboom.letrasparavolar.network.ApiSingleton;
+import com.clickaboom.letrasparavolar.network.GsonRequest;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -48,6 +57,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         View.OnClickListener {
 
+    private static final String TAG = "com.lpv.MainActivity";
     private RelativeLayout legendsBtn, collectionsBtn, libraryBtn;
     private Book mBook;
     private RecyclerView mRecyclerView, mRecyclerView2;
@@ -58,6 +68,7 @@ public class MainActivity extends AppCompatActivity
     private BannerPagerAdapter mBannerAdapter;
     private ImageView image;
     private LinearLayoutManager mLayoutManager2;
+    private List<Banner> mBannerItems = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,7 +107,7 @@ public class MainActivity extends AppCompatActivity
         // Set toolbar_asistant title
         ((TextView)findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.news_title));
         findViewById(R.id.left_btn).setVisibility(View.GONE);
-        findViewById(R.id.right_bnt).setVisibility(View.GONE);
+        findViewById(R.id.right_btn).setVisibility(View.GONE);
 
         image = (ImageView)findViewById(R.id.mi_barquitoo);
         image.post(new Runnable() {
@@ -121,14 +132,39 @@ public class MainActivity extends AppCompatActivity
         loadBooks();
 
         view1 = (ViewPager)findViewById(R.id.banner);
+        view1.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageSelected(int index) {
+                Log.v( "onPageSelected", String.valueOf( index ) );
+            }
 
-        List<String> bannerItems = new ArrayList<>();
+            @Override
+            public void onPageScrolled(int arg0, float arg1, int arg2) {
+                // Log.v("onPageScrolled", "");
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+                Log.v("onPageScrollStateCh", String.valueOf(state));
+
+                if (state ==ViewPager.SCROLL_STATE_IDLE) {
+                    int index = view1.getCurrentItem();
+                    if ( index == 0 ) {
+                        view1.setCurrentItem(mBannerAdapter.getCount() - 2, false);
+                    } else if ( index == mBannerAdapter.getCount() - 1 )
+                        view1.setCurrentItem( 1 , false);
+                }
+            }
+        });
+
+    /*    List<String> bannerItems = new ArrayList<>();
         bannerItems.add("http://letrasparavolar.org/wp-content/themes/nuevas_letras/slider/images/cajadeletras-01.png");
         bannerItems.add("http://letrasparavolar.org/wp-content/themes/nuevas_letras/slider/images/app.png");
-        bannerItems.add("http://letrasparavolar.org/wp-content/themes/nuevas_letras/slider/images/RED_1000x250.jpg");
+        bannerItems.add("http://letrasparavolar.org/wp-content/themes/nuevas_letras/slider/images/RED_1000x250.jpg");*/
 
-        mBannerAdapter = new BannerPagerAdapter(getApplicationContext(), bannerItems);
+        mBannerAdapter = new BannerPagerAdapter(getApplicationContext(), mBannerItems);
         view1.setAdapter(mBannerAdapter);
+        loadBanners();
     }
     
     @Override
@@ -287,6 +323,37 @@ public class MainActivity extends AppCompatActivity
             mBooksList.add(new Book("Los primeros dioses" + i, "Leyenda popular " + i, R.drawable.test_1));
             mAdapter.notifyItemInserted(i);
         }
+    }
+
+    private void loadBanners() {
+
+        // Access the RequestQueue through your singleton class.
+        ApiSingleton.getInstance(getApplicationContext())
+                .addToRequestQueue(new GsonRequest(ApiConfig.banners,
+                        ResBanners.class,
+                        Request.Method.GET,
+                        null, null,
+                        new Response.Listener() {
+                            @Override
+                            public void onResponse(Object response) {
+                                Log.d(TAG, response.toString());
+                                List<Banner> res = ((ResBanners) response).data;
+                                mBannerItems.clear();
+
+                                // Repeat last and first values to make an infinite ViewPager
+                                mBannerItems.add(res.get(res.size()-1));
+                                mBannerItems.addAll(res); // Add main book to list
+                                mBannerItems.add(res.get(0));
+
+                                mBannerAdapter.notifyDataSetChanged();
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d(TAG, error.toString());
+                    }
+                }));
+
     }
 
     private void animateBarquito(final ImageView image) {

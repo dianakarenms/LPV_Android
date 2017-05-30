@@ -9,22 +9,23 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.NetworkImageView;
 import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.activities.MainActivity;
 import com.clickaboom.letrasparavolar.adapters.CollectionsAdapter;
 import com.clickaboom.letrasparavolar.models.Book;
-import com.clickaboom.letrasparavolar.models.collections.by_category.Collections;
-import com.clickaboom.letrasparavolar.models.collections.by_category.ResCollections;
+import com.clickaboom.letrasparavolar.models.collections.Collections;
+import com.clickaboom.letrasparavolar.models.collections.ResCollections;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
 import com.clickaboom.letrasparavolar.network.ApiSingleton;
 import com.clickaboom.letrasparavolar.network.GsonRequest;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,12 +86,18 @@ public class BookDetailsFragment extends Fragment {
         }
 
 
-
-        NetworkImageView image = (NetworkImageView) v.findViewById(R.id.book_img);
-        image.setDefaultImageResId(R.drawable.book_placeholder);String imgUrl = ApiConfig.collectionsImg + item.imagen;
+        String imgUrl = ApiConfig.collectionsImg + item.imagen;
+        /*NetworkImageView image = (NetworkImageView) v.findViewById(R.id.book_img);
+        image.setDefaultImageResId(R.drawable.book_placeholder);
         imageLoader = ApiSingleton.getInstance(getContext()).getImageLoader();
         imageLoader.get(imgUrl, ImageLoader.getImageListener(image, R.drawable.book_placeholder, android.R.drawable.ic_dialog_alert));
-        image.setImageUrl(imgUrl, imageLoader);
+        image.setImageUrl(imgUrl, imageLoader);*/
+        ImageView image = (ImageView) v.findViewById(R.id.book_img);
+        Picasso.with(getContext())
+                .load(imgUrl)
+                .resize(300,300)
+                .centerInside()
+                .into(image);
 
         ((TextView)v.findViewById(R.id.title_txt)).setText(item.titulo);
 

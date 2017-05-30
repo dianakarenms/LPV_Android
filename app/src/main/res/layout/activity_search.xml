@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:background="@color/transp_back"
+              android:paddingLeft="40dp"
+              android:paddingRight="40dp"
+              android:gravity="center"
+              android:clickable="true"
+              android:onClick="onClick"
+              android:id="@+id/search_back"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/toolbar"
+        android:layout_marginBottom="@dimen/small_padding"
+        android:gravity="bottom"
+        android:orientation="horizontal">
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scaleType="fitXY"
+            android:src="@drawable/pattern_header_up" />
+    </LinearLayout>
+        <EditText
+            android:id="@+id/search_edit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/search_edittext"
+            android:drawableLeft="@drawable/ic_action_name"
+            android:padding="@dimen/extra_small_padding"
+            android:hint="@string/buscar"
+            android:lines="1"
+            android:imeOptions="actionSearch"
+            android:inputType="text"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/toolbar"
+        android:layout_marginTop="@dimen/small_padding"
+        android:orientation="horizontal">
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scaleType="fitXY"
+            android:src="@drawable/pattern_header_down" />
+    </LinearLayout>
+
+</LinearLayout>

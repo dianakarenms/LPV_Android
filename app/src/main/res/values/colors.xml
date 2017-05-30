@@ -5,15 +5,17 @@
     <color name="colorAccent">#cf3683</color>
     <color name="legends_nav">#c6528e</color>
     <color name="white">#fff</color>
-    <color name="toolbar">#f1dec0</color>
+    <color name="background">#f6f6f2</color>
+    <color name="transp_back">#d8f6f6f2</color>
     <color name="divider">#e1e1e1</color>
-    <color name="collections_nav">#a5c05c</color>
-    <color name="collections_nav_pressed">#b2c96a</color>
+    <color name="toolbar">#f1dec0</color>
+    <color name="collections_nav">#a2be58</color>
+    <color name="collections_nav_pressed">#b3c96f</color>
     <color name="bottom_nav">#2fa5ff</color>
     <color name="bottom_nav_pressed">#0086da</color>
     <color name="toolbar_divider">#5c88df</color>
     <color name="order_back">#6684e2</color>
     <color name="order_back_pressed">#3756bc</color>
     <color name="lilac">#AB79AC</color>
-    <color name="background">#FAF9F7</color>
+    <color name="dark_lilac">#9c78a7</color>
 </resources>

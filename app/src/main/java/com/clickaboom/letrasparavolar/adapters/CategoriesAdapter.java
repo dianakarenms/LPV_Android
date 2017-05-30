@@ -6,15 +6,15 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.NetworkImageView;
 import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.models.collections.categories.Categoria;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
-import com.clickaboom.letrasparavolar.network.ApiSingleton;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -39,12 +39,12 @@ public class CategoriesAdapter extends RecyclerView.Adapter<CategoriesAdapter.Vi
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView mTitle;
-        public NetworkImageView mImage;
+        public ImageView mImage;
         public LinearLayout mCategoryLay;
         public ViewHolder(View v) {
             super(v);
             mTitle = (TextView) v.findViewById(R.id.title_txt);
-            mImage = (NetworkImageView)v.findViewById(R.id.book_img);
+            mImage = (ImageView) v.findViewById(R.id.book_img);
             mCategoryLay = (LinearLayout)v.findViewById(R.id.category_item_lay);
         }
     }
@@ -62,11 +62,16 @@ public class CategoriesAdapter extends RecyclerView.Adapter<CategoriesAdapter.Vi
         final Categoria category = mList.get(position);
         holder.mTitle.setText(category.nombre);
         //holder.mImage.setDefaultImageResId(R.drawable.book_placeholder);
-
         String imgUrl = ApiConfig.baseUrl + mImgPath + category.icono;
+        /*
         imageLoader = ApiSingleton.getInstance(mContext).getImageLoader();
         imageLoader.get(imgUrl, ImageLoader.getImageListener(holder.mImage, R.mipmap.ic_launcher, android.R.drawable.ic_dialog_alert));
-        holder.mImage.setImageUrl(imgUrl, imageLoader);
+        holder.mImage.setImageUrl(imgUrl, imageLoader);*/
+        Picasso.with(mContext)
+                .load(imgUrl)
+                .resize(100, 100)
+                .centerInside()
+                .into(holder.mImage);
 //        holder.mImage.setDefaultImageResId(R.drawable.book_placeholder);
 //        String imgUrl = ApiConfig.baseUrl + mImgPath + category.icono;
 //        holder.mImage.setImageUrl(imgUrl, ApiSingleton.getInstance(mContext).getImageLoader());
