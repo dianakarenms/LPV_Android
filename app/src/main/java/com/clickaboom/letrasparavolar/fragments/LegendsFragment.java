@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,7 +14,6 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.clickaboom.letrasparavolar.R;
-import com.clickaboom.letrasparavolar.activities.MainActivity;
 import com.clickaboom.letrasparavolar.adapters.CollectionsAdapter;
 import com.clickaboom.letrasparavolar.models.Book;
 import com.clickaboom.letrasparavolar.models.collections.Collections;
@@ -56,8 +54,7 @@ public class LegendsFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_legends, container, false);
         mRecyclerView = (RecyclerView) v.findViewById(R.id.legends_recycler);
 
-        Toolbar toolbar = (Toolbar)v.findViewById(R.id.toolbar);
-        ((MainActivity) getContext()).setSupportActionBar(toolbar);
+        //Toolbar toolbar = ((MainActivity) getActivity()).mToolbar;
 
         // Set toolbar_asistant title
         ((TextView)v.findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.legends_title));

@@ -21,7 +21,7 @@
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:padding="7dp"
+                android:paddingTop="4dp"
                 android:layout_above="@+id/legends_txt"
                 android:adjustViewBounds="true"
                 android:scaleType="centerInside"
@@ -46,7 +46,7 @@
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:padding="7dp"
+                android:paddingTop="4dp"
                 android:layout_above="@+id/collections_txt"
                 android:adjustViewBounds="true"
                 android:scaleType="centerInside"
@@ -71,7 +71,7 @@
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:padding="7dp"
+                android:paddingTop="4dp"
                 android:layout_above="@+id/library_txt"
                 android:adjustViewBounds="true"
                 android:scaleType="centerInside"

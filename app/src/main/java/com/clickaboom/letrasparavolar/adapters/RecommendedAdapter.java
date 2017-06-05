@@ -24,12 +24,12 @@ import java.util.List;
  * Created by Karencita on 13/05/2017.
  */
 
-public class CollectionsAdapter extends RecyclerView.Adapter<CollectionsAdapter.ViewHolder> {
+public class RecommendedAdapter extends RecyclerView.Adapter<RecommendedAdapter.ViewHolder> {
     private static Context mContext;
     private static List<Collections> mBookList;
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public CollectionsAdapter(List<Collections> bookList, Context context) {
+    public RecommendedAdapter(List<Collections> bookList, Context context) {
         mContext = context;
         mBookList = bookList;
     }
@@ -55,7 +55,7 @@ public class CollectionsAdapter extends RecyclerView.Adapter<CollectionsAdapter.
     }
 
     @Override
-    public CollectionsAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RecommendedAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_book, parent, false);
         ViewHolder viewHolder = new ViewHolder(v);
@@ -63,7 +63,7 @@ public class CollectionsAdapter extends RecyclerView.Adapter<CollectionsAdapter.
     }
 
     @Override
-    public void onBindViewHolder(CollectionsAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(RecommendedAdapter.ViewHolder holder, int position) {
         // Title
         holder.mTitle.setText(mBookList.get(position).titulo);
 

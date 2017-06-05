@@ -2,11 +2,13 @@ package com.clickaboom.letrasparavolar.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcelable;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,11 +19,9 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.clickaboom.letrasparavolar.R;
-import com.clickaboom.letrasparavolar.activities.MainActivity;
 import com.clickaboom.letrasparavolar.activities.SearchActivity;
 import com.clickaboom.letrasparavolar.adapters.CategoriesAdapter;
 import com.clickaboom.letrasparavolar.adapters.CollectionsAdapter;
-import com.clickaboom.letrasparavolar.models.Book;
 import com.clickaboom.letrasparavolar.models.collections.Collections;
 import com.clickaboom.letrasparavolar.models.collections.ResCollections;
 import com.clickaboom.letrasparavolar.models.collections.categories.Categoria;
@@ -30,7 +30,6 @@ import com.clickaboom.letrasparavolar.network.ApiConfig;
 import com.clickaboom.letrasparavolar.network.ApiSingleton;
 import com.clickaboom.letrasparavolar.network.GsonRequest;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,7 +44,7 @@ public class CollectionsFragment extends Fragment implements View.OnClickListene
     private static final String TAG = "com.lpv.collecByOrder";
     public static final int REQUEST_SEARCH = 0;
     public static final String RESULT_SEARCH = "searchText";
-    private Book mBook;
+    private static final String LIST_STATE_KEY = "listState";
     private RecyclerView mCategoriesRV, mCollectionsRV;
     private CollectionsAdapter mCollectionsAdapter;
     private List<Collections> mCollectionsList;
@@ -53,49 +52,49 @@ public class CollectionsFragment extends Fragment implements View.OnClickListene
     private View v;
     private String url = "", params = "", mImgPath;
     private CategoriesAdapter mCategoriesAdapter;
+    private GridLayoutManager mGridLayoutManager;
+    private Parcelable mListState;
+    private NestedScrollView mNestedScroll;
 
-    public CollectionsFragment() {
+    public static CollectionsFragment newInstance() {
+        CollectionsFragment fragment = new CollectionsFragment();
+        return fragment;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+//        mListState = mGridLayoutManager.onSaveInstanceState();
+//        outState.putParcelable(LIST_STATE_KEY, mListState);
+        /*outState.putSerializable("categories", (Serializable) mCategoriesList);
+        outState.putSerializable("collections", (Serializable) mCollectionsList);
+        outState.putString("imgPath", mImgPath);*/
+
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        Log.d("res", "restored");
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //setRetainInstance(true);
-        mBook = new Book();
-        mCollectionsList = new ArrayList<>();
-        mCategoriesList = new ArrayList<>();
-        mImgPath = "";
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putSerializable("categories", (Serializable) mCategoriesList);
-        outState.putSerializable("collections", (Serializable) mCollectionsList);
-        outState.putString("imgPath", mImgPath);
-
-    }
-
-    @Override
-    public void onActivityCreated(Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        if(savedInstanceState != null) {
-            mImgPath = savedInstanceState.getString("imgPath");
-            mCategoriesList = (List<Categoria>) savedInstanceState.getSerializable("categories");
-            mCollectionsList = (List<Collections>) savedInstanceState.getSerializable("collections");
-            mCategoriesAdapter.notifyDataSetChanged();
-            mCollectionsAdapter.notifyDataSetChanged();
-        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         v = inflater.inflate(R.layout.fragment_collections, container, false);
-        // Set Suppor Toolbar
-        Toolbar toolbar = (Toolbar)v.findViewById(R.id.toolbar);
-        ((MainActivity) getContext()).setSupportActionBar(toolbar);
+
+        mNestedScroll = (NestedScrollView) v.findViewById(R.id.nested_scroll);
+        mCollectionsList = new ArrayList<>();
+        mCategoriesList = new ArrayList<>();
+        mImgPath = "";
 
         // Set toolbar_asistant title
+
         ((TextView)v.findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.collections_title));
         v.findViewById(R.id.left_btn).setVisibility(View.VISIBLE);
         v.findViewById(R.id.right_btn).setVisibility(View.VISIBLE);
@@ -134,8 +133,9 @@ public class CollectionsFragment extends Fragment implements View.OnClickListene
 
         // Collections RecyclerView
         mCollectionsRV = (RecyclerView) v.findViewById(R.id.collections_recycler);
-        GridLayoutManager mGridLayoutManager = new GridLayoutManager(getContext(), 3);
+        mGridLayoutManager = new GridLayoutManager(getContext(), 3);
         mCollectionsRV.setLayoutManager(mGridLayoutManager);
+        mCollectionsRV.setHasFixedSize(true);
         mCollectionsAdapter = new CollectionsAdapter(mCollectionsList, getContext());
         mCollectionsRV.setAdapter(mCollectionsAdapter);
 
@@ -196,7 +196,9 @@ public class CollectionsFragment extends Fragment implements View.OnClickListene
                                 for(List<Collections> item : res) {
                                     mCollectionsList.addAll(item); // Add main book to list
                                 }
+
                                 mCollectionsAdapter.notifyDataSetChanged();
+                                mNestedScroll.scrollTo(0, 0);
                             }
                         }, new Response.ErrorListener() {
                     @Override

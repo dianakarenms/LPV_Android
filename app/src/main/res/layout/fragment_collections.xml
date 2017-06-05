@@ -1,18 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
               android:orientation="vertical"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:background="@drawable/fondo_grecas">
 
-    <include layout="@layout/toolbar_asistant"/>
-
     <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <android.support.v4.widget.NestedScrollView
+        android:layout_height="match_parent">
+
+        <android.support.design.widget.AppBarLayout
+            android:layout_height="wrap_content"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:theme="@style/AppTheme.AppBarOverlay">
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="-18dp"
+                app:popupTheme="@style/AppTheme.PopupOverlay"
+                app:layout_scrollFlags="scroll|enterAlways|snap">
+                <include layout="@layout/toolbar" />
+            </android.support.v7.widget.Toolbar>
+        </android.support.design.widget.AppBarLayout>
+
+        <com.clickaboom.letrasparavolar.views.StickyScrollView
+            android:id="@+id/nested_scroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -170,6 +187,10 @@
                     </LinearLayout>
 
                 </LinearLayout>-->
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:tag="sticky">
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/categories_recycler"
                     android:layout_width="match_parent"
@@ -177,20 +198,14 @@
                     android:nestedScrollingEnabled="false"
                     android:overScrollMode="never"
                     android:background="@color/collections_nav"/>
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp">
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_below="@id/categories_recycler"
                         android:background="@color/white"
-                        android:weightSum="4"
-                        android:layout_marginBottom="5dp"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginRight="10dp">
+                        android:layout_marginLeft="@dimen/small_padding"
+                        android:layout_marginRight="@dimen/small_padding"
+                        android:weightSum="4">
                         <TextView
                             android:id="@+id/news_txt"
                             android:layout_width="0dp"
@@ -252,6 +267,13 @@
                             android:textAllCaps="true"
                             android:clickable="true"/>
                     </LinearLayout>
+                </RelativeLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical"
+                    android:paddingTop="10dp"
+                    android:paddingBottom="10dp">
 
                     <android.support.v7.widget.RecyclerView
                         android:id="@+id/collections_recycler"
@@ -262,7 +284,7 @@
                         android:layout_marginRight="@dimen/extra_small_padding"/>
                 </LinearLayout>
             </LinearLayout>
-        </android.support.v4.widget.NestedScrollView>
+        </com.clickaboom.letrasparavolar.views.StickyScrollView>
     </android.support.design.widget.CoordinatorLayout>
 
     <!-- Bottom Nav Bar -->

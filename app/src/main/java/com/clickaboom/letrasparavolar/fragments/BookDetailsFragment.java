@@ -18,7 +18,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.activities.MainActivity;
-import com.clickaboom.letrasparavolar.adapters.CollectionsAdapter;
+import com.clickaboom.letrasparavolar.adapters.RecommendedAdapter;
 import com.clickaboom.letrasparavolar.models.Book;
 import com.clickaboom.letrasparavolar.models.collections.Collections;
 import com.clickaboom.letrasparavolar.models.collections.ResCollections;
@@ -41,7 +41,7 @@ public class BookDetailsFragment extends Fragment {
     private Book mBook;
     private RecyclerView mRecyclerView;
     private GridLayoutManager mGridLayoutManager;
-    private CollectionsAdapter mAdapter;
+    private RecommendedAdapter mAdapter;
     private List<Collections> mBooksList = new ArrayList<>();
     private String params;
     private ImageLoader imageLoader;
@@ -76,7 +76,7 @@ public class BookDetailsFragment extends Fragment {
         mRecyclerView.setLayoutManager(mGridLayoutManager);
 
         // specify an adapter (see also next example)
-        mAdapter = new CollectionsAdapter(mBooksList, getContext());
+        mAdapter = new RecommendedAdapter(mBooksList, getContext());
         mRecyclerView.setAdapter(mAdapter);
 
         // show new collecByOrder on start

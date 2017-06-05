@@ -5,11 +5,12 @@
     <color name="colorAccent">#cf3683</color>
     <color name="legends_nav">#c6528e</color>
     <color name="white">#fff</color>
+    <color name="white_trans">#abffffff</color>
     <color name="background">#f6f6f2</color>
     <color name="transp_back">#d8f6f6f2</color>
     <color name="divider">#e1e1e1</color>
     <color name="toolbar">#f1dec0</color>
-    <color name="collections_nav">#a2be58</color>
+    <color name="collections_nav">#96b144</color>
     <color name="collections_nav_pressed">#b3c96f</color>
     <color name="bottom_nav">#2fa5ff</color>
     <color name="bottom_nav_pressed">#0086da</color>
@@ -19,4 +20,5 @@
     <color name="lilac">#AB79AC</color>
     <color name="dark_lilac">#9c78a7</color>
     <color name="light_gray">#d4d4d4</color>
+    <color name="dark_gray">#616161</color>
 </resources>

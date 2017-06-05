@@ -13,7 +13,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
@@ -104,8 +103,8 @@ public class MainActivity extends AppCompatActivity
         mRecyclerView = (RecyclerView)findViewById(R.id.home_recycler);
         mRecyclerView2 = (RecyclerView)findViewById(R.id.home_recycler2);
 
-        Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        //Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+        //setSupportActionBar(toolbar);
 
         // Set toolbar_asistant title
         ((TextView)findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.news_title));
@@ -253,8 +252,7 @@ public class MainActivity extends AppCompatActivity
                 replaceFragment(legFrag, MainActivity.this);
                 break;
             case R.id.collections_btn:
-                Fragment colFrag = new CollectionsFragment();
-                replaceFragment(colFrag, MainActivity.this);
+                replaceFragment(CollectionsFragment.newInstance(), MainActivity.this);
                 break;
             case R.id.library_btn:
                 Fragment libFrag = new LibraryFragment();
@@ -292,7 +290,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public static void replaceFragment (Fragment fragment, FragmentActivity activity){
+    public static void replaceFragment(Fragment fragment, FragmentActivity activity){
         String backStateName = fragment.getClass().getName();
 
         FragmentManager manager = activity.getSupportFragmentManager();
@@ -304,6 +302,18 @@ public class MainActivity extends AppCompatActivity
             ft.addToBackStack(backStateName);
             ft.commit();
         }
+    }
+
+    public static void addFragment(Fragment fragment, Fragment parentFragment, FragmentActivity activity){
+        String backStateName = fragment.getClass().getName();
+        FragmentManager manager = activity.getSupportFragmentManager();
+
+        FragmentTransaction ft = manager.beginTransaction();
+        //ft.hide(manager.findFragmentById(R.id.fragment_container));
+        ft.add(R.id.fragment_container, fragment);
+        ft.addToBackStack(backStateName);
+        ft.commit();
+
     }
 
     public int windowWidth() {

@@ -1,31 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/header"
-    android:layout_width="match_parent"
-    android:layout_height="@dimen/toolbar"
-    android:background="@color/white">
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:padding="5dp"
-        android:src="@drawable/icono"
-        android:layout_centerInParent="true"/>
-
-    <ImageButton
-        android:id="@+id/drawer_button"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:padding="5dp"
-        android:layout_marginRight="10dp"
-        android:src="@drawable/menu"
-        android:adjustViewBounds="true"
-        android:scaleType="centerInside"
-        android:background="@null"
-        android:layout_alignParentRight="true"/>
-
-    <View
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical" >
+    <!-- Main toolbar -->
+    <RelativeLayout
+        android:id="@+id/header"
         android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="@color/toolbar_divider"
-        android:layout_alignParentBottom="true"/>
-</RelativeLayout>
+        android:layout_height="@dimen/toolbar"
+        android:background="@color/white">
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:padding="5dp"
+            android:src="@drawable/icono"
+            android:layout_centerInParent="true"/>
+
+        <ImageButton
+            android:id="@+id/drawer_button"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:padding="5dp"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/menu"
+            android:adjustViewBounds="true"
+            android:scaleType="centerInside"
+            android:background="@null"
+            android:layout_alignParentRight="true"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="@color/toolbar_divider"
+            android:layout_alignParentBottom="true"/>
+    </RelativeLayout>
+    <include
+        android:id="@+id/toolbar_asistant"
+        layout="@layout/toolbar_asistant" />
+</LinearLayout>

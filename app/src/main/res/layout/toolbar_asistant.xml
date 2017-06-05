@@ -20,6 +20,7 @@
         android:orientation="horizontal"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
+        android:background="@color/white_trans"
         android:clickable="true"
         android:descendantFocusability="blocksDescendants">
         <ImageView
@@ -36,6 +37,7 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:text="@string/mapa"
+            android:textColor="@color/dark_gray"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
             android:gravity="center"/>
     </LinearLayout>
@@ -57,12 +59,14 @@
         android:orientation="horizontal"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true"
+        android:background="@color/white_trans"
         android:clickable="true"
         android:descendantFocusability="blocksDescendants">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:text="@string/buscar"
+            android:textColor="@color/dark_gray"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
             android:gravity="center"/>
         <ImageView
