@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,7 +16,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.activities.MainActivity;
-import com.clickaboom.letrasparavolar.activities.SearchActivity;
 import com.clickaboom.letrasparavolar.adapters.CategoriesAdapter;
 import com.clickaboom.letrasparavolar.adapters.CollectionsAdapter;
 import com.clickaboom.letrasparavolar.models.Book;
@@ -40,7 +38,7 @@ import static android.app.Activity.RESULT_OK;
 
 public class LibraryFragment extends Fragment implements View.OnClickListener {
 
-    private static final String TAG = "com.lpv.collecByOrder";
+    private static final String TAG = "com.lpv.collections";
     public static final int REQUEST_SEARCH = 0;
     public static final String RESULT_SEARCH = "searchText";
     private Book mBook;
@@ -89,24 +87,18 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         v = inflater.inflate(R.layout.fragment_library, container, false);
-        // Set Suppor Toolbar
-        Toolbar toolbar = (Toolbar)v.findViewById(R.id.toolbar);
-        ((MainActivity) getContext()).setSupportActionBar(toolbar);
+
+        // Set its bottomNavButton clicked
+        ((MainActivity)getActivity()).restoreBottonNavColors();
+        ((MainActivity)getActivity()).libraryBtn.
+                setBackgroundColor(getResources().getColor(R.color.bottom_nav_pressed));
 
         // Set toolbar_asistant title
         ((TextView)v.findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.library_title));
-        v.findViewById(R.id.left_btn).setVisibility(View.VISIBLE);
-        v.findViewById(R.id.right_btn).setVisibility(View.VISIBLE);
-        v.findViewById(R.id.right_btn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivityForResult(
-                        SearchActivity.newIntent(getContext()),
-                        REQUEST_SEARCH);
-            }
-        });
+        v.findViewById(R.id.left_btn).setVisibility(View.GONE);
+        v.findViewById(R.id.right_btn).setVisibility(View.GONE);
 
-        // Order collecByOrder
+        // Order collections
         v.findViewById(R.id.favorites_txt).setOnClickListener(this);
         v.findViewById(R.id.downloaded_txt).setOnClickListener(this);
 
@@ -134,9 +126,9 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
         mCollectionsRV.setAdapter(mCollectionsAdapter);
         mCategoriesRV.setAdapter(mCollectionsAdapter);
 
-        // show new collecByOrder on start
+        // show new collections on start
         if(mCollectionsList.isEmpty()) {
-            url = ApiConfig.collectionByCategory;
+            url = ApiConfig.searchCollections;
             params = "?categoria=" + "13";
             loadCollections(url, params);
         }
@@ -176,7 +168,7 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         restoreOrderColors();
-        url = ApiConfig.collectionByCategory;
+        url = ApiConfig.searchCollections;
         switch (v.getId()) {
             case R.id.favorites_txt:
                 params = "?categoria=" + "13";

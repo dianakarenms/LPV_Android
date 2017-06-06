@@ -1,8 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+    android:orientation="vertical">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:theme="@style/AppTheme.AppBarOverlay">
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/toolbar"
+            android:layout_marginLeft="-18dp"
+            app:popupTheme="@style/AppTheme.PopupOverlay"
+            app:layout_scrollFlags="scroll|enterAlwaysCollapsed"
+            android:background="@color/white">
+            <include layout="@layout/toolbar" />
+        </android.support.v7.widget.Toolbar>
+    </android.support.design.widget.AppBarLayout>
+
     <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -363,7 +383,7 @@
             android:layout_marginBottom="@dimen/large_padding"
             android:background="@color/divider"/>
         <!-- Requirements -->
-        <LinearLayout
+        <!--<LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
@@ -380,14 +400,14 @@
                 android:layout_height="wrap_content"
                 android:text="@string/lorem_ipsum"
                 android:textSize="@dimen/medium_small"/>
-        </LinearLayout>
+        </LinearLayout>-->
         <!-- Divider -->
-        <View
+        <!--<View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:layout_marginTop="@dimen/large_padding"
             android:layout_marginBottom="@dimen/large_padding"
-            android:background="@color/divider"/>
+            android:background="@color/divider"/>-->
         <!-- Related -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -408,4 +428,4 @@
         </LinearLayout>
     </LinearLayout>
     </android.support.v4.widget.NestedScrollView>
-</android.support.design.widget.CoordinatorLayout>
+</LinearLayout>

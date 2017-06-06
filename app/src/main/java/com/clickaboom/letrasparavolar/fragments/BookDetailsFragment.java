@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -67,8 +66,8 @@ public class BookDetailsFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_book_detail, container, false);
         Collections item = (Collections) getArguments().getSerializable("item");
 
-        Toolbar toolbar = (Toolbar)v.findViewById(R.id.toolbar);
-        ((MainActivity) getContext()).setSupportActionBar(toolbar);
+        // Set toolbar_asistant title
+        v.findViewById(R.id.toolbar_asistant).setVisibility(View.GONE);
 
         // use a linear layout manager
         mGridLayoutManager = new GridLayoutManager(getContext(), 3);
@@ -79,7 +78,7 @@ public class BookDetailsFragment extends Fragment {
         mAdapter = new RecommendedAdapter(mBooksList, getContext());
         mRecyclerView.setAdapter(mAdapter);
 
-        // show new collecByOrder on start
+        // show new collections on start
         if(mBooksList.isEmpty()) {
             params = "?order=nuevas";
             loadBooks();
@@ -117,7 +116,7 @@ public class BookDetailsFragment extends Fragment {
     private void loadBooks() {
         // Access the RequestQueue through your singleton class.
         ApiSingleton.getInstance(getActivity())
-                .addToRequestQueue(new GsonRequest(ApiConfig.collecByOrder + params,
+                .addToRequestQueue(new GsonRequest(ApiConfig.collections + params,
                         ResCollections.class,
                         Request.Method.GET,
                         null, null,

@@ -25,14 +25,16 @@ import java.util.List;
 public class CategoriesAdapter extends RecyclerView.Adapter<CategoriesAdapter.ViewHolder> {
     private static Context mContext;
     private static List<Categoria> mList;
+    private final int mPressedColor;
     private String mImgPath;
     private static RecyclerViewClickListener mItemListener;
     private ImageLoader imageLoader;
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public CategoriesAdapter(List<Categoria> list, String imgPath, Context context, RecyclerViewClickListener itemListener) {
+    public CategoriesAdapter(List<Categoria> list, String imgPath, int pressedColor, Context context, RecyclerViewClickListener itemListener) {
         mList = list;
         mImgPath = imgPath;
+        mPressedColor = pressedColor;
         mContext = context;
         mItemListener = itemListener;
     }
@@ -77,7 +79,7 @@ public class CategoriesAdapter extends RecyclerView.Adapter<CategoriesAdapter.Vi
 //        holder.mImage.setImageUrl(imgUrl, ApiSingleton.getInstance(mContext).getImageLoader());
 
         if(category.active) {
-            holder.mCategoryLay.setBackgroundColor(mContext.getResources().getColor(R.color.collections_nav_pressed));
+            holder.mCategoryLay.setBackgroundColor(mContext.getResources().getColor(mPressedColor));
         } else {
             holder.mCategoryLay.setBackgroundColor(Color.TRANSPARENT);
         }

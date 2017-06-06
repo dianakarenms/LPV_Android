@@ -12,7 +12,6 @@ import android.widget.TextView;
 import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.activities.MainActivity;
 import com.clickaboom.letrasparavolar.fragments.BookDetailsFragment;
-import com.clickaboom.letrasparavolar.fragments.CollectionsFragment;
 import com.clickaboom.letrasparavolar.models.collections.Collections;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
 import com.squareup.picasso.Picasso;
@@ -50,7 +49,7 @@ public class RecommendedAdapter extends RecyclerView.Adapter<RecommendedAdapter.
         @Override
         public void onClick(View v) {
             Fragment fragment = BookDetailsFragment.newInstance(mBookList.get(getAdapterPosition()));
-            MainActivity.addFragment(fragment, new CollectionsFragment(), (MainActivity) mContext);
+            MainActivity.addFragment(fragment, (MainActivity) mContext);
         }
     }
 

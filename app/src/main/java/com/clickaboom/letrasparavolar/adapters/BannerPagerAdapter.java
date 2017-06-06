@@ -56,6 +56,8 @@ public class BannerPagerAdapter extends PagerAdapter
         Picasso.with(mContext)
                 .load(ApiConfig.baseUrl + "/" + banner.imagen)
                 .fit()
+//                .resize(1000, 200)
+//                .centerInside()
                 .into(imgIcon);
 
         itemView.setOnClickListener(new View.OnClickListener() {

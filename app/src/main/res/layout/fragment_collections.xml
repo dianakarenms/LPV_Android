@@ -20,7 +20,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="-18dp"
                 app:popupTheme="@style/AppTheme.PopupOverlay"
-                app:layout_scrollFlags="scroll|enterAlways|snap">
+                app:layout_scrollFlags="scroll|snap|enterAlwaysCollapsed">
                 <include layout="@layout/toolbar" />
             </android.support.v7.widget.Toolbar>
         </android.support.design.widget.AppBarLayout>
@@ -203,8 +203,9 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@id/categories_recycler"
                         android:background="@color/white"
-                        android:layout_marginLeft="@dimen/small_padding"
                         android:layout_marginRight="@dimen/small_padding"
+                        android:layout_marginLeft="@dimen/small_padding"
+                        android:layout_marginBottom="@dimen/mini_padding"
                         android:weightSum="4">
                         <TextView
                             android:id="@+id/news_txt"
@@ -271,17 +272,16 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp">
+                    android:orientation="vertical">
 
                     <android.support.v7.widget.RecyclerView
                         android:id="@+id/collections_recycler"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:nestedScrollingEnabled="false"
-                        android:layout_marginLeft="@dimen/extra_small_padding"
-                        android:layout_marginRight="@dimen/extra_small_padding"/>
+                        android:layout_marginLeft="@dimen/mini_padding"
+                        android:layout_marginRight="@dimen/mini_padding"
+                        android:layout_marginBottom="@dimen/mini_padding"/>
                 </LinearLayout>
             </LinearLayout>
         </com.clickaboom.letrasparavolar.views.StickyScrollView>

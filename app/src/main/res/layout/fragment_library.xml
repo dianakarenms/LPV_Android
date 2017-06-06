@@ -84,7 +84,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:padding="@dimen/small_padding"
-                        android:text="@string/lecturas"
+                        android:text="@string/legends_title"
                         android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
                     <android.support.v7.widget.RecyclerView
                         android:id="@+id/readings_recycler"
@@ -97,7 +97,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:padding="@dimen/small_padding"
-                        android:text="@string/libros"
+                        android:text="@string/collections_title"
                         android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
                     <android.support.v7.widget.RecyclerView
                         android:id="@+id/books_recycler"

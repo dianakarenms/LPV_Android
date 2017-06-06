@@ -18,7 +18,7 @@ import com.clickaboom.letrasparavolar.network.ApiConfig;
 
 public class ProgramInfoFragment extends Fragment implements View.OnClickListener {
 
-    private static final String TAG = "com.lpv.collecByOrder";
+    private static final String TAG = "com.lpv.collections";
     private View v;
     private String url = "", params = "";
 
@@ -54,7 +54,7 @@ public class ProgramInfoFragment extends Fragment implements View.OnClickListene
         // Set toolbar_asistant title
         ((TextView)v.findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.library_title));
 
-        // Order collecByOrder
+        // Order collections
         v.findViewById(R.id.favorites_txt).setOnClickListener(this);
         v.findViewById(R.id.downloaded_txt).setOnClickListener(this);
 
@@ -64,7 +64,7 @@ public class ProgramInfoFragment extends Fragment implements View.OnClickListene
     @Override
     public void onClick(View v) {
         restoreOrderColors();
-        url = ApiConfig.collectionByCategory;
+        url = ApiConfig.searchCollections;
         switch (v.getId()) {
             case R.id.favorites_txt:
                 params = "?categoria=" + "13";

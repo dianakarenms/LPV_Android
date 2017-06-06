@@ -19,6 +19,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.clickaboom.letrasparavolar.R;
+import com.clickaboom.letrasparavolar.activities.MainActivity;
 import com.clickaboom.letrasparavolar.activities.SearchActivity;
 import com.clickaboom.letrasparavolar.adapters.CategoriesAdapter;
 import com.clickaboom.letrasparavolar.adapters.CollectionsAdapter;
@@ -41,7 +42,7 @@ import static android.app.Activity.RESULT_OK;
 
 public class CollectionsFragment extends Fragment implements View.OnClickListener {
 
-    private static final String TAG = "com.lpv.collecByOrder";
+    private static final String TAG = "com.lpv.collections";
     public static final int REQUEST_SEARCH = 0;
     public static final String RESULT_SEARCH = "searchText";
     private static final String LIST_STATE_KEY = "listState";
@@ -88,13 +89,17 @@ public class CollectionsFragment extends Fragment implements View.OnClickListene
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         v = inflater.inflate(R.layout.fragment_collections, container, false);
 
+        // Set its bottomNavButton clicked
+        ((MainActivity)getActivity()).restoreBottonNavColors();
+        ((MainActivity)getActivity()).collectionsBtn.
+                setBackgroundColor(getResources().getColor(R.color.bottom_nav_pressed));
+
         mNestedScroll = (NestedScrollView) v.findViewById(R.id.nested_scroll);
         mCollectionsList = new ArrayList<>();
         mCategoriesList = new ArrayList<>();
         mImgPath = "";
 
         // Set toolbar_asistant title
-
         ((TextView)v.findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.collections_title));
         v.findViewById(R.id.left_btn).setVisibility(View.VISIBLE);
         v.findViewById(R.id.right_btn).setVisibility(View.VISIBLE);
@@ -107,7 +112,7 @@ public class CollectionsFragment extends Fragment implements View.OnClickListene
             }
         });
 
-        // Order collecByOrder
+        // Order collections
         v.findViewById(R.id.news_txt).setOnClickListener(this);
         v.findViewById(R.id.top_txt).setOnClickListener(this);
         v.findViewById(R.id.month_theme_txt).setOnClickListener(this);
@@ -117,10 +122,10 @@ public class CollectionsFragment extends Fragment implements View.OnClickListene
         mCategoriesRV = (RecyclerView) v.findViewById(R.id.categories_recycler);
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         mCategoriesRV.setLayoutManager(mLayoutManager);
-        mCategoriesAdapter = new CategoriesAdapter(mCategoriesList, mImgPath, getContext(), new CategoriesAdapter.RecyclerViewClickListener() {
+        mCategoriesAdapter = new CategoriesAdapter(mCategoriesList, mImgPath, R.color.collections_nav_pressed, getContext(), new CategoriesAdapter.RecyclerViewClickListener() {
             @Override
             public void recyclerViewListClicked(String categoryId) {
-                url = ApiConfig.collectionByCategory;
+                url = ApiConfig.searchCollections;
                 params = "?categoria=" + categoryId;
                 loadCollections(url, params);
                 restoreOrderColors();
@@ -139,11 +144,9 @@ public class CollectionsFragment extends Fragment implements View.OnClickListene
         mCollectionsAdapter = new CollectionsAdapter(mCollectionsList, getContext());
         mCollectionsRV.setAdapter(mCollectionsAdapter);
 
-        // show new collecByOrder on start
+        // show new collections on start
         if(mCollectionsList.isEmpty()) {
-            url = ApiConfig.collecByOrder;
-            params = "?order=nuevas";
-            loadCollections(url, params);
+            ((TextView)v.findViewById(R.id.news_txt)).performClick();
         }
 
         return v;
@@ -212,7 +215,7 @@ public class CollectionsFragment extends Fragment implements View.OnClickListene
     @Override
     public void onClick(View v) {
         restoreOrderColors();
-        url = ApiConfig.collecByOrder;
+        url = ApiConfig.collections;
         switch (v.getId()) {
             case R.id.news_txt:
                 params = "?order=nuevas";

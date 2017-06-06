@@ -27,19 +27,39 @@
         android:id="@+id/banner"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="2.2"/>
-    
+        android:layout_weight="2.4"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/legends_title"
+        android:textColor="@color/dark_gray"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+        android:layout_marginLeft="@dimen/small_padding"/>
     <android.support.v7.widget.RecyclerView
         android:id="@+id/home_recycler"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="3.1" />
+        android:layout_weight="3" />
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/medium_gray"
+        android:layout_margin="@dimen/mini_padding"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/collections_title"
+        android:textColor="@color/dark_gray"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+        android:layout_marginLeft="@dimen/small_padding"/>
     <android.support.v7.widget.RecyclerView
         android:id="@+id/home_recycler2"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="3.1"/>
+        android:layout_weight="3"/>
 
     <RelativeLayout
         android:layout_width="match_parent"

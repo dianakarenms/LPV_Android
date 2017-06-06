@@ -1,5 +1,6 @@
 package com.clickaboom.letrasparavolar.activities;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -29,7 +30,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.adapters.BannerPagerAdapter;
-import com.clickaboom.letrasparavolar.adapters.BooksHomeAdapter;
+import com.clickaboom.letrasparavolar.adapters.CollectionsDefaultAdapter;
+import com.clickaboom.letrasparavolar.adapters.LegendsDefaultAdapter;
 import com.clickaboom.letrasparavolar.fragments.CollectionsFragment;
 import com.clickaboom.letrasparavolar.fragments.LegendsFragment;
 import com.clickaboom.letrasparavolar.fragments.LibraryFragment;
@@ -37,6 +39,8 @@ import com.clickaboom.letrasparavolar.fragments.ProgramInfoFragment;
 import com.clickaboom.letrasparavolar.models.Book;
 import com.clickaboom.letrasparavolar.models.banners.Banner;
 import com.clickaboom.letrasparavolar.models.banners.ResBanners;
+import com.clickaboom.letrasparavolar.models.collections.Collections;
+import com.clickaboom.letrasparavolar.models.defaults.ResDefaults;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
 import com.clickaboom.letrasparavolar.network.ApiSingleton;
 import com.clickaboom.letrasparavolar.network.GsonRequest;
@@ -60,17 +64,19 @@ public class MainActivity extends AppCompatActivity
         View.OnClickListener {
 
     private static final String TAG = "com.lpv.MainActivity";
-    private RelativeLayout legendsBtn, collectionsBtn, libraryBtn;
-    private Book mBook;
+    public RelativeLayout legendsBtn, collectionsBtn, libraryBtn;
     private RecyclerView mRecyclerView, mRecyclerView2;
     private LinearLayoutManager mLayoutManager;
-    private BooksHomeAdapter mAdapter;
+    private CollectionsDefaultAdapter mCollectionsAdapter;
+    private LegendsDefaultAdapter mLegendsAdapter;
     private List<Book> mBooksList = new ArrayList<>();
     private ViewPager view1;
     private BannerPagerAdapter mBannerAdapter;
     private ImageView image;
     private LinearLayoutManager mLayoutManager2;
     private List<Banner> mBannerItems = new ArrayList<>();
+    private Context mContext;
+    private List<Collections> mLegendsList = new ArrayList<>(), mCollectionsList = new ArrayList<>();;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +85,8 @@ public class MainActivity extends AppCompatActivity
 
         /* TODO: Remove NukeSSL in Release version as it can cause severe security issues */
         new NukeSSLCerts().nuke();
+
+        mContext = this;
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -127,11 +135,14 @@ public class MainActivity extends AppCompatActivity
         mRecyclerView2.setLayoutManager(mLayoutManager2);
 
         // specify an adapter (see also next example)
-        mAdapter = new BooksHomeAdapter(mBooksList, getApplicationContext());
-        mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView2.setAdapter(mAdapter);
+        mLegendsAdapter = new LegendsDefaultAdapter(mLegendsList, mContext);
+        mRecyclerView.setAdapter(mLegendsAdapter);
 
-        loadBooks();
+        mCollectionsAdapter = new CollectionsDefaultAdapter(mCollectionsList, mContext);
+        mRecyclerView2.setAdapter(mCollectionsAdapter);
+
+        loadLegends();
+        loadCollections();
 
         view1 = (ViewPager)findViewById(R.id.banner);
         view1.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -171,17 +182,22 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
-        restoreBottonNavColors();
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.END)) {
             drawer.closeDrawer(GravityCompat.END);
-        } /*else if (getSupportFragmentManager().findFragmentByTag("FragmentC") != null) {
-            // I'm viewing Fragment C
-            getSupportFragmentManager().popBackStack("A_B_TAG",
-                    FragmentManager.POP_BACK_STACK_INCLUSIVE);
-        } */else {
-            super.onBackPressed();
+        } else {
+            // If there're available fragments pop them from backstack
+            // by overriding the backbutton
+            FragmentManager fm = getSupportFragmentManager();
+            if(fm.getBackStackEntryCount() > 0) {
+                super.onBackPressed();
+            }
+
+            // If there aren't any fragments in backstack then
+            // unselect all bottomNavView buttons
+            if(fm.getBackStackEntryCount() == 0) {
+                restoreBottonNavColors();
+            }
         }
     }
 
@@ -234,7 +250,7 @@ public class MainActivity extends AppCompatActivity
 
 
 
-    private void restoreBottonNavColors() {
+    public void restoreBottonNavColors() {
         legendsBtn.setBackgroundColor(Color.TRANSPARENT);
         collectionsBtn.setBackgroundColor(Color.TRANSPARENT);
         libraryBtn.setBackgroundColor(Color.TRANSPARENT);
@@ -244,19 +260,18 @@ public class MainActivity extends AppCompatActivity
     public void onClick(View v) {
         // Set selected button
         restoreBottonNavColors();
-        v.setBackgroundColor(getResources().getColor(R.color.bottom_nav_pressed));
+        //v.setBackgroundColor(getResources().getColor(R.color.bottom_nav_pressed));
 
         switch (v.getId()) {
             case R.id.legends_btn:
-                Fragment legFrag = new LegendsFragment();
-                replaceFragment(legFrag, MainActivity.this);
+                replaceFragment(LegendsFragment.newInstance());
                 break;
             case R.id.collections_btn:
-                replaceFragment(CollectionsFragment.newInstance(), MainActivity.this);
+                replaceFragment(CollectionsFragment.newInstance());
                 break;
             case R.id.library_btn:
                 Fragment libFrag = new LibraryFragment();
-                replaceFragment(libFrag, MainActivity.this);
+                replaceFragment(libFrag);
                 break;
         }
     }
@@ -266,7 +281,7 @@ public class MainActivity extends AppCompatActivity
             case R.id.info_btn:
                 Toast.makeText(getApplicationContext(), "info_btn", Toast.LENGTH_SHORT).show();
                 Fragment programInfoFragmentFrag = new ProgramInfoFragment();
-                replaceFragment(programInfoFragmentFrag, MainActivity.this);
+                replaceFragment(programInfoFragmentFrag);
                 DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
                 drawer.closeDrawer(GravityCompat.END);
                 break;
@@ -290,21 +305,21 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public static void replaceFragment(Fragment fragment, FragmentActivity activity){
+    public void replaceFragment(Fragment fragment){
         String backStateName = fragment.getClass().getName();
 
-        FragmentManager manager = activity.getSupportFragmentManager();
+        FragmentManager manager = getSupportFragmentManager();
         boolean fragmentPopped = manager.popBackStackImmediate (backStateName, 0);
 
-        if (!fragmentPopped){ //fragment not in back stack, create it.
+        if (!fragmentPopped && manager.findFragmentByTag(backStateName) == null){ //fragment not in back stack, create it.
             FragmentTransaction ft = manager.beginTransaction();
-            ft.replace(R.id.fragment_container, fragment);
+            ft.replace(R.id.fragment_container, fragment, backStateName);
             ft.addToBackStack(backStateName);
             ft.commit();
         }
     }
 
-    public static void addFragment(Fragment fragment, Fragment parentFragment, FragmentActivity activity){
+    public static void addFragment(Fragment fragment, FragmentActivity activity){
         String backStateName = fragment.getClass().getName();
         FragmentManager manager = activity.getSupportFragmentManager();
 
@@ -354,11 +369,67 @@ public class MainActivity extends AppCompatActivity
         return width;
     }
 
-    private void loadBooks() {
-        for(int i=0; i<4; i ++) {
-            mBooksList.add(new Book("Los primeros dioses" + i, "Leyenda popular " + i, R.drawable.test_1));
-            mAdapter.notifyItemInserted(i);
-        }
+    private void loadLegends() {
+
+        // Access the RequestQueue through your singleton class.
+        ApiSingleton.getInstance(mContext)
+                .addToRequestQueue(new GsonRequest(ApiConfig.legendsDefaults,
+                        ResDefaults.class,
+                        Request.Method.GET,
+                        null, null,
+                        new Response.Listener() {
+                            @Override
+                            public void onResponse(Object response) {
+                                Log.d(TAG, response.toString());
+                                List<Collections> res = ((ResDefaults) response).data;
+
+                                mLegendsList.clear();
+                                mLegendsList.addAll(res);
+                                /*for(Collections item : res) {
+                                    mLegendsList.add(item); // Add main book to list
+                                }
+*/                                mLegendsAdapter.notifyDataSetChanged();
+                                //mNestedScroll.scrollTo(0, 0);
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d(TAG, error.toString());
+                    }
+                }));
+
+    }
+
+    private void loadCollections() {
+
+        // Access the RequestQueue through your singleton class.
+        ApiSingleton.getInstance(mContext)
+                .addToRequestQueue(new GsonRequest(ApiConfig.collectionsDefaults,
+                        ResDefaults.class,
+                        Request.Method.GET,
+                        null, null,
+                        new Response.Listener() {
+                            @Override
+                            public void onResponse(Object response) {
+                                Log.d(TAG, response.toString());
+                                List<Collections> res = ((ResDefaults) response).data;
+
+                                mCollectionsList.clear();
+                                mCollectionsList.addAll(res);
+                                /*for(Collections item : res) {
+                                    mCollectionsList.add(item); // Add main book to list
+                                }*/
+
+                                mCollectionsAdapter.notifyDataSetChanged();
+                                //mNestedScroll.scrollTo(0, 0);
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d(TAG, error.toString());
+                    }
+                }));
+
     }
 
     private void loadBanners() {
