@@ -19,7 +19,7 @@ import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.activities.MainActivity;
 import com.clickaboom.letrasparavolar.adapters.RecommendedAdapter;
 import com.clickaboom.letrasparavolar.models.Book;
-import com.clickaboom.letrasparavolar.models.collections.Collections;
+import com.clickaboom.letrasparavolar.models.collections.Colecciones;
 import com.clickaboom.letrasparavolar.models.collections.ResCollections;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
 import com.clickaboom.letrasparavolar.network.ApiSingleton;
@@ -41,11 +41,11 @@ public class BookDetailsFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private GridLayoutManager mGridLayoutManager;
     private RecommendedAdapter mAdapter;
-    private List<Collections> mBooksList = new ArrayList<>();
+    private List<Colecciones> mBooksList = new ArrayList<>();
     private String params;
     private ImageLoader imageLoader;
 
-    public static BookDetailsFragment newInstance(Collections item) {
+    public static BookDetailsFragment newInstance(Colecciones item) {
         BookDetailsFragment myFragment = new BookDetailsFragment();
 
         Bundle args = new Bundle();
@@ -64,7 +64,7 @@ public class BookDetailsFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_book_detail, container, false);
-        Collections item = (Collections) getArguments().getSerializable("item");
+        Colecciones item = (Colecciones) getArguments().getSerializable("item");
 
         // Set toolbar_asistant title
         v.findViewById(R.id.toolbar_asistant).setVisibility(View.GONE);
@@ -125,7 +125,7 @@ public class BookDetailsFragment extends Fragment {
                             public void onResponse(Object response) {
                                 Log.d(TAG, response.toString());
                                 mBooksList.clear();
-                                List<List<Collections>> res = ((ResCollections) response).data;
+                                List<List<Colecciones>> res = ((ResCollections) response).data;
                                 //for(int i = 0; i<res.size(); i ++) {
                                     mBooksList.addAll(res.get(0));
                                 //}

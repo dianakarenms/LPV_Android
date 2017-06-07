@@ -12,7 +12,7 @@ import android.widget.TextView;
 import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.activities.MainActivity;
 import com.clickaboom.letrasparavolar.fragments.BookDetailsFragment;
-import com.clickaboom.letrasparavolar.models.collections.Collections;
+import com.clickaboom.letrasparavolar.models.collections.Colecciones;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
 import com.squareup.picasso.Picasso;
 
@@ -25,10 +25,10 @@ import java.util.List;
 
 public class CollectionsDefaultAdapter extends RecyclerView.Adapter<CollectionsDefaultAdapter.ViewHolder> {
     private static Context mContext;
-    private static List<Collections> mBookList;
+    private static List<Colecciones> mBookList;
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public CollectionsDefaultAdapter(List<Collections> bookList, Context context) {
+    public CollectionsDefaultAdapter(List<Colecciones> bookList, Context context) {
         mContext = context;
         mBookList = bookList;
     }

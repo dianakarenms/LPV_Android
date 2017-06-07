@@ -50,5 +50,13 @@
     <string name="lecturas">Lecturas</string>
     <string name="libros">Libros</string>
     <string name="international">Internacionalización</string>
-    <string name="program_description">Letras para Volar es un programa de fomento a la lectura para niños y jóvenes. Es el primer proyecto de colaboración internacional entre la Universidad de Guadalajara y la Fielding Graduate University. s un programa para el cambio social que relaciona a estudiantes y profesores de ambas instituciones para servir a las comunidades mexicanas a través de estrategias que promuevan el amor por las letras, el amor por la ciencia, las raíces culturales ancestrales, la conciencia social y la solidaridad. Busca el desarrollo del potencial humano de la niñez mediante la consolidación de sus habilidades intelectuales de pensamiento crítico, solución de problemas y el desarrollo de sus habilidades comunicativas.</string>
+    <string name="program_description">Letras para Volar es un programa de fomento a la lectura para niños y jóvenes. Es el primer proyecto de colaboración
+          internacional entre la Universidad de Guadalajara y la Fielding Graduate University.
+          Es un programa para el cambio social que relaciona a estudiantes y profesores de ambas instituciones para servir a
+          las comunidades mexicanas a través de estrategias que promuevan el amor por las letras, el amor por la ciencia,
+          las raíces culturales ancestrales, la conciencia social y la solidaridad. Busca el desarrollo del potencial humano
+          de la niñez mediante la consolidación de sus habilidades intelectuales de pensamiento crítico, solución de problemas
+          y el desarrollo de sus habilidades comunicativas.</string>
+    <string name="program_title">Programa Universitario de Fomento a la Lectura Letras para volar</string>
+    <string name="title_activity_maps">Map</string>
 </resources>

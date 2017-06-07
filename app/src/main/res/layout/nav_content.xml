@@ -230,8 +230,8 @@
                 <com.clickaboom.letrasparavolar.views.SquareImageButtonHeight
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
-                    android:layout_weight="4"
-                    android:src="@drawable/menu_noticias"
+                    android:layout_weight="5"
+                    android:src="@drawable/ic_icono_gacetita"
                     android:adjustViewBounds="true"
                     android:scaleType="centerInside"
                     android:background="@null"

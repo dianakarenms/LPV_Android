@@ -19,7 +19,7 @@ import com.clickaboom.letrasparavolar.activities.MainActivity;
 import com.clickaboom.letrasparavolar.adapters.CategoriesAdapter;
 import com.clickaboom.letrasparavolar.adapters.CollectionsAdapter;
 import com.clickaboom.letrasparavolar.models.Book;
-import com.clickaboom.letrasparavolar.models.collections.Collections;
+import com.clickaboom.letrasparavolar.models.collections.Colecciones;
 import com.clickaboom.letrasparavolar.models.collections.ResCollections;
 import com.clickaboom.letrasparavolar.models.collections.categories.Categoria;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
@@ -44,7 +44,7 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
     private Book mBook;
     private RecyclerView mCategoriesRV, mCollectionsRV;
     private CollectionsAdapter mCollectionsAdapter;
-    private List<Collections> mCollectionsList;
+    private List<Colecciones> mCollectionsList;
     private List<Categoria> mCategoriesList;
     private View v;
     private String url = "", params = "", mImgPath;
@@ -78,7 +78,7 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
         if(savedInstanceState != null) {
             mImgPath = savedInstanceState.getString("imgPath");
             mCategoriesList = (List<Categoria>) savedInstanceState.getSerializable("categories");
-            mCollectionsList = (List<Collections>) savedInstanceState.getSerializable("collections");
+            mCollectionsList = (List<Colecciones>) savedInstanceState.getSerializable("collections");
             mCategoriesAdapter.notifyDataSetChanged();
             mCollectionsAdapter.notifyDataSetChanged();
         }
@@ -99,8 +99,8 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
         v.findViewById(R.id.right_btn).setVisibility(View.GONE);
 
         // Order collections
-        v.findViewById(R.id.favorites_txt).setOnClickListener(this);
-        v.findViewById(R.id.downloaded_txt).setOnClickListener(this);
+        v.findViewById(R.id.information_txt).setOnClickListener(this);
+        v.findViewById(R.id.international_txt).setOnClickListener(this);
 
         // Categories Recycler View
         mCategoriesRV = (RecyclerView) v.findViewById(R.id.readings_recycler);
@@ -148,10 +148,10 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
                             @Override
                             public void onResponse(Object response) {
                                 Log.d(TAG, response.toString());
-                                List<List<Collections>> res = ((ResCollections) response).data;
+                                List<List<Colecciones>> res = ((ResCollections) response).data;
 
                                 mCollectionsList.clear();
-                                for(List<Collections> item : res) {
+                                for(List<Colecciones> item : res) {
                                     mCollectionsList.addAll(item); // Add main book to list
                                 }
                                 mCollectionsAdapter.notifyDataSetChanged();
@@ -170,9 +170,10 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
         restoreOrderColors();
         url = ApiConfig.searchCollections;
         switch (v.getId()) {
-            case R.id.favorites_txt:
+            case R.id.information_txt:
                 params = "?categoria=" + "13";
-            case R.id.downloaded_txt:
+                break;
+            case R.id.international_txt:
                 params = "?categoria=" + "15";
                 break;
 
@@ -184,8 +185,8 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
     }
 
     private void restoreOrderColors() {
-        v.findViewById(R.id.favorites_txt).setBackground(getResources().getDrawable(R.drawable.nav_subcategories_button));
-        v.findViewById(R.id.downloaded_txt).setBackground(getResources().getDrawable(R.drawable.nav_subcategories_button));
+        v.findViewById(R.id.information_txt).setBackground(getResources().getDrawable(R.drawable.nav_subcategories_button));
+        v.findViewById(R.id.international_txt).setBackground(getResources().getDrawable(R.drawable.nav_subcategories_button));
     }
 
     @Override

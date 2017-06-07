@@ -1,6 +1,5 @@
-package com.clickaboom.letrasparavolar.models.defaults;
+package com.clickaboom.letrasparavolar.models.internationalization;
 
-import com.clickaboom.letrasparavolar.models.collections.Colecciones;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -11,14 +10,11 @@ import java.util.List;
  * Created by clickaboom on 6/6/17.
  */
 
-public class ResDefaults implements Serializable {
+public class ResInter implements Serializable {
     @SerializedName("status")
     @Expose
     public Boolean status;
     @SerializedName("data")
     @Expose
-    public List<Colecciones> data = null;
-    @SerializedName("path_epubs")
-    @Expose
-    public String pathEpubs;
+    public List<Internationalization> data = null;
 }

@@ -20,10 +20,11 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.activities.MainActivity;
+import com.clickaboom.letrasparavolar.activities.MapsActivity;
 import com.clickaboom.letrasparavolar.activities.SearchActivity;
 import com.clickaboom.letrasparavolar.adapters.CategoriesAdapter;
 import com.clickaboom.letrasparavolar.adapters.CollectionsAdapter;
-import com.clickaboom.letrasparavolar.models.collections.Collections;
+import com.clickaboom.letrasparavolar.models.collections.Colecciones;
 import com.clickaboom.letrasparavolar.models.collections.ResCollections;
 import com.clickaboom.letrasparavolar.models.collections.categories.Categoria;
 import com.clickaboom.letrasparavolar.models.collections.categories.ResCategories;
@@ -48,7 +49,7 @@ public class LegendsFragment extends Fragment implements View.OnClickListener {
     private static final String LIST_STATE_KEY = "listState";
     private RecyclerView mCategoriesRV, mCollectionsRV;
     private CollectionsAdapter mLegendsAdapter;
-    private List<Collections> mLegendsList;
+    private List<Colecciones> mLegendsList;
     private List<Categoria> mCategoriesList;
     private View v;
     private String url = "", params = "", mImgPath;
@@ -103,6 +104,12 @@ public class LegendsFragment extends Fragment implements View.OnClickListener {
 
         ((TextView)v.findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.legends_title));
         v.findViewById(R.id.left_btn).setVisibility(View.VISIBLE);
+        v.findViewById(R.id.left_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(MapsActivity.newInstance(getContext(), "legends"));
+            }
+        });
         v.findViewById(R.id.right_btn).setVisibility(View.VISIBLE);
         v.findViewById(R.id.right_btn).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -194,10 +201,10 @@ public class LegendsFragment extends Fragment implements View.OnClickListener {
                             @Override
                             public void onResponse(Object response) {
                                 Log.d(TAG, response.toString());
-                                List<List<Collections>> res = ((ResCollections) response).data;
+                                List<List<Colecciones>> res = ((ResCollections) response).data;
 
                                 mLegendsList.clear();
-                                for(List<Collections> item : res) {
+                                for(List<Colecciones> item : res) {
                                     mLegendsList.addAll(item); // Add main book to list
                                 }
 
@@ -220,6 +227,7 @@ public class LegendsFragment extends Fragment implements View.OnClickListener {
         switch (v.getId()) {
             case R.id.news_txt:
                 params = "?order=nuevas";
+                break;
             case R.id.top_txt:
                 params = "?order=populares";
                 break;

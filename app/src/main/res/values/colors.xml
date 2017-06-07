@@ -5,6 +5,7 @@
     <color name="colorAccent">#cf3683</color>
     <color name="legends_nav">#c6528e</color>
     <color name="legends_nav_pressed">#d767a1</color>
+    <color name="legends_nav_ligher">#ec8fbf</color>
     <color name="white">#fff</color>
     <color name="white_trans">#abffffff</color>
     <color name="background">#f6f6f2</color>

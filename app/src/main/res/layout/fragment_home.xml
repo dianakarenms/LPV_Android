@@ -8,20 +8,7 @@
               android:weightSum="10"
               android:layout_marginBottom="-10dp">
 
-    <android.support.design.widget.AppBarLayout
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent"
-        android:theme="@style/AppTheme.AppBarOverlay">
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="-18dp"
-            app:popupTheme="@style/AppTheme.PopupOverlay"
-            app:layout_scrollFlags="scroll|enterAlwaysCollapsed">
-            <include layout="@layout/toolbar" />
-        </android.support.v7.widget.Toolbar>
-    </android.support.design.widget.AppBarLayout>
+    <include layout="@layout/toolbar_full" />
 
     <android.support.v4.view.ViewPager
         android:id="@+id/banner"

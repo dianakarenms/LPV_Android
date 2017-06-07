@@ -23,7 +23,7 @@ import com.clickaboom.letrasparavolar.activities.MainActivity;
 import com.clickaboom.letrasparavolar.activities.SearchActivity;
 import com.clickaboom.letrasparavolar.adapters.CategoriesAdapter;
 import com.clickaboom.letrasparavolar.adapters.CollectionsAdapter;
-import com.clickaboom.letrasparavolar.models.collections.Collections;
+import com.clickaboom.letrasparavolar.models.collections.Colecciones;
 import com.clickaboom.letrasparavolar.models.collections.ResCollections;
 import com.clickaboom.letrasparavolar.models.collections.categories.Categoria;
 import com.clickaboom.letrasparavolar.models.collections.categories.ResCategories;
@@ -48,7 +48,7 @@ public class CollectionsFragment extends Fragment implements View.OnClickListene
     private static final String LIST_STATE_KEY = "listState";
     private RecyclerView mCategoriesRV, mCollectionsRV;
     private CollectionsAdapter mCollectionsAdapter;
-    private List<Collections> mCollectionsList;
+    private List<Colecciones> mCollectionsList;
     private List<Categoria> mCategoriesList;
     private View v;
     private String url = "", params = "", mImgPath;
@@ -193,10 +193,10 @@ public class CollectionsFragment extends Fragment implements View.OnClickListene
                             @Override
                             public void onResponse(Object response) {
                                 Log.d(TAG, response.toString());
-                                List<List<Collections>> res = ((ResCollections) response).data;
+                                List<List<Colecciones>> res = ((ResCollections) response).data;
 
                                 mCollectionsList.clear();
-                                for(List<Collections> item : res) {
+                                for(List<Colecciones> item : res) {
                                     mCollectionsList.addAll(item); // Add main book to list
                                 }
 
@@ -219,6 +219,7 @@ public class CollectionsFragment extends Fragment implements View.OnClickListene
         switch (v.getId()) {
             case R.id.news_txt:
                 params = "?order=nuevas";
+                break;
             case R.id.top_txt:
                 params = "?order=populares";
                 break;

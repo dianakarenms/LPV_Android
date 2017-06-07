@@ -6,13 +6,14 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by clickaboom on 5/27/17.
  */
 
-public class Collections implements Serializable {
+public class Colecciones implements Serializable {
 
     @SerializedName("id")
     @Expose
@@ -43,10 +44,10 @@ public class Collections implements Serializable {
     public List<Autores> autores = null;
     @SerializedName("latitud")
     @Expose
-    public String latitud;
+    public double latitud;
     @SerializedName("longitud")
     @Expose
-    public String longitud;
+    public double longitud;
     @SerializedName("imagen")
     @Expose
     public String imagen;
@@ -61,10 +62,10 @@ public class Collections implements Serializable {
     public List<Categoria> categorias = null;
     @SerializedName("etiquetas")
     @Expose
-    public List<Object> etiquetas = null;
+    public List<Etiqueta> etiquetas = null;
     @SerializedName("libros_relacionados")
     @Expose
-    public List<Collections> librosRelacionados = null;
+    public List<Colecciones> librosRelacionados = new ArrayList<>();
 
     @SerializedName("0")
     @Expose

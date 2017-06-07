@@ -33,13 +33,13 @@ import com.clickaboom.letrasparavolar.adapters.BannerPagerAdapter;
 import com.clickaboom.letrasparavolar.adapters.CollectionsDefaultAdapter;
 import com.clickaboom.letrasparavolar.adapters.LegendsDefaultAdapter;
 import com.clickaboom.letrasparavolar.fragments.CollectionsFragment;
+import com.clickaboom.letrasparavolar.fragments.InformationFragment;
 import com.clickaboom.letrasparavolar.fragments.LegendsFragment;
 import com.clickaboom.letrasparavolar.fragments.LibraryFragment;
-import com.clickaboom.letrasparavolar.fragments.ProgramInfoFragment;
 import com.clickaboom.letrasparavolar.models.Book;
 import com.clickaboom.letrasparavolar.models.banners.Banner;
 import com.clickaboom.letrasparavolar.models.banners.ResBanners;
-import com.clickaboom.letrasparavolar.models.collections.Collections;
+import com.clickaboom.letrasparavolar.models.collections.Colecciones;
 import com.clickaboom.letrasparavolar.models.defaults.ResDefaults;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
 import com.clickaboom.letrasparavolar.network.ApiSingleton;
@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity
     private LinearLayoutManager mLayoutManager2;
     private List<Banner> mBannerItems = new ArrayList<>();
     private Context mContext;
-    private List<Collections> mLegendsList = new ArrayList<>(), mCollectionsList = new ArrayList<>();;
+    private List<Colecciones> mLegendsList = new ArrayList<>(), mCollectionsList = new ArrayList<>();;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
 
         /* TODO: Remove NukeSSL in Release version as it can cause severe security issues */
-        new NukeSSLCerts().nuke();
+        /*new NukeSSLCerts().nuke();*/
 
         mContext = this;
 
@@ -279,8 +279,7 @@ public class MainActivity extends AppCompatActivity
     public void navOnClick(View v) {
         switch (v.getId()) {
             case R.id.info_btn:
-                Toast.makeText(getApplicationContext(), "info_btn", Toast.LENGTH_SHORT).show();
-                Fragment programInfoFragmentFrag = new ProgramInfoFragment();
+                Fragment programInfoFragmentFrag = new InformationFragment();
                 replaceFragment(programInfoFragmentFrag);
                 DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
                 drawer.closeDrawer(GravityCompat.END);
@@ -381,7 +380,7 @@ public class MainActivity extends AppCompatActivity
                             @Override
                             public void onResponse(Object response) {
                                 Log.d(TAG, response.toString());
-                                List<Collections> res = ((ResDefaults) response).data;
+                                List<Colecciones> res = ((ResDefaults) response).data;
 
                                 mLegendsList.clear();
                                 mLegendsList.addAll(res);
@@ -412,7 +411,7 @@ public class MainActivity extends AppCompatActivity
                             @Override
                             public void onResponse(Object response) {
                                 Log.d(TAG, response.toString());
-                                List<Collections> res = ((ResDefaults) response).data;
+                                List<Colecciones> res = ((ResDefaults) response).data;
 
                                 mCollectionsList.clear();
                                 mCollectionsList.addAll(res);

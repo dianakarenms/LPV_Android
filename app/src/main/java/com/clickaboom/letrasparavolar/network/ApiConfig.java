@@ -5,7 +5,7 @@ package com.clickaboom.letrasparavolar.network;
  */
 
 public class ApiConfig {
-    public static final String baseUrl = "https://app.letrasparavolar.org";
+    public static final String baseUrl = "http://app.letrasparavolar.org";
 
     // Banners
     public static final String banners = baseUrl + "/api/banners/";
@@ -24,7 +24,14 @@ public class ApiConfig {
 
     // Images URL
     public static final String collectionsImg = baseUrl + "/uploads/images/libros/thumb_";
+    public static final String interImg = baseUrl + "/uploads/images/juegos/";
 
     // Epubs URL
     public static final String epubs = baseUrl + "/uploads/epubs/";
+
+    // Internacionalización
+    public static final String internacionalization = baseUrl + "/api/internacionalizacion/";
+
+    // Mapa
+    public static final String mapaMarkers = baseUrl + "/api/mapa/";
 }

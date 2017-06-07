@@ -16,5 +16,11 @@ public class ResCollections implements Serializable {
     public Boolean status;
     @SerializedName("data")
     @Expose
-    public List<List<Collections>> data = null;
+    public List<List<Colecciones>> data = null;
+    @SerializedName("leyendas")
+    @Expose
+    public List<Colecciones> leyendas = null;
+    @SerializedName("colecciones")
+    @Expose
+    public List<Colecciones> colecciones = null;
 }
