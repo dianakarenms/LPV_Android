@@ -19,7 +19,9 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.clickaboom.letrasparavolar.R;
+import com.clickaboom.letrasparavolar.activities.BookDetailsActivity;
 import com.clickaboom.letrasparavolar.activities.MainActivity;
+import com.clickaboom.letrasparavolar.activities.MapsActivity;
 import com.clickaboom.letrasparavolar.activities.SearchActivity;
 import com.clickaboom.letrasparavolar.adapters.CategoriesAdapter;
 import com.clickaboom.letrasparavolar.adapters.CollectionsAdapter;
@@ -102,6 +104,12 @@ public class CollectionsFragment extends Fragment implements View.OnClickListene
         // Set toolbar_asistant title
         ((TextView)v.findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.collections_title));
         v.findViewById(R.id.left_btn).setVisibility(View.VISIBLE);
+        v.findViewById(R.id.left_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(MapsActivity.newInstance(getContext(), BookDetailsActivity.COLECCIONES));
+            }
+        });
         v.findViewById(R.id.right_btn).setVisibility(View.VISIBLE);
         v.findViewById(R.id.right_btn).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -142,11 +150,12 @@ public class CollectionsFragment extends Fragment implements View.OnClickListene
         mCollectionsRV.setLayoutManager(mGridLayoutManager);
         mCollectionsRV.setHasFixedSize(true);
         mCollectionsAdapter = new CollectionsAdapter(mCollectionsList, getContext());
+        mCollectionsAdapter.mColType = BookDetailsActivity.COLECCIONES;
         mCollectionsRV.setAdapter(mCollectionsAdapter);
 
         // show new collections on start
         if(mCollectionsList.isEmpty()) {
-            ((TextView)v.findViewById(R.id.news_txt)).performClick();
+            v.findViewById(R.id.news_txt).performClick();
         }
 
         return v;

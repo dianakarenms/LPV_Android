@@ -17,14 +17,12 @@
         android:id="@+id/title_txt"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="lorem ipsunm dolor et ñlkjañslk d"
         android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
         android:textStyle="bold"/>
     <TextView
         android:id="@+id/subtitle_id"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="lorem ipsunm dolor et ñlkjañslk d"
         android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"/>
 
 </LinearLayout>

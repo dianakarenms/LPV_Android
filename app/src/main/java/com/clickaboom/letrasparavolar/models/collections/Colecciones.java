@@ -17,7 +17,7 @@ public class Colecciones implements Serializable {
 
     @SerializedName("id")
     @Expose
-    public String id;
+    public int id;
     @SerializedName("titulo")
     @Expose
     public String titulo;

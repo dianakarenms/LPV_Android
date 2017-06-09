@@ -1,7 +1,6 @@
 package com.clickaboom.letrasparavolar.adapters;
 
 import android.content.Context;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,8 +9,8 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.clickaboom.letrasparavolar.R;
+import com.clickaboom.letrasparavolar.activities.BookDetailsActivity;
 import com.clickaboom.letrasparavolar.activities.MainActivity;
-import com.clickaboom.letrasparavolar.fragments.BookDetailsFragment;
 import com.clickaboom.letrasparavolar.models.collections.Colecciones;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
 import com.squareup.picasso.Picasso;
@@ -26,6 +25,7 @@ import java.util.List;
 public class CollectionsAdapter extends RecyclerView.Adapter<CollectionsAdapter.ViewHolder> {
     private static Context mContext;
     private static List<Colecciones> mBookList;
+    public static String mColType;
 
     // Provide a suitable constructor (depends on the kind of dataset)
     public CollectionsAdapter(List<Colecciones> bookList, Context context) {
@@ -35,7 +35,6 @@ public class CollectionsAdapter extends RecyclerView.Adapter<CollectionsAdapter.
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         public TextView mTitle, mSubtitle;
-        //public NetworkImageView mImage;
         public ImageButton mImage;
         public ViewHolder(View v) {
             super(v);
@@ -43,13 +42,13 @@ public class CollectionsAdapter extends RecyclerView.Adapter<CollectionsAdapter.
             mTitle = (TextView) v.findViewById(R.id.title_txt);
             mSubtitle = (TextView) v.findViewById(R.id.subtitle_id);
             mImage = (ImageButton)v.findViewById(R.id.book_img);
-            //mImage = (NetworkImageView)v.findViewById(R.id.book_img);
         }
 
         @Override
         public void onClick(View v) {
-            Fragment fragment = BookDetailsFragment.newInstance(mBookList.get(getAdapterPosition()));
-            MainActivity.addFragment(fragment, (MainActivity) mContext);
+            mContext.startActivity(BookDetailsActivity.newIntent(mContext, mBookList.get(getAdapterPosition()).id, mColType));
+//            Fragment fragment = BookDetailsFragment.newInstance(mBookList.get(getAdapterPosition()));
+//            MainActivity.addFragment(fragment, (MainActivity) mContext);
         }
     }
 
@@ -79,12 +78,7 @@ public class CollectionsAdapter extends RecyclerView.Adapter<CollectionsAdapter.
                 .load(imgUrl)
                 .resize(200,200)
                 .centerInside()
-                //.memoryPolicy(MemoryPolicy.NO_CACHE)
                 .into(holder.mImage);
-        /*
-        imageLoader = ApiSingleton.getInstance(mContext).getImageLoader();
-        imageLoader.get(imgUrl, ImageLoader.getImageListener(holder.mImage, R.drawable.book_placeholder, android.R.drawable.ic_dialog_alert));
-        holder.mImage.setImageUrl(imgUrl, imageLoader);*/
     }
 
     @Override

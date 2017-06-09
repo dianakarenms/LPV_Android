@@ -136,9 +136,11 @@ public class MainActivity extends AppCompatActivity
 
         // specify an adapter (see also next example)
         mLegendsAdapter = new LegendsDefaultAdapter(mLegendsList, mContext);
+        mLegendsAdapter.mColType = BookDetailsActivity.LEGENDS;
         mRecyclerView.setAdapter(mLegendsAdapter);
 
         mCollectionsAdapter = new CollectionsDefaultAdapter(mCollectionsList, mContext);
+        mCollectionsAdapter.mColType = BookDetailsActivity.COLECCIONES;
         mRecyclerView2.setAdapter(mCollectionsAdapter);
 
         loadLegends();

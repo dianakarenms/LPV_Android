@@ -1,7 +1,6 @@
 package com.clickaboom.letrasparavolar.adapters;
 
 import android.content.Context;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,8 +9,8 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.clickaboom.letrasparavolar.R;
+import com.clickaboom.letrasparavolar.activities.BookDetailsActivity;
 import com.clickaboom.letrasparavolar.activities.MainActivity;
-import com.clickaboom.letrasparavolar.fragments.BookDetailsFragment;
 import com.clickaboom.letrasparavolar.models.collections.Colecciones;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
 import com.squareup.picasso.Picasso;
@@ -26,6 +25,7 @@ import java.util.List;
 public class LegendsDefaultAdapter extends RecyclerView.Adapter<LegendsDefaultAdapter.ViewHolder> {
     private static Context mContext;
     private static List<Colecciones> mBookList;
+    public static String mColType;
 
     // Provide a suitable constructor (depends on the kind of dataset)
     public LegendsDefaultAdapter(List<Colecciones> bookList, Context context) {
@@ -48,8 +48,9 @@ public class LegendsDefaultAdapter extends RecyclerView.Adapter<LegendsDefaultAd
 
         @Override
         public void onClick(View v) {
-            Fragment fragment = BookDetailsFragment.newInstance(mBookList.get(getAdapterPosition()));
-            MainActivity.addFragment(fragment, (MainActivity) mContext);
+            mContext.startActivity(BookDetailsActivity.newIntent(mContext, mBookList.get(getAdapterPosition()).id, mColType));
+//            Fragment fragment = BookDetailsFragment.newInstance(mBookList.get(getAdapterPosition()));
+//            MainActivity.addFragment(fragment, (MainActivity) mContext);
         }
     }
 

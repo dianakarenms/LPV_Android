@@ -12,7 +12,6 @@ import com.android.volley.VolleyError;
 import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.models.collections.Colecciones;
 import com.clickaboom.letrasparavolar.models.collections.ResCollections;
-import com.clickaboom.letrasparavolar.models.defaults.ResDefaults;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
 import com.clickaboom.letrasparavolar.network.ApiSingleton;
 import com.clickaboom.letrasparavolar.network.GsonRequest;
@@ -24,16 +23,18 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.clickaboom.letrasparavolar.R.id.map;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
-    private static final String EXTRA_MAP_TYPE = "com.lpv.extraMapType";
+    public static final String EXTRA_MAP_TYPE = "com.lpv.extraMapType";
     private static final String TAG = "MapsActivity";
     private GoogleMap mMap;
     private Context mContext;
+    private String mapType;
 
     public static Intent newInstance(Context packageContext, String mapType) {
         Intent i = new Intent(packageContext, MapsActivity.class);
@@ -45,6 +46,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        mapType = getIntent().getStringExtra(EXTRA_MAP_TYPE);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(map);
@@ -68,10 +70,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
-//                Toast.makeText(mContext, "Clicked title " + ((Colecciones)marker.getTag()).titulo, Toast.LENGTH_SHORT);
-//                Intent intent = new Intent(MapsActivity.this, SearchActivity.class);
-//                startActivity(intent);
-                loadItem(ApiConfig.legends, "?id=" + ((Colecciones)marker.getTag()).id);
+                startActivity(BookDetailsActivity.newIntent(mContext, ((Colecciones)marker.getTag()).id, mapType));
             }
         });
 
@@ -94,10 +93,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             @Override
                             public void onResponse(Object response) {
                                 Log.d(TAG, response.toString());
-                                List<Colecciones> res = ((ResCollections) response).leyendas;
+                                List<Colecciones> res = new ArrayList<>();
+
+                                if(mapType.equals(BookDetailsActivity.LEGENDS))
+                                    res = ((ResCollections) response).leyendas;
+                                else if(mapType.equals(BookDetailsActivity.COLECCIONES))
+                                    res = ((ResCollections) response).colecciones;
+
                                 for(Colecciones col: res) {
                                     createMarker(col);
                                 }
+
                                 LatLng mexicoCenter = new LatLng(20.926893,-101.9256694);
                                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mexicoCenter, 4.0f));
                             }
@@ -120,28 +126,5 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return marker;
 /*        PicassoMarker pMarker = new PicassoMarker(marker);
         Picasso.with(MapsActivity.this).load(url).into(pMarker);*/
-    }
-
-    private void loadItem(String url, String params) {
-        // Access the RequestQueue through your singleton class.
-        ApiSingleton.getInstance(mContext)
-                .addToRequestQueue(new GsonRequest(url + params,
-                        ResDefaults.class,
-                        Request.Method.GET,
-                        null, null,
-                        new Response.Listener() {
-                            @Override
-                            public void onResponse(Object response) {
-                                Log.d(TAG, response.toString());
-                                List<Colecciones> res = ((ResDefaults) response).data;
-                                startActivity(BookDetailsActivity.newIntent(mContext, res.get(0)));
-                            }
-                        }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.d(TAG, error.toString());
-                    }
-                }));
-
     }
 }

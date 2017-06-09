@@ -2,7 +2,6 @@ package com.clickaboom.letrasparavolar.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.NestedScrollView;
@@ -19,6 +18,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.clickaboom.letrasparavolar.R;
+import com.clickaboom.letrasparavolar.activities.BookDetailsActivity;
 import com.clickaboom.letrasparavolar.activities.MainActivity;
 import com.clickaboom.letrasparavolar.activities.MapsActivity;
 import com.clickaboom.letrasparavolar.activities.SearchActivity;
@@ -55,7 +55,6 @@ public class LegendsFragment extends Fragment implements View.OnClickListener {
     private String url = "", params = "", mImgPath;
     private CategoriesAdapter mCategoriesAdapter;
     private GridLayoutManager mGridLayoutManager;
-    private Parcelable mListState;
     private NestedScrollView mNestedScroll;
 
     public static LegendsFragment newInstance() {
@@ -107,7 +106,7 @@ public class LegendsFragment extends Fragment implements View.OnClickListener {
         v.findViewById(R.id.left_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(MapsActivity.newInstance(getContext(), "legends"));
+                startActivity(MapsActivity.newInstance(getContext(), BookDetailsActivity.LEGENDS));
             }
         });
         v.findViewById(R.id.right_btn).setVisibility(View.VISIBLE);
@@ -150,11 +149,12 @@ public class LegendsFragment extends Fragment implements View.OnClickListener {
         mCollectionsRV.setLayoutManager(mGridLayoutManager);
         mCollectionsRV.setHasFixedSize(true);
         mLegendsAdapter = new CollectionsAdapter(mLegendsList, getContext());
+        mLegendsAdapter.mColType = BookDetailsActivity.LEGENDS;
         mCollectionsRV.setAdapter(mLegendsAdapter);
 
         // show new collections on start
         if(mLegendsList.isEmpty()) {
-            ((TextView)v.findViewById(R.id.news_txt)).performClick();
+            v.findViewById(R.id.news_txt).performClick();
         }
 
         return v;
