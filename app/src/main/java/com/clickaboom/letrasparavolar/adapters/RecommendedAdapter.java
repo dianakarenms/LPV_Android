@@ -10,6 +10,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.clickaboom.letrasparavolar.R;
+import com.clickaboom.letrasparavolar.activities.BookDetailsActivity;
 import com.clickaboom.letrasparavolar.activities.MainActivity;
 import com.clickaboom.letrasparavolar.fragments.BookDetailsFragment;
 import com.clickaboom.letrasparavolar.models.collections.Colecciones;
@@ -26,6 +27,7 @@ import java.util.List;
 public class RecommendedAdapter extends RecyclerView.Adapter<RecommendedAdapter.ViewHolder> {
     private static Context mContext;
     private static List<Colecciones> mBookList;
+    public static String mColType;
 
     // Provide a suitable constructor (depends on the kind of dataset)
     public RecommendedAdapter(List<Colecciones> bookList, Context context) {
@@ -48,8 +50,9 @@ public class RecommendedAdapter extends RecyclerView.Adapter<RecommendedAdapter.
 
         @Override
         public void onClick(View v) {
-            Fragment fragment = BookDetailsFragment.newInstance(mBookList.get(getAdapterPosition()));
-            MainActivity.addFragment(fragment, (MainActivity) mContext);
+            mContext.startActivity(BookDetailsActivity.newIntent(mContext, mBookList.get(getAdapterPosition()).id, mColType));
+//            Fragment fragment = BookDetailsFragment.newInstance(mBookList.get(getAdapterPosition()));
+//            MainActivity.addFragment(fragment, (MainActivity) mContext);
         }
     }
 

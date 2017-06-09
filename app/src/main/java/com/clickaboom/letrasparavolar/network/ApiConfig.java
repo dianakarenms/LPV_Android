@@ -10,6 +10,9 @@ public class ApiConfig {
     // Banners
     public static final String banners = baseUrl + "/api/banners/";
 
+    // Images Path Categorias
+    public static final String catImgPath = baseUrl + "/uploads/images/categorias/";
+
     // Libros / Leyendas
     public static final String legends = baseUrl + "/api/libros/";
     public static final String legendsCategories = baseUrl + "/api/categorias/";

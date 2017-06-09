@@ -12,11 +12,12 @@ import android.widget.TextView;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.clickaboom.letrasparavolar.R;
-import com.clickaboom.letrasparavolar.models.collections.categories.Categoria;
+import com.clickaboom.letrasparavolar.models.collections.Categoria;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
+
 
 /**
  * Created by Karencita on 13/05/2017.

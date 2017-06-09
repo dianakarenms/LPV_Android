@@ -1,5 +1,6 @@
 package com.clickaboom.letrasparavolar.models.collections.categories;
 
+import com.clickaboom.letrasparavolar.models.collections.Categoria;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
