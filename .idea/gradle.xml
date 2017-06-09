@@ -9,6 +9,9 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/epublib-tools-viewer-latest" />
+            <option value="$PROJECT_DIR$/slf4j-android-1.7.25" />
+            <option value="$PROJECT_DIR$/slf4j-api-1.7.25" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

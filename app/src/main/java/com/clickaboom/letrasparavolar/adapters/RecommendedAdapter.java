@@ -1,7 +1,6 @@
 package com.clickaboom.letrasparavolar.adapters;
 
 import android.content.Context;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +11,6 @@ import android.widget.TextView;
 import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.activities.BookDetailsActivity;
 import com.clickaboom.letrasparavolar.activities.MainActivity;
-import com.clickaboom.letrasparavolar.fragments.BookDetailsFragment;
 import com.clickaboom.letrasparavolar.models.collections.Colecciones;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
 import com.squareup.picasso.Picasso;

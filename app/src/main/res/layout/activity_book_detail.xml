@@ -133,6 +133,7 @@
                         android:textSize="@dimen/medium_small"/>
                 </LinearLayout>
                 <Button
+                    android:id="@+id/downloadBtn"
                     android:layout_width="0dp"
                     android:layout_height="35dp"
                     android:layout_weight="1.1"

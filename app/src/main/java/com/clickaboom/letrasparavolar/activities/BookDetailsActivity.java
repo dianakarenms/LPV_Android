@@ -2,6 +2,7 @@ package com.clickaboom.letrasparavolar.activities;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -24,8 +25,13 @@ import com.clickaboom.letrasparavolar.network.ApiSingleton;
 import com.clickaboom.letrasparavolar.network.GsonRequest;
 import com.squareup.picasso.Picasso;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import nl.siegmann.epublib.domain.Book;
+import nl.siegmann.epublib.epub.EpubReader;
 
 import static com.clickaboom.letrasparavolar.activities.MainActivity.getStringFromListByCommas;
 
@@ -58,7 +64,7 @@ public class BookDetailsActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_book_detail);
+        setContentView(R.layout.activity_book_detail);
 
         mContext = this;
 
@@ -153,6 +159,30 @@ public class BookDetailsActivity extends AppCompatActivity {
                                     mBooksList.addAll(item.librosRelacionados);
                                     mAdapter.notifyDataSetChanged();
                                 }
+
+                                // Download Button
+                                findViewById(R.id.downloadBtn).setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        startActivity(EPubDemo.newIntent(mContext));
+                                        /*// read epub
+                                        try {
+                                            EpubReader epubReader = new EpubReader();
+                                            AssetManager am = mContext.getAssets();
+                                            InputStream is = am.open("epubs/alice_in_wonderland.epub");
+                                            //nl.siegmann.epublib.domain.Book book = epubReader.readEpub(new FileInputStream("/assets/"));
+                                            Book book = epubReader.readEpub(is);
+                                            //nl.siegmann.epublib.domain.Book book = epubReader.readEpub(is);
+                                            book.getMetadata().setTitles(new ArrayList<String>() {{
+                                                add("an awesome book");
+                                            }});
+
+
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }*/
+                                    }
+                                });
                             }
                         }, new Response.ErrorListener() {
                     @Override

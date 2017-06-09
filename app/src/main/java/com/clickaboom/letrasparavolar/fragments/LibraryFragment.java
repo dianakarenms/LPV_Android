@@ -18,7 +18,6 @@ import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.activities.MainActivity;
 import com.clickaboom.letrasparavolar.adapters.CategoriesAdapter;
 import com.clickaboom.letrasparavolar.adapters.CollectionsAdapter;
-import com.clickaboom.letrasparavolar.models.Book;
 import com.clickaboom.letrasparavolar.models.collections.Categoria;
 import com.clickaboom.letrasparavolar.models.collections.Colecciones;
 import com.clickaboom.letrasparavolar.models.collections.ResCollections;
@@ -41,7 +40,6 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
     private static final String TAG = "com.lpv.collections";
     public static final int REQUEST_SEARCH = 0;
     public static final String RESULT_SEARCH = "searchText";
-    private Book mBook;
     private RecyclerView mCategoriesRV, mCollectionsRV;
     private CollectionsAdapter mCollectionsAdapter;
     private List<Colecciones> mCollectionsList;
@@ -57,7 +55,6 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //setRetainInstance(true);
-        mBook = new Book();
         mCollectionsList = new ArrayList<>();
         mCategoriesList = new ArrayList<>();
         mImgPath = "";

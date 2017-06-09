@@ -57,6 +57,11 @@
             android:name=".activities.MapsActivity"
             android:label="@string/title_activity_maps">
         </activity>
+
+        <activity
+            android:name=".activities.EPubDemo"
+            android:label="@string/title_activity_maps">
+        </activity>
     </application>
 
 </manifest>

@@ -1,1 +1,1 @@
-include ':app'
+include ':app', ':epublib-tools-viewer-latest', ':slf4j-android-1.7.25', ':slf4j-api-1.7.25'

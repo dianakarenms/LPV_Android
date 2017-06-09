@@ -36,7 +36,6 @@ import com.clickaboom.letrasparavolar.fragments.CollectionsFragment;
 import com.clickaboom.letrasparavolar.fragments.InformationFragment;
 import com.clickaboom.letrasparavolar.fragments.LegendsFragment;
 import com.clickaboom.letrasparavolar.fragments.LibraryFragment;
-import com.clickaboom.letrasparavolar.models.Book;
 import com.clickaboom.letrasparavolar.models.banners.Banner;
 import com.clickaboom.letrasparavolar.models.banners.ResBanners;
 import com.clickaboom.letrasparavolar.models.collections.Colecciones;
@@ -69,7 +68,6 @@ public class MainActivity extends AppCompatActivity
     private LinearLayoutManager mLayoutManager;
     private CollectionsDefaultAdapter mCollectionsAdapter;
     private LegendsDefaultAdapter mLegendsAdapter;
-    private List<Book> mBooksList = new ArrayList<>();
     private ViewPager view1;
     private BannerPagerAdapter mBannerAdapter;
     private ImageView image;

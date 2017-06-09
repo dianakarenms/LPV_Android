@@ -35,5 +35,9 @@ dependencies {
     compile 'se.emilsjolander:StickyScrollViewItems:1.1.0'
     compile 'me.biubiubiu.justifytext:library:1.1'
     compile 'com.google.android.gms:play-services-maps:10.2.6'
+    // Remote binary dependency
+    compile 'nl.siegmann.epublib:epub-core:1.0@aar'
+    compile 'org.slf4j:slf4j-api:1.7.22'
+    compile 'eu.lp0.slf4j:slf4j-android:1.7.22-0'
     testCompile 'junit:junit:4.12'
 }
