@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/Letrasparavolar.iml" filepath="$PROJECT_DIR$/Letrasparavolar.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/epublib-core-latest/epublib-core-latest.iml" filepath="$PROJECT_DIR$/epublib-core-latest/epublib-core-latest.iml" />
       <module fileurl="file://$PROJECT_DIR$/epublib-tools-viewer-latest/epublib-tools-viewer-latest.iml" filepath="$PROJECT_DIR$/epublib-tools-viewer-latest/epublib-tools-viewer-latest.iml" />
       <module fileurl="file://$PROJECT_DIR$/lpv.iml" filepath="$PROJECT_DIR$/lpv.iml" />
       <module fileurl="file://$PROJECT_DIR$/slf4j-android-1.7.25/slf4j-android-1.7.25.iml" filepath="$PROJECT_DIR$/slf4j-android-1.7.25/slf4j-android-1.7.25.iml" />

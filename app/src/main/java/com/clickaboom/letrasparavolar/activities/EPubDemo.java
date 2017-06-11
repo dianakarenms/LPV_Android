@@ -18,6 +18,9 @@ import java.io.InputStreamReader;
 import java.util.List;
 
 import nl.siegmann.epublib.domain.Book;
+import nl.siegmann.epublib.domain.Resource;
+import nl.siegmann.epublib.domain.Spine;
+import nl.siegmann.epublib.domain.SpineReference;
 import nl.siegmann.epublib.domain.TOCReference;
 import nl.siegmann.epublib.epub.EpubReader;
 
@@ -29,6 +32,9 @@ public class EPubDemo extends Activity {
     WebView webview;
     String line, line1 = "", finalstr = "";
     int i = 0;
+    private String linez;
+    private String bookName = ""; //"books/el_callejon.epub";
+    private Book book;
 
     public static Intent newIntent(Context packageContext) {
         Intent i = new Intent(packageContext, EPubDemo.class);
@@ -41,11 +47,47 @@ public class EPubDemo extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_webview);
         webview = (WebView) findViewById(R.id.webView1);
-        AssetManager assetManager = getAssets();
+
+        webview.getSettings().setJavaScriptEnabled(true);
+        AssetManager am = getAssets();
+        try {
+            InputStream epubInputStream = am.open(bookName);
+            book = (new EpubReader()).readEpub(epubInputStream);
+        } catch (IOException e) {
+            Log.e("epublib", e.getMessage());
+        }
+
+        Spine spine = book.getSpine();
+        List<SpineReference> spineList = spine.getSpineReferences() ;
+        int count = spineList.size();
+        //tv.setText(Integer.toString(count));
+        StringBuilder string = new StringBuilder();
+        for (int i = 0; count > i; i++) {
+            Resource res = spine.getResource(i);
+
+            try {
+                InputStream is = res.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+                try {
+                    while ((line = reader.readLine()) != null) {
+                        linez =   string.append(line + "\n").toString();
+                    }
+
+                } catch (IOException e) {e.printStackTrace();}
+
+                //do something with stream
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+        webview.loadData(linez, "text/html", "utf-8");
+
+        /*AssetManager assetManager = getAssets();
         try {
             // find InputStream for book
             InputStream epubInputStream = assetManager
-                    .open("epubs/alice_in_wonderland.epub");
+                    .open("epubs/el_callejon.epub");
 
             // Load Book from inputStream
             Book book = (new EpubReader()).readEpub(epubInputStream);
@@ -56,7 +98,7 @@ public class EPubDemo extends Activity {
             // Log the book's title
             Log.i("title", " : " + book.getTitle());
 
-            /* Log the book's coverimage property */
+             Log the book's coverimage property
             // Bitmap coverImage =
             // BitmapFactory.decodeStream(book.getCoverImage()
             // .getInputStream());
@@ -64,8 +106,14 @@ public class EPubDemo extends Activity {
             // " by "
             // + coverImage.getHeight() + " pixels");
 
+            // String html = readFile(is);
+            String baseUrl = "file:///android_asset/epubs/";
+            String data = new String(book.getContents().get(2).getData());
+            mWebView.loadDataWithBaseURL(baseUrl, data, "text/html", "UTF-8", null);
+
+
             // Log the tale of contents
-            logTableOfContents(book.getTableOfContents().getTocReferences(), 0);
+            //logTableOfContents(book.getTableOfContents().getTocReferences(), 0);
         } catch (IOException e) {
             Log.e("epublib exception", e.getMessage());
         }
@@ -74,7 +122,7 @@ public class EPubDemo extends Activity {
         try {
             // InputStream input = getResources().openRawResource(R.raw.lights);
             InputStream input = this.getAssets().open(
-                    "epubs/alice_in_wonderland.epub");
+                    "epubs/el_callejon.epub");
 
             int size;
             size = input.available();
@@ -86,10 +134,10 @@ public class EPubDemo extends Activity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        // String html = readFile(is);
 
-        webview.loadDataWithBaseURL("file:///android_asset/", javascrips,
-                "application/epub+zip", "UTF-8", null);
+        mWebView.getSettings().setJavaScriptEnabled(true);
+//        mWebView.loadDataWithBaseURL("file:///android_asset/", javascrips,
+//                "application/epub+zip", "UTF-8", null);*/
     }
 
     @SuppressWarnings("unused")

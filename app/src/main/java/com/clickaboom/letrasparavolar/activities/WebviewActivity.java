@@ -12,7 +12,7 @@ import com.clickaboom.letrasparavolar.R;
 public class WebviewActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String TAG = "com.lpv.SearchActivity";
-    private static final String EXTRA_URL = "com.lpv.webview.url";
+    private static final String EXTRA_URL = "com.lpv.mWebView.url";
     //private static final String EXTRA_SEARCH_TYPE = "com.lpv.SearchType";
     private Context mCxt;
     private WebView webView;
