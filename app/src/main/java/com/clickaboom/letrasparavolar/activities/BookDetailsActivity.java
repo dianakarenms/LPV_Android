@@ -99,7 +99,7 @@ public class BookDetailsActivity extends AppCompatActivity {
                             public void onResponse(Object response) {
                                 Log.d(TAG, response.toString());
                                 List<Colecciones> res = ((ResDefaults) response).data;
-                                Colecciones item = res.get(0);
+                                final Colecciones item = res.get(0);
 
                                 // Book title info
                                 ((TextView)findViewById(R.id.title_txt)).setText(item.titulo);
@@ -159,7 +159,7 @@ public class BookDetailsActivity extends AppCompatActivity {
                                     @Override
                                     public void onClick(View v) {
                                         //startActivity(EPubDemo.newIntent(mContext));
-                                        startActivity(EpubBookContentActivity.newIntent(mContext));
+                                        startActivity(EpubBookContentActivity2.newIntent(mContext, item.epub));
                                         /*// read epub
                                         try {
                                             EpubReader epubReader = new EpubReader();

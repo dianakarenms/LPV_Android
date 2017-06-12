@@ -3,6 +3,12 @@
 buildscript {
     repositories {
         jcenter()
+
+        mavenLocal()
+
+        maven { url 'http://repo.pageturner-reader.org' }
+
+        mavenCentral()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.3.3'

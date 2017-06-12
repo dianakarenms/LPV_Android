@@ -3,6 +3,7 @@
           package="com.clickaboom.letrasparavolar">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <!--
@@ -60,6 +61,7 @@
         </activity>
 
         <activity android:name=".activities.EpubBookContentActivity" />
+        <activity android:name=".activities.EpubBookContentActivity2" />
 
         <activity android:name=".activities.EPubDemo" />
     </application>
