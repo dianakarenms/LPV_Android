@@ -18,6 +18,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 import com.clickaboom.letrasparavolar.R;
+import com.clickaboom.letrasparavolar.models.collections.Colecciones;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
 import com.clickaboom.letrasparavolar.network.DownloadFile;
 
@@ -40,6 +41,8 @@ import nl.siegmann.epublib.domain.SpineReference;
 import nl.siegmann.epublib.epub.EpubReader;
 import nl.siegmann.epublib.service.MediatypeService;
 
+import static com.clickaboom.letrasparavolar.activities.MainActivity.db;
+
 /**
  * Created by clickaboom on 6/10/17.
  */
@@ -57,15 +60,15 @@ public class EpubBookContentActivity2 extends Activity implements DownloadFile.O
     String line;
     int i = 0;
     private Context mContext;
-    private String epubName;
+    private Colecciones mEpub;
     private DownloadFile.OnTaskCompleted mDownloadsListener;
     private ProgressDialog barProgressDialog;
     private String linez;
     private String basePath;
 
-    public static Intent newIntent(Context packageContext, String epubName) {
+    public static Intent newIntent(Context packageContext, Colecciones epub) {
         Intent i = new Intent(packageContext, EpubBookContentActivity2.class);
-        i.putExtra(EXTRA_EPUB, epubName);
+        i.putExtra(EXTRA_EPUB, epub);
         return i;
     }
 
@@ -77,9 +80,9 @@ public class EpubBookContentActivity2 extends Activity implements DownloadFile.O
         mContext = this;
         mDownloadsListener = this;
 
-        epubName = getIntent().getStringExtra(EXTRA_EPUB);
+        mEpub = (Colecciones) getIntent().getSerializableExtra(EXTRA_EPUB);
 
-        descargar(ApiConfig.epubs + epubName, epubName);
+        descargar(ApiConfig.epubs + mEpub.epub, mEpub.epub);
 
         mWebView = (WebView) findViewById(R.id.webView1);
         mWebView.getSettings().setJavaScriptEnabled(true);
@@ -98,12 +101,12 @@ public class EpubBookContentActivity2 extends Activity implements DownloadFile.O
 
     public void loadEpubFromStorage() {
 
-        basePath = Environment.getExternalStorageDirectory() + "/LPV_eBooks/" + epubName;
+        basePath = Environment.getExternalStorageDirectory() + "/LPV_eBooks/" + mEpub.epub;
 
         // read epub
         EpubReader epubReader = new EpubReader();
         try {
-            book = epubReader.readEpub(new FileInputStream(basePath + "/" + epubName));
+            book = epubReader.readEpub(new FileInputStream(basePath + "/" + mEpub.epub));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -304,6 +307,9 @@ public class EpubBookContentActivity2 extends Activity implements DownloadFile.O
 
         @Override
         protected Void doInBackground(Void... arg0) {
+            if(db.insertBook(mEpub)) {
+                Log.d("ebookContent", "stored in db");
+            }
             loadEpubFromStorage();
             return null;
         }

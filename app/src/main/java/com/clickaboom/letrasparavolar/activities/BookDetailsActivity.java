@@ -159,7 +159,7 @@ public class BookDetailsActivity extends AppCompatActivity {
                                     @Override
                                     public void onClick(View v) {
                                         //startActivity(EPubDemo.newIntent(mContext));
-                                        startActivity(EpubBookContentActivity2.newIntent(mContext, item.epub));
+                                        startActivity(EpubBookContentActivity2.newIntent(mContext, item));
                                         /*// read epub
                                         try {
                                             EpubReader epubReader = new EpubReader();

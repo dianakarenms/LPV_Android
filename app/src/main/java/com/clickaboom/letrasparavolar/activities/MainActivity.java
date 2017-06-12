@@ -3,6 +3,7 @@ package com.clickaboom.letrasparavolar.activities;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -36,6 +37,7 @@ import com.clickaboom.letrasparavolar.fragments.CollectionsFragment;
 import com.clickaboom.letrasparavolar.fragments.InformationFragment;
 import com.clickaboom.letrasparavolar.fragments.LegendsFragment;
 import com.clickaboom.letrasparavolar.fragments.LibraryFragment;
+import com.clickaboom.letrasparavolar.models.SQLiteDBHelper;
 import com.clickaboom.letrasparavolar.models.banners.Banner;
 import com.clickaboom.letrasparavolar.models.banners.ResBanners;
 import com.clickaboom.letrasparavolar.models.collections.Colecciones;
@@ -44,11 +46,13 @@ import com.clickaboom.letrasparavolar.network.ApiConfig;
 import com.clickaboom.letrasparavolar.network.ApiSingleton;
 import com.clickaboom.letrasparavolar.network.GsonRequest;
 
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.net.ssl.HostnameVerifier;
@@ -58,12 +62,16 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import static android.R.attr.path;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         View.OnClickListener {
 
-    private static final String TAG = "com.lpv.MainActivity";
     public RelativeLayout legendsBtn, collectionsBtn, libraryBtn;
+    public static List<String> mLocalEpubsList = new ArrayList<>();
+
+    private static final String TAG = "com.lpv.MainActivity";
     private RecyclerView mRecyclerView, mRecyclerView2;
     private LinearLayoutManager mLayoutManager;
     private CollectionsDefaultAdapter mCollectionsAdapter;
@@ -75,6 +83,7 @@ public class MainActivity extends AppCompatActivity
     private List<Banner> mBannerItems = new ArrayList<>();
     private Context mContext;
     private List<Colecciones> mLegendsList = new ArrayList<>(), mCollectionsList = new ArrayList<>();;
+    public static SQLiteDBHelper db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +94,8 @@ public class MainActivity extends AppCompatActivity
         /*new NukeSSLCerts().nuke();*/
 
         mContext = this;
+
+        db = SQLiteDBHelper.getInstance(this);
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -173,6 +184,10 @@ public class MainActivity extends AppCompatActivity
         mBannerAdapter = new BannerPagerAdapter(getApplicationContext(), mBannerItems);
         view1.setAdapter(mBannerAdapter);
         loadBanners();
+
+        mLocalEpubsList = getDownloadedEpubs();
+
+        Log.d("MainActivity", mLocalEpubsList.toString());
     }
     
     @Override
@@ -520,5 +535,21 @@ public class MainActivity extends AppCompatActivity
             }
         }
         return answer;
+    }
+
+    private static List<String> getDownloadedEpubs() {
+        List<String> epubsList = new ArrayList<>();
+        String path = Environment.getExternalStorageDirectory() + "/LPV_eBooks/";
+        Log.d("Files", "Path: " + path);
+        File directory = new File(path);
+        File[] files = directory.listFiles();
+        if(files != null) {
+            Log.d("Files", "Size: " + files.length);
+            for (int i = 0; i < files.length; i++) {
+                Log.d("Files", "FileName:" + files[i].getName());
+                epubsList.add(files[i].getName());
+            }
+        }
+        return epubsList;
     }
 }

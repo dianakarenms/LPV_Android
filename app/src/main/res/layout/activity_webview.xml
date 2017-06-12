@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-          android:layout_width="match_parent"
-          android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/white">
     <LinearLayout
         android:id="@+id/webview_toolbar"
@@ -15,7 +16,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_marginLeft="@dimen/medium_padding"
-            android:src="@drawable/ic_back_arrow"
+            app:srcCompat="@drawable/ic_back_arrow"
             android:tint="@color/colorAccent"
             android:background="@null"/>
         <ImageButton
@@ -23,7 +24,7 @@
             android:layout_width="45dp"
             android:layout_height="13dp"
             android:layout_marginLeft="@dimen/medium_padding"
-            android:src="@drawable/ic_forward_arrow"
+            app:srcCompat="@drawable/ic_forward_arrow"
             android:tint="@color/colorAccent"
             android:background="@null"/>
     </LinearLayout>

@@ -1,6 +1,7 @@
 package com.clickaboom.letrasparavolar.fragments;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
@@ -11,25 +12,23 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.activities.MainActivity;
 import com.clickaboom.letrasparavolar.adapters.CategoriesAdapter;
 import com.clickaboom.letrasparavolar.adapters.CollectionsAdapter;
 import com.clickaboom.letrasparavolar.models.collections.Categoria;
 import com.clickaboom.letrasparavolar.models.collections.Colecciones;
-import com.clickaboom.letrasparavolar.models.collections.ResCollections;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
-import com.clickaboom.letrasparavolar.network.ApiSingleton;
-import com.clickaboom.letrasparavolar.network.GsonRequest;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.R.attr.key;
 import static android.app.Activity.RESULT_OK;
+import static com.clickaboom.letrasparavolar.activities.MainActivity.db;
+import static com.clickaboom.letrasparavolar.models.SQLiteDBHelper.BOOK_KEY;
+import static com.clickaboom.letrasparavolar.models.SQLiteDBHelper.titulo;
 
 /**
  * Created by Karencita on 15/05/2017.
@@ -127,38 +126,49 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
         if(mCollectionsList.isEmpty()) {
             url = ApiConfig.searchCollections;
             params = "?categoria=" + "13";
-            loadCollections(url, params);
+            loadCollections();
         }
 
         return v;
     }
 
-    private void loadCollections(String url, String params) {
+    private void loadCollections() {
 
-        // Access the RequestQueue through your singleton class.
-        ApiSingleton.getInstance(getActivity())
-                .addToRequestQueue(new GsonRequest(url + params,
-                        ResCollections.class,
-                        Request.Method.GET,
-                        null, null,
-                        new Response.Listener() {
-                            @Override
-                            public void onResponse(Object response) {
-                                Log.d(TAG, response.toString());
-                                List<List<Colecciones>> res = ((ResCollections) response).data;
+        Cursor rs = db.getAllBooks();
+        ArrayList<Colecciones> mArrayList = new ArrayList<>();
+        while(rs.moveToNext()) {
+            mArrayList.add(new Colecciones(
+                    Integer.valueOf(rs.getString(rs.getColumnIndex(db.id))),
+                    rs.getString(rs.getColumnIndex(db.titulo)),
+                    rs.getString(rs.getColumnIndex(db.fecha)),
+                    rs.getString(rs.getColumnIndex(db.epub)),
+                    rs.getString(rs.getColumnIndex(db.descripcion)),
+                    rs.getString(rs.getColumnIndex(db.editorial)),
+                    rs.getString(rs.getColumnIndex(db.length)),
+                    rs.getString(rs.getColumnIndex(db.imagen)),
+                    rs.getString(rs.getColumnIndex(db.favorito))
+                    )); //add the item
+        }
 
-                                mCollectionsList.clear();
-                                for(List<Colecciones> item : res) {
-                                    mCollectionsList.addAll(item); // Add main book to list
-                                }
-                                mCollectionsAdapter.notifyDataSetChanged();
-                            }
-                        }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.d(TAG, error.toString());
-                    }
-                }));
+        mCollectionsList.addAll(mArrayList);
+
+//        ArrayList<Colecciones> mArrayList = new ArrayList<Colecciones>();
+//        for(rs.moveToFirst(); !rs.isAfterLast(); rs.moveToNext()) {
+//            // The Cursor is now set to the right position
+//            mArrayList.add(rs.getString(db.titulo));
+//        }
+
+        /*
+        rs.moveToFirst();
+        String value = "";
+        try {
+            value = rs.getString(rs.getColumnIndex(titulo));
+            if (!rs.isClosed()) {
+                rs.close();
+            }
+        } catch (IndexOutOfBoundsException ex) {
+            Log.d("Db getLabel", ex.getMessage());
+        }*/
 
     }
 
@@ -176,7 +186,7 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
 
         }
         v.setBackgroundColor(getResources().getColor(R.color.order_back_pressed));
-        loadCollections(url, params);
+        loadCollections();
         //mCategoriesAdapter.clearActive();
         //mCategoriesAdapter.notifyDataSetChanged();
     }
@@ -192,7 +202,7 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
         switch (requestCode) {
             case REQUEST_SEARCH:
                 if(resultCode == RESULT_OK) {
-                    loadCollections(ApiConfig.searchCollections, "?q=" + data.getStringExtra(RESULT_SEARCH));
+                    loadCollections();
                 }
                 break;
         }

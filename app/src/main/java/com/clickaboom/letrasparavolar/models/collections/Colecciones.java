@@ -66,6 +66,20 @@ public class Colecciones implements Serializable {
     @Expose
     public List<Colecciones> librosRelacionados = new ArrayList<>();
 
+    public String favorito;
+
+    public Colecciones(int id, String titulo, String fecha, String epub, String descripcion, String editorial, String length, String imagen, String favorito) {
+        this.id = id;
+        this.titulo = titulo;
+        this.fecha = fecha;
+        this.epub = epub;
+        this.descripcion = descripcion;
+        this.editorial = editorial;
+        this.length = length;
+        this.imagen = imagen;
+        this.favorito = favorito;
+    }
+
     @SerializedName("0")
     @Expose
     public String _0;

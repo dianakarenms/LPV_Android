@@ -2,24 +2,39 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="wrap_content"
     android:layout_height="match_parent"
-    android:weightSum="5" android:padding="5dp"
+    android:weightSum="5" android:layout_margin="5dp"
     android:gravity="center_horizontal"
     android:descendantFocusability="blocksDescendants">
-
-    <ImageButton
-        android:id="@+id/book_img"
+    <RelativeLayout
+        android:id="@+id/favorite_star"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_above="@id/title_txt"
-        android:background="@null"
-        android:adjustViewBounds="true"
-        android:scaleType="centerInside"
-        android:clickable="false"/>
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/title_txt">
+        <ImageButton
+            android:id="@+id/book_img"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:adjustViewBounds="true"
+            android:layout_centerHorizontal="true"
+            android:scaleType="centerInside"
+            android:clickable="false"/>
+        <ImageView
+            android:layout_width="@dimen/small_icon"
+            android:layout_height="@dimen/small_icon"
+            android:padding="@dimen/extra_small_padding"
+            android:background="@color/white_trans"
+            android:layout_alignRight="@id/book_img"
+            android:src="@drawable/star_gray"
+            android:clickable="true"/>
+    </RelativeLayout>
     <TextView
         android:id="@+id/title_txt"
         android:layout_width="130dp"
         android:layout_height="wrap_content"
-        android:layout_above="@id/subtitle_id"
+        android:layout_above="@+id/subtitle_id"
         android:lines="1"
         android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
         android:textStyle="bold"

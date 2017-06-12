@@ -191,7 +191,6 @@ public class CollectionsFragment extends Fragment implements View.OnClickListene
     }
 
     private void loadCollections(String url, String params) {
-
         // Access the RequestQueue through your singleton class.
         ApiSingleton.getInstance(getActivity())
                 .addToRequestQueue(new GsonRequest(url + params,
