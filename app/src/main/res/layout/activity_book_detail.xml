@@ -65,8 +65,10 @@
                     android:id="@+id/add_to_favorites_llay"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:clickable="true">
                     <ImageView
+                        android:id="@+id/favorite_star"
                         android:layout_width="@dimen/small_icon"
                         android:layout_height="@dimen/small_icon"
                         android:padding="@dimen/extra_small_padding"
@@ -77,7 +79,7 @@
                         android:layout_height="match_parent"
                         android:layout_marginLeft="@dimen/small_padding"
                         android:text="@string/add_to_favorites"
-                        android:textSize="@dimen/mini_text"
+                        android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
                         android:gravity="center_vertical"/>
                 </LinearLayout>
             </LinearLayout>
@@ -138,7 +140,6 @@
                     android:layout_height="35dp"
                     android:layout_weight="1.1"
                     android:layout_marginLeft="@dimen/large_padding"
-                    android:text="@string/download"
                     android:textColor="@color/white"
                     android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
                     android:textAllCaps="false"

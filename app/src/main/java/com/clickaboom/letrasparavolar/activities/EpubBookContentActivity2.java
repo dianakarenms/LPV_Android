@@ -280,7 +280,6 @@ public class EpubBookContentActivity2 extends Activity implements DownloadFile.O
 
     @Override
     public void onTaskCompleted() {
-        //loadEpubFromStorage();
         new LoadBook(mContext, barProgressDialog).execute();
     }
 

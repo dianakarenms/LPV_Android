@@ -38,9 +38,10 @@ import static com.clickaboom.letrasparavolar.activities.MainActivity.db;
 
 public class LibraryFragment extends Fragment implements View.OnClickListener {
 
-    private static final String TAG = "com.lpv.collections";
+    private static final String TAG = "com.lpv.library";
     public static final int REQUEST_SEARCH = 0;
-    public static final String RESULT_SEARCH = "searchText";
+    private static final String FAVORITES = "favorites";
+    private static final String DOWNLOADED = "downloaded";
     private RecyclerView mLegendsRV, mColeccionesRV;
     private CollectionsAdapter mCollectionsAdapter;
     private LegendsAdapter mLegendsAdapter;
@@ -81,7 +82,7 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        v = inflater.inflate(R.layout.fragment_library, container, false);
+        v = inflater.inflate(R.layout.fragment_library_2, container, false);
 
         // Set its bottomNavButton clicked
         ((MainActivity)getActivity()).restoreBottonNavColors();
@@ -94,8 +95,8 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
         v.findViewById(R.id.right_btn).setVisibility(View.GONE);
 
         // Order collections
-        v.findViewById(R.id.information_txt).setOnClickListener(this);
-        v.findViewById(R.id.international_txt).setOnClickListener(this);
+        v.findViewById(R.id.favorites_txt).setOnClickListener(this);
+        v.findViewById(R.id.downloaded_txt).setOnClickListener(this);
 
         // Categories Recycler View
         mLegendsRV = (RecyclerView)v.findViewById(R.id.legends_recycler);
@@ -115,7 +116,8 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
         mCollectionsAdapter.mColType = BookDetailsActivity.COLECCIONES;
         mColeccionesRV.setAdapter(mCollectionsAdapter);
 
-        loadCollections();
+        // Load favorites at fragment visible
+        v.findViewById(R.id.favorites_txt).performClick();
 
         return v;
     }
@@ -125,48 +127,29 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
         mLegendsList.clear();
         mCollectionsList.clear();
 
-        ArrayList<Colecciones> mArrayList = db.getAllBooks();
-        /*ArrayList<Colecciones> mArrayList = new ArrayList<>();
-
-        Gson gson = new Gson();
-        Type autType = new TypeToken<ArrayList<Autores>>() {}.getType();
-        Type imgsType = new TypeToken<ArrayList<Imagen>>() {}.getType();
-        Type etType = new TypeToken<ArrayList<Etiqueta>>() {}.getType();
-        Type catType = new TypeToken<ArrayList<Categoria>>() {}.getType();
-        Type colType = new TypeToken<ArrayList<Colecciones>>() {}.getType();
-
-        while(rs.moveToNext()) {
-            ArrayList<Autores> autores = gson.fromJson(rs.getString(rs.getColumnIndex(db.autores)), autType);
-            ArrayList<Imagen> imagenes = gson.fromJson(rs.getString(rs.getColumnIndex(db.imagenes)), imgsType);
-            ArrayList<Etiqueta> etiquetas = gson.fromJson(rs.getString(rs.getColumnIndex(db.etiquetas)), etType);
-            ArrayList<Categoria> categorias = gson.fromJson(rs.getString(rs.getColumnIndex(db.categorias)), catType);
-            ArrayList<Colecciones> librosRelacionados = gson.fromJson(rs.getString(rs.getColumnIndex(db.librosRelacionados)), colType);
-            mArrayList.add(new Colecciones(
-                    Integer.valueOf(rs.getString(rs.getColumnIndex(db.id))),
-                    rs.getString(rs.getColumnIndex(db.titulo)),
-                    rs.getString(rs.getColumnIndex(db.fecha)),
-                    rs.getString(rs.getColumnIndex(db.epub)),
-                    rs.getString(rs.getColumnIndex(db.descripcion)),
-                    rs.getString(rs.getColumnIndex(db.editorial)),
-                    rs.getString(rs.getColumnIndex(db.length)),
-                    autores,
-                    rs.getString(rs.getColumnIndex(db.imagen)),
-                    imagenes,
-                    categorias,
-                    etiquetas,
-                    librosRelacionados,
-                    rs.getInt(rs.getColumnIndex(db.favorito))  > 0,
-                    rs.getString(rs.getColumnIndex(db.type))
-                    )); //add the item
-        }*/
-
-        for(Colecciones book: mArrayList) {
-            if(book.type.equals(BookDetailsActivity.LEGENDS))
-                mLegendsList.add(book);
-            else
-                mCollectionsList.add(book);
+        if(params.equals(DOWNLOADED)) { // Request all downloaded Books
+            ArrayList<Colecciones> mArrayList = db.getAllBooks();
+            if (mArrayList != null) {
+                for (Colecciones book : mArrayList) {
+                    if (book.type.equals(BookDetailsActivity.LEGENDS))
+                        mLegendsList.add(book);
+                    else
+                        mCollectionsList.add(book);
+                }
+            }
+        } else { // Request just the favorite books
+            ArrayList<Colecciones> mArrayList = db.getAllBooks();
+            if (mArrayList != null) {
+                for (Colecciones book : mArrayList) {
+                    if (book.type.equals(BookDetailsActivity.LEGENDS) && book.favorito)
+                        mLegendsList.add(book);
+                    else if (book.type.equals(BookDetailsActivity.COLECCIONES) && book.favorito)
+                        mCollectionsList.add(book);
+                }
+            }
         }
 
+        // Update Adapters
         mLegendsAdapter.notifyDataSetChanged();
         mCollectionsAdapter.notifyDataSetChanged();
     }
@@ -176,23 +159,21 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
         restoreOrderColors();
         url = ApiConfig.searchCollections;
         switch (v.getId()) {
-            case R.id.information_txt:
-                params = "?categoria=" + "13";
+            case R.id.favorites_txt:
+                params = FAVORITES;
                 break;
-            case R.id.international_txt:
-                params = "?categoria=" + "15";
+            case R.id.downloaded_txt:
+                params = DOWNLOADED;
                 break;
 
         }
         v.setBackgroundColor(getResources().getColor(R.color.order_back_pressed));
         loadCollections();
-        //mCategoriesAdapter.clearActive();
-        //mCategoriesAdapter.notifyDataSetChanged();
     }
 
     private void restoreOrderColors() {
-        v.findViewById(R.id.information_txt).setBackground(getResources().getDrawable(R.drawable.nav_subcategories_button));
-        v.findViewById(R.id.international_txt).setBackground(getResources().getDrawable(R.drawable.nav_subcategories_button));
+        v.findViewById(R.id.favorites_txt).setBackground(getResources().getDrawable(R.drawable.nav_subcategories_button));
+        v.findViewById(R.id.downloaded_txt).setBackground(getResources().getDrawable(R.drawable.nav_subcategories_button));
     }
 
     @Override

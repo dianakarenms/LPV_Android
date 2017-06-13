@@ -2,6 +2,7 @@ package com.clickaboom.letrasparavolar.activities;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -9,6 +10,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -51,6 +53,7 @@ public class BookDetailsActivity extends AppCompatActivity {
     private String TAG = "com.lpv.bookDetails";
     private String mColType;
     private int mItemId;
+    private ImageView starBtn;
 
     public static Intent newIntent(Context packageContext, int id, String colType) {
         Intent i = new Intent(packageContext, BookDetailsActivity.class);
@@ -134,6 +137,17 @@ public class BookDetailsActivity extends AppCompatActivity {
         // Item type for storing it in db
         item.type = mColType;
         item.favorito = false;
+        final ArrayList<Colecciones> localItem = db.getBookByePub(item.epub);
+
+        starBtn = (ImageView) findViewById(R.id.favorite_star);
+
+        if(!localItem.isEmpty()) {
+            ((TextView) findViewById(R.id.downloadBtn)).setText(getResources().getString(R.string.open));
+            if(localItem.get(0).favorito) {
+                starBtn.setBackgroundColor(getResources().getColor(R.color.legends_nav_pressed));
+            }
+        } else
+            ((TextView)findViewById(R.id.downloadBtn)).setText(getResources().getString(R.string.download));
 
         // Book title info
         ((TextView)findViewById(R.id.title_txt)).setText(item.titulo);
@@ -188,6 +202,20 @@ public class BookDetailsActivity extends AppCompatActivity {
             mBooksList.addAll(item.librosRelacionados);
             mAdapter.notifyDataSetChanged();
         }
+
+        // add book to favorites
+        findViewById(R.id.add_to_favorites_llay).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!localItem.isEmpty()) {
+                    if(db.updateFavBook(item.epub, localItem.get(0).favorito ? 0 : 1))
+                        starBtn.setBackgroundColor(getResources().getColor(R.color.legends_nav_pressed));
+                    else
+                        starBtn.setBackgroundColor(Color.TRANSPARENT);
+                } else
+                    Toast.makeText(mContext, "Descárgalo para poder marcarlo como favorito", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         // Download Button
         findViewById(R.id.downloadBtn).setOnClickListener(new View.OnClickListener() {

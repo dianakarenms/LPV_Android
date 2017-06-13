@@ -44,7 +44,7 @@
     <string name="tags">Etiquetas:</string>
     <string name="requirements">Requisitos:</string>
     <string name="related">Relacionados:</string>
-    <string name="add_to_favorites">Marcar como favorito</string>
+    <string name="add_to_favorites">Favorito</string>
     <string name="favorites">Favoritos</string>
     <string name="downloaded">Descargados</string>
     <string name="lecturas">Lecturas</string>
@@ -59,4 +59,5 @@
           y el desarrollo de sus habilidades comunicativas.</string>
     <string name="program_title">Programa Universitario de Fomento a la Lectura Letras para volar</string>
     <string name="title_activity_maps">Map</string>
+    <string name="open">Abrir</string>
 </resources>
