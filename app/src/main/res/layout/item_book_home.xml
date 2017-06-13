@@ -28,7 +28,8 @@
             android:background="@color/white_trans"
             android:layout_alignRight="@id/book_img"
             android:src="@drawable/star_gray"
-            android:clickable="true"/>
+            android:clickable="true"
+            android:visibility="gone"/>
     </RelativeLayout>
     <TextView
         android:id="@+id/title_txt"

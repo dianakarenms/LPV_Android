@@ -11,7 +11,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.clickaboom.letrasparavolar.R;
-import com.clickaboom.letrasparavolar.fragments.CollectionsFragment;
+import com.clickaboom.letrasparavolar.fragments.ColeccionesFragment;
 
 public class SearchActivity extends AppCompatActivity
         implements View.OnClickListener {
@@ -41,7 +41,7 @@ public class SearchActivity extends AppCompatActivity
                 boolean handled = false;
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                     Intent resultIntent = new Intent();
-                    resultIntent.putExtra(CollectionsFragment.RESULT_SEARCH, searchField.getText().toString());
+                    resultIntent.putExtra(ColeccionesFragment.RESULT_SEARCH, searchField.getText().toString());
                     setResult(RESULT_OK, resultIntent);
                     finish();
                     handled = true;

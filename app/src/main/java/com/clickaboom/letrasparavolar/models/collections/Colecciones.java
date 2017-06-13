@@ -66,9 +66,10 @@ public class Colecciones implements Serializable {
     @Expose
     public List<Colecciones> librosRelacionados = new ArrayList<>();
 
-    public String favorito;
+    public Boolean favorito;
+    public String type = "";
 
-    public Colecciones(int id, String titulo, String fecha, String epub, String descripcion, String editorial, String length, String imagen, String favorito) {
+    public Colecciones(int id, String titulo, String fecha, String epub, String descripcion, String editorial, String length, ArrayList<Autores> autores, String imagen, ArrayList<Imagen> imagenes, ArrayList<Categoria> categorias, ArrayList<Etiqueta> etiquetas, ArrayList<Colecciones> librosRelacionados, Boolean favorito, String type) {
         this.id = id;
         this.titulo = titulo;
         this.fecha = fecha;
@@ -76,8 +77,14 @@ public class Colecciones implements Serializable {
         this.descripcion = descripcion;
         this.editorial = editorial;
         this.length = length;
+        this.autores = autores;
         this.imagen = imagen;
+        this.imagenes = imagenes;
+        this.categorias = categorias;
+        this.etiquetas = etiquetas;
+        this.librosRelacionados = librosRelacionados;
         this.favorito = favorito;
+        this.type = type;
     }
 
     @SerializedName("0")

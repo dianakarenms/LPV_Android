@@ -42,7 +42,7 @@ import static android.app.Activity.RESULT_OK;
  * Created by Karencita on 15/05/2017.
  */
 
-public class CollectionsFragment extends Fragment implements View.OnClickListener {
+public class ColeccionesFragment extends Fragment implements View.OnClickListener {
 
     private static final String TAG = "com.lpv.collections";
     public static final int REQUEST_SEARCH = 0;
@@ -59,8 +59,8 @@ public class CollectionsFragment extends Fragment implements View.OnClickListene
     private Parcelable mListState;
     private NestedScrollView mNestedScroll;
 
-    public static CollectionsFragment newInstance() {
-        CollectionsFragment fragment = new CollectionsFragment();
+    public static ColeccionesFragment newInstance() {
+        ColeccionesFragment fragment = new ColeccionesFragment();
         return fragment;
     }
 

@@ -6,29 +6,31 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.clickaboom.letrasparavolar.R;
+import com.clickaboom.letrasparavolar.activities.BookDetailsActivity;
 import com.clickaboom.letrasparavolar.activities.MainActivity;
-import com.clickaboom.letrasparavolar.adapters.CategoriesAdapter;
 import com.clickaboom.letrasparavolar.adapters.CollectionsAdapter;
+import com.clickaboom.letrasparavolar.adapters.LegendsAdapter;
+import com.clickaboom.letrasparavolar.models.Imagen;
+import com.clickaboom.letrasparavolar.models.collections.Autores;
 import com.clickaboom.letrasparavolar.models.collections.Categoria;
 import com.clickaboom.letrasparavolar.models.collections.Colecciones;
+import com.clickaboom.letrasparavolar.models.collections.Etiqueta;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
-import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import static android.R.attr.key;
 import static android.app.Activity.RESULT_OK;
 import static com.clickaboom.letrasparavolar.activities.MainActivity.db;
-import static com.clickaboom.letrasparavolar.models.SQLiteDBHelper.BOOK_KEY;
-import static com.clickaboom.letrasparavolar.models.SQLiteDBHelper.titulo;
 
 /**
  * Created by Karencita on 15/05/2017.
@@ -39,13 +41,12 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
     private static final String TAG = "com.lpv.collections";
     public static final int REQUEST_SEARCH = 0;
     public static final String RESULT_SEARCH = "searchText";
-    private RecyclerView mCategoriesRV, mCollectionsRV;
+    private RecyclerView mLegendsRV, mColeccionesRV;
     private CollectionsAdapter mCollectionsAdapter;
-    private List<Colecciones> mCollectionsList;
-    private List<Categoria> mCategoriesList;
+    private LegendsAdapter mLegendsAdapter;
+    private List<Colecciones> mCollectionsList, mLegendsList;
     private View v;
     private String url = "", params = "", mImgPath;
-    private CategoriesAdapter mCategoriesAdapter;
 
     public LibraryFragment() {
     }
@@ -55,29 +56,27 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         //setRetainInstance(true);
         mCollectionsList = new ArrayList<>();
-        mCategoriesList = new ArrayList<>();
+        mLegendsList = new ArrayList<>();
         mImgPath = "";
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putSerializable("categories", (Serializable) mCategoriesList);
-        outState.putSerializable("collections", (Serializable) mCollectionsList);
-        outState.putString("imgPath", mImgPath);
+//        outState.putSerializable("collections", (Serializable) mCollectionsList);
+//        outState.putString("imgPath", mImgPath);
 
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if(savedInstanceState != null) {
+        /*if(savedInstanceState != null) {
             mImgPath = savedInstanceState.getString("imgPath");
-            mCategoriesList = (List<Categoria>) savedInstanceState.getSerializable("categories");
             mCollectionsList = (List<Colecciones>) savedInstanceState.getSerializable("collections");
             mCategoriesAdapter.notifyDataSetChanged();
             mCollectionsAdapter.notifyDataSetChanged();
-        }
+        }*/
     }
 
     @Override
@@ -99,44 +98,49 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
         v.findViewById(R.id.international_txt).setOnClickListener(this);
 
         // Categories Recycler View
-        mCategoriesRV = (RecyclerView) v.findViewById(R.id.readings_recycler);
+        mLegendsRV = (RecyclerView)v.findViewById(R.id.legends_recycler);
+        mColeccionesRV = (RecyclerView)v.findViewById(R.id.collections_recycler);
+
         GridLayoutManager mGridLayoutManager = new GridLayoutManager(getContext(), 3);
-        mCategoriesRV.setLayoutManager(mGridLayoutManager);
-        /*mCategoriesAdapter = new CategoriesAdapter(mCategoriesList, mImgPath, getContext(), new CategoriesAdapter.RecyclerViewClickListener() {
-            @Override
-            public void recyclerViewListClicked(String categoryId) {
-                url = ApiConfig.collectionByCategory;
-                params = "?categoria=" + categoryId;
-                loadCollections(url, params);
-                restoreOrderColors();
-            }
-        });
-        mCategoriesRV.setAdapter(mCategoriesAdapter);*/
-
-
-        // Collections RecyclerView
-        mCollectionsRV = (RecyclerView) v.findViewById(R.id.books_recycler);
+        mLegendsRV.setLayoutManager(mGridLayoutManager);
         mGridLayoutManager = new GridLayoutManager(getContext(), 3);
-        mCollectionsRV.setLayoutManager(mGridLayoutManager);
-        mCollectionsAdapter = new CollectionsAdapter(mCollectionsList, getContext());
-        mCollectionsRV.setAdapter(mCollectionsAdapter);
-        mCategoriesRV.setAdapter(mCollectionsAdapter);
+        mColeccionesRV.setLayoutManager(mGridLayoutManager);
 
-        // show new collections on start
-        if(mCollectionsList.isEmpty()) {
-            url = ApiConfig.searchCollections;
-            params = "?categoria=" + "13";
-            loadCollections();
-        }
+        // specify an adapter (see also next example)
+        mLegendsAdapter = new LegendsAdapter(mLegendsList, getContext());
+        mLegendsAdapter.mColType = BookDetailsActivity.LEGENDS;
+        mLegendsRV.setAdapter(mLegendsAdapter);
+
+        mCollectionsAdapter = new CollectionsAdapter(mCollectionsList, getContext());
+        mCollectionsAdapter.mColType = BookDetailsActivity.COLECCIONES;
+        mColeccionesRV.setAdapter(mCollectionsAdapter);
+
+        loadCollections();
 
         return v;
     }
 
     private void loadCollections() {
+        // Clear previous data
+        mLegendsList.clear();
+        mCollectionsList.clear();
 
-        Cursor rs = db.getAllBooks();
-        ArrayList<Colecciones> mArrayList = new ArrayList<>();
+        ArrayList<Colecciones> mArrayList = db.getAllBooks();
+        /*ArrayList<Colecciones> mArrayList = new ArrayList<>();
+
+        Gson gson = new Gson();
+        Type autType = new TypeToken<ArrayList<Autores>>() {}.getType();
+        Type imgsType = new TypeToken<ArrayList<Imagen>>() {}.getType();
+        Type etType = new TypeToken<ArrayList<Etiqueta>>() {}.getType();
+        Type catType = new TypeToken<ArrayList<Categoria>>() {}.getType();
+        Type colType = new TypeToken<ArrayList<Colecciones>>() {}.getType();
+
         while(rs.moveToNext()) {
+            ArrayList<Autores> autores = gson.fromJson(rs.getString(rs.getColumnIndex(db.autores)), autType);
+            ArrayList<Imagen> imagenes = gson.fromJson(rs.getString(rs.getColumnIndex(db.imagenes)), imgsType);
+            ArrayList<Etiqueta> etiquetas = gson.fromJson(rs.getString(rs.getColumnIndex(db.etiquetas)), etType);
+            ArrayList<Categoria> categorias = gson.fromJson(rs.getString(rs.getColumnIndex(db.categorias)), catType);
+            ArrayList<Colecciones> librosRelacionados = gson.fromJson(rs.getString(rs.getColumnIndex(db.librosRelacionados)), colType);
             mArrayList.add(new Colecciones(
                     Integer.valueOf(rs.getString(rs.getColumnIndex(db.id))),
                     rs.getString(rs.getColumnIndex(db.titulo)),
@@ -145,31 +149,26 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
                     rs.getString(rs.getColumnIndex(db.descripcion)),
                     rs.getString(rs.getColumnIndex(db.editorial)),
                     rs.getString(rs.getColumnIndex(db.length)),
+                    autores,
                     rs.getString(rs.getColumnIndex(db.imagen)),
-                    rs.getString(rs.getColumnIndex(db.favorito))
+                    imagenes,
+                    categorias,
+                    etiquetas,
+                    librosRelacionados,
+                    rs.getInt(rs.getColumnIndex(db.favorito))  > 0,
+                    rs.getString(rs.getColumnIndex(db.type))
                     )); //add the item
-        }
-
-        mCollectionsList.addAll(mArrayList);
-
-//        ArrayList<Colecciones> mArrayList = new ArrayList<Colecciones>();
-//        for(rs.moveToFirst(); !rs.isAfterLast(); rs.moveToNext()) {
-//            // The Cursor is now set to the right position
-//            mArrayList.add(rs.getString(db.titulo));
-//        }
-
-        /*
-        rs.moveToFirst();
-        String value = "";
-        try {
-            value = rs.getString(rs.getColumnIndex(titulo));
-            if (!rs.isClosed()) {
-                rs.close();
-            }
-        } catch (IndexOutOfBoundsException ex) {
-            Log.d("Db getLabel", ex.getMessage());
         }*/
 
+        for(Colecciones book: mArrayList) {
+            if(book.type.equals(BookDetailsActivity.LEGENDS))
+                mLegendsList.add(book);
+            else
+                mCollectionsList.add(book);
+        }
+
+        mLegendsAdapter.notifyDataSetChanged();
+        mCollectionsAdapter.notifyDataSetChanged();
     }
 
     @Override

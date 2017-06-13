@@ -70,7 +70,7 @@
                     android:text="@string/legends_title"
                     android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
                 <android.support.v7.widget.RecyclerView
-                    android:id="@+id/readings_recycler"
+                    android:id="@+id/legends_recycler"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:nestedScrollingEnabled="false"
@@ -83,7 +83,7 @@
                     android:text="@string/collections_title"
                     android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
                 <android.support.v7.widget.RecyclerView
-                    android:id="@+id/books_recycler"
+                    android:id="@+id/collections_recycler"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:nestedScrollingEnabled="false"

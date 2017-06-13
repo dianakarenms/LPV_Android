@@ -27,6 +27,7 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.clickaboom.letrasparavolar.activities.MainActivity.db;
 import static com.clickaboom.letrasparavolar.activities.MainActivity.getStringFromListByCommas;
 
 /**
@@ -38,7 +39,8 @@ public class BookDetailsActivity extends AppCompatActivity {
     private static final String EXTRA_ITEMID = "com.lpv.item";
     public static final String COLECCIONES = "colecciones";
     public static final String LEGENDS = "leyendas";
-    private static final String EXTRA_COL_TYPE = "com.lpv.colType";
+    private static final String EXTRA_COL_TYPE = "com.lpv.mColType";
+    private static final String STATE_BOOKS_LIST = "com.lpv.mBooksList";
 
     private RecyclerView mRecyclerView;
     private GridLayoutManager mGridLayoutManager;
@@ -47,6 +49,8 @@ public class BookDetailsActivity extends AppCompatActivity {
     private String params;
     private Context mContext;
     private String TAG = "com.lpv.bookDetails";
+    private String mColType;
+    private int mItemId;
 
     public static Intent newIntent(Context packageContext, int id, String colType) {
         Intent i = new Intent(packageContext, BookDetailsActivity.class);
@@ -56,22 +60,30 @@ public class BookDetailsActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        // Avoid setting a null mBookList in mAdapter
+        mAdapter.setList(mBooksList);
+        mAdapter.notifyDataSetChanged();
+    }
+
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_detail);
 
         mContext = this;
 
-        int itemId = getIntent().getIntExtra(EXTRA_ITEMID, 0);
-        String colType = getIntent().getStringExtra(EXTRA_COL_TYPE);
+        mItemId = getIntent().getIntExtra(EXTRA_ITEMID, 0);
+        mColType = getIntent().getStringExtra(EXTRA_COL_TYPE);
         String url = "";
-        if(colType.equals(LEGENDS))
+        if(mColType.equals(LEGENDS))
             url = ApiConfig.legends;
         else
             url = ApiConfig.collections;
 
         // Load Book Data
-        loadItem(url, itemId);
+        loadItem(url, mItemId);
 
         // Set toolbar_asistant title
         findViewById(R.id.toolbar_asistant).setVisibility(View.GONE);
@@ -83,7 +95,7 @@ public class BookDetailsActivity extends AppCompatActivity {
 
         // specify an adapter (see also next example)
         mAdapter = new RecommendedAdapter(mBooksList, mContext);
-        mAdapter.mColType = colType;
+        mAdapter.mColType = mColType;
         mRecyclerView.setAdapter(mAdapter);
     }
 
@@ -99,67 +111,89 @@ public class BookDetailsActivity extends AppCompatActivity {
                             public void onResponse(Object response) {
                                 Log.d(TAG, response.toString());
                                 List<Colecciones> res = ((ResDefaults) response).data;
-                                final Colecciones item = res.get(0);
+                                Colecciones item = res.get(0);
 
-                                // Book title info
-                                ((TextView)findViewById(R.id.title_txt)).setText(item.titulo);
-                                String imgUrl = ApiConfig.collectionsImg + item.imagenes.get(0).imagen;
-                                ImageView image = (ImageView) findViewById(R.id.book_img);
-                                Picasso.with(mContext)
-                                        .load(imgUrl)
-                                        .resize(300,300)
-                                        .centerInside()
-                                        .into(image);
-                                ((TextView)findViewById(R.id.date_title_txt)).setText(item.fecha);
+                                updateUI(item);
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d(TAG, error.toString());
+                        ArrayList<Colecciones> book = db.getBookById(String.valueOf(mItemId), mColType);
+                        if(book.isEmpty())
+                            Toast.makeText(mContext, "Error de conexión", Toast.LENGTH_SHORT).show();
+                        else {
+                            updateUI(book.get(0));
+                        }
+                    }
+                }));
 
-                                // Subtitle Authors
-                                List<String> autoresList = new ArrayList<>();
-                                for(int i = 0; i<item.autores.size(); i++) {
-                                    autoresList.add(item.autores.get(i).autor);
-                                }
-                                ((TextView)findViewById(R.id.subtitle_txt)).setText(getStringFromListByCommas(autoresList));
-                                ((TextView)findViewById(R.id.date_title_txt)).setText(item.fecha);
+    }
 
-                                // Category Image
-                                if(!item.categorias.isEmpty()) {
-                                    imgUrl = ApiConfig.catImgPath + item.categorias.get(0).icono;
-                                    image = (ImageView) findViewById(R.id.category_img);
-                                    Picasso.with(mContext)
-                                            .load(imgUrl)
-                                            .resize(300, 300)
-                                            .centerInside()
-                                            .into(image);
-                                    ((TextView)findViewById(R.id.category_name)).setText(item.categorias.get(0).categoria);
-                                    ((TextView)findViewById(R.id.category_txt)).setText(item.categorias.get(0).categoria);
-                                }
+    private void updateUI(final Colecciones item) {
+        // Item type for storing it in db
+        item.type = mColType;
+        item.favorito = false;
 
-                                // Book extra info
-                                ((TextView)findViewById(R.id.description_txt)).setText(item.descripcion);
-                                ((TextView)findViewById(R.id.idiom_txt)).setText("Español");
-                                ((TextView)findViewById(R.id.publisher_txt)).setText(item.editorial);
-                                ((TextView)findViewById(R.id.date_txt)).setText(item.fecha);
-                                ((TextView)findViewById(R.id.size_txt)).setText(item.length + " MB");
-                                ((TextView)findViewById(R.id.pages_txt)).setText(item.length);
+        // Book title info
+        ((TextView)findViewById(R.id.title_txt)).setText(item.titulo);
+        String imgUrl = ApiConfig.collectionsImg + item.imagenes.get(0).imagen;
+        item.imagen = item.imagenes.get(0).imagen;
+        ImageView image = (ImageView) findViewById(R.id.book_img);
+        Picasso.with(mContext)
+                .load(imgUrl)
+                .resize(300,300)
+                .centerInside()
+                .into(image);
+        ((TextView)findViewById(R.id.date_title_txt)).setText(item.fecha);
 
-                                // Tags
-                                List<String> tagsList = new ArrayList<>();
-                                for(int i = 0; i<item.etiquetas.size(); i++) {
-                                    autoresList.add(item.etiquetas.get(i).etiqueta);
-                                }
-                                ((TextView)findViewById(R.id.tags_txt)).setText(getStringFromListByCommas(tagsList));
+        // Subtitle Authors
+        List<String> autoresList = new ArrayList<>();
+        for(int i = 0; i<item.autores.size(); i++) {
+            autoresList.add(item.autores.get(i).autor);
+        }
+        ((TextView)findViewById(R.id.subtitle_txt)).setText(getStringFromListByCommas(autoresList));
+        ((TextView)findViewById(R.id.date_title_txt)).setText(item.fecha);
 
-                                // show new collections on start
-                                if(!item.librosRelacionados.isEmpty()) {
-                                    mBooksList.addAll(item.librosRelacionados);
-                                    mAdapter.notifyDataSetChanged();
-                                }
+        // Category Image
+        if(!item.categorias.isEmpty()) {
+            imgUrl = ApiConfig.catImgPath + item.categorias.get(0).icono;
+            image = (ImageView) findViewById(R.id.category_img);
+            Picasso.with(mContext)
+                    .load(imgUrl)
+                    .resize(300, 300)
+                    .centerInside()
+                    .into(image);
+            ((TextView)findViewById(R.id.category_name)).setText(item.categorias.get(0).categoria);
+            ((TextView)findViewById(R.id.category_txt)).setText(item.categorias.get(0).categoria);
+        }
 
-                                // Download Button
-                                findViewById(R.id.downloadBtn).setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        //startActivity(EPubDemo.newIntent(mContext));
-                                        startActivity(EpubBookContentActivity2.newIntent(mContext, item));
+        // Book extra info
+        ((TextView)findViewById(R.id.description_txt)).setText(item.descripcion);
+        ((TextView)findViewById(R.id.idiom_txt)).setText("Español");
+        ((TextView)findViewById(R.id.publisher_txt)).setText(item.editorial);
+        ((TextView)findViewById(R.id.date_txt)).setText(item.fecha);
+        ((TextView)findViewById(R.id.size_txt)).setText(item.length + " MB");
+        ((TextView)findViewById(R.id.pages_txt)).setText(item.length);
+
+        // Tags
+        List<String> tagsList = new ArrayList<>();
+        for(int i = 0; i<item.etiquetas.size(); i++) {
+            autoresList.add(item.etiquetas.get(i).etiqueta);
+        }
+        ((TextView)findViewById(R.id.tags_txt)).setText(getStringFromListByCommas(tagsList));
+
+        // show new collections on start
+        if(!item.librosRelacionados.isEmpty()) {
+            mBooksList.addAll(item.librosRelacionados);
+            mAdapter.notifyDataSetChanged();
+        }
+
+        // Download Button
+        findViewById(R.id.downloadBtn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(EpubBookContentActivity2.newIntent(mContext, item));
                                         /*// read epub
                                         try {
                                             EpubReader epubReader = new EpubReader();
@@ -176,16 +210,7 @@ public class BookDetailsActivity extends AppCompatActivity {
                                         } catch (IOException e) {
                                             e.printStackTrace();
                                         }*/
-                                    }
-                                });
-                            }
-                        }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.d(TAG, error.toString());
-                        Toast.makeText(mContext, "Error de conexión", Toast.LENGTH_SHORT).show();
-                    }
-                }));
-
+            }
+        });
     }
 }

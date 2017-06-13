@@ -1,4 +1,4 @@
-package com.clickaboom.letrasparavolar.models;
+package com.clickaboom.letrasparavolar.network;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -8,8 +8,19 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import com.clickaboom.letrasparavolar.models.Imagen;
+import com.clickaboom.letrasparavolar.models.collections.Autores;
+import com.clickaboom.letrasparavolar.models.collections.Categoria;
 import com.clickaboom.letrasparavolar.models.collections.Colecciones;
+import com.clickaboom.letrasparavolar.models.collections.Etiqueta;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+
+import static android.R.attr.id;
+import static android.R.attr.type;
 
 /**
  * Created by karen on 25/04/17.
@@ -26,7 +37,7 @@ public class SQLiteDBHelper extends SQLiteOpenHelper {
     public static final String BOOKS_TABLE = "books";
     public static final String BOOK_KEY = "ID_epubCodeName";
 
-    public static final String id = "id";
+    public static final String KEY_ID = "id";
     public static final String titulo = "titulo";
     public static final String fecha = "fecha";
     public static final String epub = "epub";
@@ -40,6 +51,7 @@ public class SQLiteDBHelper extends SQLiteOpenHelper {
     public static final String etiquetas = "etiquetas";
     public static final String librosRelacionados = "librosRelacionados";
     public static final String favorito = "favorito";
+    public static final String KEY_TYPE = "type";
 
     private SQLiteDBHelper(Context context) {
         super(context, DATABASE_NAME , null, DATABASE_VERSION);
@@ -72,7 +84,8 @@ public class SQLiteDBHelper extends SQLiteOpenHelper {
                 imagenes + " TEXT, " +
                 categorias + " TEXT, " +
                 etiquetas + " TEXT, " +
-                favorito + " BOOLEAN, " +
+                favorito + " INTEGER, " +
+                type + " TEXT, " +
                 librosRelacionados + " TEXT)"
         );
     }
@@ -89,7 +102,7 @@ public class SQLiteDBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(BOOK_KEY, book.epub);
-        contentValues.put(id, String.valueOf(book.id));
+        contentValues.put(KEY_ID, String.valueOf(book.id));
         contentValues.put(titulo, book.titulo);
         contentValues.put(fecha, book.fecha);
         contentValues.put(epub, book.epub);
@@ -101,8 +114,9 @@ public class SQLiteDBHelper extends SQLiteOpenHelper {
         contentValues.put(imagenes, gson.toJson(book.imagenes));
         contentValues.put(categorias, gson.toJson(book.categorias));
         contentValues.put(etiquetas, gson.toJson(book.etiquetas));
-        contentValues.put(favorito, book.favorito);
         contentValues.put(librosRelacionados, gson.toJson(book.librosRelacionados));
+        contentValues.put(favorito, book.favorito ? 1 : 0);
+        contentValues.put(KEY_TYPE, book.type);
         try {
             db.insertOrThrow(tableName, null, contentValues);
         } catch (SQLiteConstraintException ex) {
@@ -119,7 +133,7 @@ public class SQLiteDBHelper extends SQLiteOpenHelper {
         return true;
     }
 
-    public Cursor getBook(String key) {
+    public ArrayList<Colecciones> getBookByePub(String key) {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor rs = db.rawQuery( "SELECT * FROM " + tableName + " WHERE " +
                 BOOK_KEY + "=?", new String[] { key} );
@@ -133,7 +147,25 @@ public class SQLiteDBHelper extends SQLiteOpenHelper {
         } catch (IndexOutOfBoundsException ex) {
             Log.d("Db getLabel", ex.getMessage());
         }*/
-        return rs;
+        return arrayListFromCursor(rs);
+    }
+
+    public ArrayList<Colecciones> getBookById(String id, String type) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor rs = db.rawQuery( "SELECT * FROM " + tableName + " WHERE " +
+                KEY_ID + "=?" + " AND " + KEY_TYPE + "=?",
+                new String[] {id, type} );
+        /*rs.moveToFirst();
+        String value = key;
+        try {
+            value = rs.getString(rs.getColumnIndex(titulo));
+            if (!rs.isClosed()) {
+                rs.close();
+            }
+        } catch (IndexOutOfBoundsException ex) {
+            Log.d("Db getLabel", ex.getMessage());
+        }*/
+        return arrayListFromCursor(rs);
     }
 
     /*public String getBook(String key) {
@@ -153,10 +185,10 @@ public class SQLiteDBHelper extends SQLiteOpenHelper {
         return value;
     }*/
 
-    public Cursor getAllBooks() {
+    public ArrayList<Colecciones> getAllBooks() {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor res = db.rawQuery( "SELECT * FROM " + tableName, null );
-        return res;
+        Cursor rs = db.rawQuery( "SELECT * FROM " + tableName, null );
+        return arrayListFromCursor(rs);
     }
 
     public Integer deleteBook(String key) {
@@ -171,7 +203,45 @@ public class SQLiteDBHelper extends SQLiteOpenHelper {
         db.execSQL("DELETE FROM "+ tableName);
         db.execSQL("VACUUM");
     }
-    
+
+    private ArrayList<Colecciones> arrayListFromCursor(Cursor rs) {
+        ArrayList<Colecciones> mArrayList = new ArrayList<>();
+
+        Gson gson = new Gson();
+        Type autType = new TypeToken<ArrayList<Autores>>() {}.getType();
+        Type imgsType = new TypeToken<ArrayList<Imagen>>() {}.getType();
+        Type etType = new TypeToken<ArrayList<Etiqueta>>() {}.getType();
+        Type catType = new TypeToken<ArrayList<Categoria>>() {}.getType();
+        Type colType = new TypeToken<ArrayList<Colecciones>>() {}.getType();
+
+        while(rs.moveToNext()) {
+            ArrayList<Autores> autoresList = gson.fromJson(rs.getString(rs.getColumnIndex(autores)), autType);
+            ArrayList<Imagen> imagenesList = gson.fromJson(rs.getString(rs.getColumnIndex(imagenes)), imgsType);
+            ArrayList<Etiqueta> etiquetasList = gson.fromJson(rs.getString(rs.getColumnIndex(etiquetas)), etType);
+            ArrayList<Categoria> categoriasList = gson.fromJson(rs.getString(rs.getColumnIndex(categorias)), catType);
+            ArrayList<Colecciones> librosRelacionadosList = gson.fromJson(rs.getString(rs.getColumnIndex(librosRelacionados)), colType);
+            mArrayList.add(new Colecciones(
+                    Integer.valueOf(rs.getString(rs.getColumnIndex(KEY_ID))),
+                    rs.getString(rs.getColumnIndex(titulo)),
+                    rs.getString(rs.getColumnIndex(fecha)),
+                    rs.getString(rs.getColumnIndex(epub)),
+                    rs.getString(rs.getColumnIndex(descripcion)),
+                    rs.getString(rs.getColumnIndex(editorial)),
+                    rs.getString(rs.getColumnIndex(length)),
+                    autoresList,
+                    rs.getString(rs.getColumnIndex(imagen)),
+                    imagenesList,
+                    categoriasList,
+                    etiquetasList,
+                    librosRelacionadosList,
+                    rs.getInt(rs.getColumnIndex(favorito)) > 0,
+                    rs.getString(rs.getColumnIndex(KEY_TYPE))
+            )); //add the item
+        }
+
+        return mArrayList;
+    }
+
     /*public void addLanguageLabels(List<Label> labels) {
         eraseTableData();
         for (Label label : labels) {
@@ -180,7 +250,7 @@ public class SQLiteDBHelper extends SQLiteOpenHelper {
         getAllBooks();
     }*/
 
-    public boolean isDataAlreadyInDB() {
+    /*public boolean isDataAlreadyInDB() {
         Cursor cursor = getAllBooks();
         if(cursor.getCount() <= 0){
             cursor.close();
@@ -188,5 +258,5 @@ public class SQLiteDBHelper extends SQLiteOpenHelper {
         }
         cursor.close();
         return true;
-    }
+    }*/
 }

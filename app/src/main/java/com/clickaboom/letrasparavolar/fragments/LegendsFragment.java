@@ -23,7 +23,7 @@ import com.clickaboom.letrasparavolar.activities.MainActivity;
 import com.clickaboom.letrasparavolar.activities.MapsActivity;
 import com.clickaboom.letrasparavolar.activities.SearchActivity;
 import com.clickaboom.letrasparavolar.adapters.CategoriesAdapter;
-import com.clickaboom.letrasparavolar.adapters.CollectionsAdapter;
+import com.clickaboom.letrasparavolar.adapters.LegendsAdapter;
 import com.clickaboom.letrasparavolar.models.collections.Categoria;
 import com.clickaboom.letrasparavolar.models.collections.Colecciones;
 import com.clickaboom.letrasparavolar.models.collections.ResCollections;
@@ -48,7 +48,7 @@ public class LegendsFragment extends Fragment implements View.OnClickListener {
     public static final String RESULT_SEARCH = "searchText";
     private static final String LIST_STATE_KEY = "listState";
     private RecyclerView mCategoriesRV, mCollectionsRV;
-    private CollectionsAdapter mLegendsAdapter;
+    private LegendsAdapter mLegendsAdapter;
     private List<Colecciones> mLegendsList;
     private List<Categoria> mCategoriesList;
     private View v;
@@ -148,7 +148,7 @@ public class LegendsFragment extends Fragment implements View.OnClickListener {
         mGridLayoutManager = new GridLayoutManager(getContext(), 3);
         mCollectionsRV.setLayoutManager(mGridLayoutManager);
         mCollectionsRV.setHasFixedSize(true);
-        mLegendsAdapter = new CollectionsAdapter(mLegendsList, getContext());
+        mLegendsAdapter = new LegendsAdapter(mLegendsList, getContext());
         mLegendsAdapter.mColType = BookDetailsActivity.LEGENDS;
         mCollectionsRV.setAdapter(mLegendsAdapter);
 

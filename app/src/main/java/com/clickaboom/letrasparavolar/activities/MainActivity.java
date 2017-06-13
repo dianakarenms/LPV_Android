@@ -33,11 +33,11 @@ import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.adapters.BannerPagerAdapter;
 import com.clickaboom.letrasparavolar.adapters.CollectionsDefaultAdapter;
 import com.clickaboom.letrasparavolar.adapters.LegendsDefaultAdapter;
-import com.clickaboom.letrasparavolar.fragments.CollectionsFragment;
+import com.clickaboom.letrasparavolar.fragments.ColeccionesFragment;
 import com.clickaboom.letrasparavolar.fragments.InformationFragment;
 import com.clickaboom.letrasparavolar.fragments.LegendsFragment;
 import com.clickaboom.letrasparavolar.fragments.LibraryFragment;
-import com.clickaboom.letrasparavolar.models.SQLiteDBHelper;
+import com.clickaboom.letrasparavolar.network.SQLiteDBHelper;
 import com.clickaboom.letrasparavolar.models.banners.Banner;
 import com.clickaboom.letrasparavolar.models.banners.ResBanners;
 import com.clickaboom.letrasparavolar.models.collections.Colecciones;
@@ -52,7 +52,6 @@ import java.lang.reflect.Method;
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import javax.net.ssl.HostnameVerifier;
@@ -61,8 +60,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
-
-import static android.R.attr.path;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
@@ -108,6 +105,14 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        //Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
+        //setSupportActionBar(toolbar);
+
+        // Set toolbar_asistant title
+        ((TextView)findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.news_title));
+        findViewById(R.id.left_btn).setVisibility(View.GONE);
+        findViewById(R.id.right_btn).setVisibility(View.GONE);
+
         legendsBtn = (RelativeLayout)findViewById(R.id.legends_btn);
         legendsBtn.setOnClickListener(this);
 
@@ -117,17 +122,6 @@ public class MainActivity extends AppCompatActivity
         libraryBtn = (RelativeLayout)findViewById(R.id.library_btn);
         libraryBtn.setOnClickListener(this);
 
-        mRecyclerView = (RecyclerView)findViewById(R.id.home_recycler);
-        mRecyclerView2 = (RecyclerView)findViewById(R.id.home_recycler2);
-
-        //Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
-
-        // Set toolbar_asistant title
-        ((TextView)findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.news_title));
-        findViewById(R.id.left_btn).setVisibility(View.GONE);
-        findViewById(R.id.right_btn).setVisibility(View.GONE);
-
         image = (ImageView)findViewById(R.id.mi_barquitoo);
         image.post(new Runnable() {
             @Override
@@ -135,6 +129,9 @@ public class MainActivity extends AppCompatActivity
                 animateBarquito(image);
             }
         });
+
+        mRecyclerView = (RecyclerView)findViewById(R.id.home_recycler);
+        mRecyclerView2 = (RecyclerView)findViewById(R.id.home_recycler2);
 
         // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
@@ -282,7 +279,7 @@ public class MainActivity extends AppCompatActivity
                 replaceFragment(LegendsFragment.newInstance());
                 break;
             case R.id.collections_btn:
-                replaceFragment(CollectionsFragment.newInstance());
+                replaceFragment(ColeccionesFragment.newInstance());
                 break;
             case R.id.library_btn:
                 Fragment libFrag = new LibraryFragment();
