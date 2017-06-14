@@ -170,7 +170,15 @@ public class DownloadFile extends AsyncTask<String, Void, Void> {
 
                 DeleteRecursive(folder);
             }
+
             // if localStored
+            if(db.getBookByePub(mEpub.epub).isEmpty()) {
+                // Epub was already downloaded but not yet added to database
+                if (db.insertBook(mEpub)) {
+                    Log.d("ebookContent", "stored in db");
+                }
+            }
+            // Return to calling activity
             listener.onTaskCompleted();
         }
     }

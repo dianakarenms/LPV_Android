@@ -5,6 +5,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.LinearLayout;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -46,6 +48,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+
+        // Set toolbar_asistant gone
+        findViewById(R.id.toolbar_asistant).setVisibility(View.GONE);
+        findViewById(R.id.toolbar).findViewById(R.id.drawer_button).setVisibility(View.GONE);
+
+        // BackBtn
+        LinearLayout backBtn = (LinearLayout) findViewById(R.id.back_btn);
+        backBtn.setVisibility(View.VISIBLE);
+        backBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
         mapType = getIntent().getStringExtra(EXTRA_MAP_TYPE);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()

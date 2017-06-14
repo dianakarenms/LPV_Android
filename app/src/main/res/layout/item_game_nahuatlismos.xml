@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:descendantFocusability="blocksDescendants"
+    android:background="@android:color/transparent" >
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp">
+
+        <!--<ImageButton
+            android:id="@+id/book_img"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:scaleType="fitCenter"
+            android:clickable="false"/>-->
+
+        <RelativeLayout
+            android:id="@+id/favorite_star"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@+id/title_txt">
+            <ImageButton
+                android:id="@+id/book_img"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@null"
+                android:adjustViewBounds="true"
+                android:layout_centerHorizontal="true"
+                android:scaleType="fitCenter"
+                android:clickable="false"/>
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <ImageView
+                android:layout_width="35dp"
+                android:layout_height="35dp"
+                android:layout_margin="@dimen/small_padding"
+                android:padding="@dimen/small_padding"
+                android:background="@drawable/circle"
+                android:layout_alignRight="@id/book_img"
+                android:clickable="true"/>
+            <TextView
+                android:id="@+id/subtitle_id"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/small_padding"
+                android:layout_gravity="center_vertical"
+                android:textColor="@color/colorPrimary"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
+            </LinearLayout>
+    </LinearLayout>
+
+    <!--<LinearLayout
+        android:id="@+id/favorite_star"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/extra_small_padding"
+        android:paddingRight="@dimen/extra_small_padding"
+        android:paddingBottom="@dimen/small_padding"
+        android:paddingLeft="@dimen/small_padding"
+        android:layout_alignParentRight="true"
+        android:clickable="true">
+        <ImageView
+            android:layout_width="@dimen/small_icon_2"
+            android:layout_height="@dimen/small_icon_2"
+            android:padding="@dimen/extra_small_padding"
+            android:background="@null"
+            android:src="@drawable/star_gray"/>
+    </LinearLayout>-->
+</RelativeLayout>

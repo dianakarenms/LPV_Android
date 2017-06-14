@@ -2,6 +2,7 @@ package com.clickaboom.letrasparavolar.fragments;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,6 +17,7 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.clickaboom.letrasparavolar.R;
+import com.clickaboom.letrasparavolar.activities.MainActivity;
 import com.clickaboom.letrasparavolar.adapters.InternationalizationAdapter;
 import com.clickaboom.letrasparavolar.models.internationalization.Internationalization;
 import com.clickaboom.letrasparavolar.models.internationalization.ResInter;
@@ -72,6 +74,25 @@ public class InformationFragment extends Fragment implements View.OnClickListene
         ((TextView)v.findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.information));
         v.findViewById(R.id.left_btn).setVisibility(View.GONE);
         v.findViewById(R.id.right_btn).setVisibility(View.GONE);
+
+        // BackBtn
+        LinearLayout backBtn = (LinearLayout) v.findViewById(R.id.back_btn);
+        backBtn.setVisibility(View.VISIBLE);
+        backBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().onBackPressed();
+            }
+        });
+
+        // Menu drawer onclicklistener
+        v.findViewById(R.id.drawer_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // open right drawer
+                MainActivity.drawer.openDrawer(GravityCompat.END);
+            }
+        });
 
         // Order collections
         v.findViewById(R.id.information_txt).setOnClickListener(this);

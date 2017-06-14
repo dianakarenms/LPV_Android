@@ -60,10 +60,14 @@
             android:label="@string/title_activity_maps">
         </activity>
 
-        <activity android:name=".activities.EpubBookContentActivity" />
-        <activity android:name=".activities.EpubBookContentActivity2" />
+        <activity android:name=".activities.EpubBookContentActivity2"
+                  android:theme="@style/AppTheme.NoActionBar"/>
 
-        <activity android:name=".activities.EPubDemo" />
+        <activity android:name=".activities.GamesActivity"
+                  android:theme="@style/AppTheme.NoActionBar"/>
+
+        <activity android:name=".activities.InGameActivity"
+                  android:theme="@style/AppTheme.NoActionBar"/>
     </application>
 
 </manifest>

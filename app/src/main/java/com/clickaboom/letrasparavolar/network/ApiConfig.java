@@ -37,4 +37,11 @@ public class ApiConfig {
 
     // Mapa
     public static final String mapaMarkers = baseUrl + "/api/mapa/";
+
+    // Games
+    public static final String nahuatlismosGame = baseUrl + "/api/nahuatlismos/";
+
+    public static final String curioseandoTests = baseUrl + "/api/curioseando/tests/";
+    public static final String curioseandoTestQuestions = baseUrl + "/api/curioseando/preguntas/";
+
 }

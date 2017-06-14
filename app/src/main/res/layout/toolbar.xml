@@ -10,17 +10,51 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/toolbar"
         android:background="@color/white">
+        <LinearLayout
+            android:id="@+id/back_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:paddingRight="@dimen/large_padding"
+            android:orientation="horizontal"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:clickable="true"
+            android:visibility="gone"
+            android:descendantFocusability="blocksDescendants">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:padding="5dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginStart="10dp"
+                android:src="@drawable/back_arrow"
+                android:adjustViewBounds="true"
+                android:scaleType="centerInside"
+                android:tint="@color/legends_nav_pressed"
+                android:layout_gravity="center_vertical"
+                android:background="@null"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="@string/atras"
+                android:textColor="@color/dark_gray"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                android:gravity="center"/>
+        </LinearLayout>
+
         <ImageView
+            android:id="@+id/toolbar_main_icon"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:padding="5dp"
             android:src="@drawable/icono"
+            android:clickable="true"
             android:layout_centerInParent="true"/>
 
         <ImageButton
             android:id="@+id/drawer_button"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="40dp"
             android:padding="5dp"
             android:layout_marginRight="10dp"
             app:srcCompat="@drawable/ic_menu"
@@ -28,6 +62,7 @@
             android:adjustViewBounds="true"
             android:scaleType="centerInside"
             android:background="@null"
+            android:layout_centerVertical="true"
             android:layout_alignParentRight="true"/>
 
         <View

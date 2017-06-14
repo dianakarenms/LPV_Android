@@ -3,11 +3,13 @@ package com.clickaboom.letrasparavolar.fragments;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.GravityCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.clickaboom.letrasparavolar.R;
@@ -93,6 +95,26 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
         ((TextView)v.findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.library_title));
         v.findViewById(R.id.left_btn).setVisibility(View.GONE);
         v.findViewById(R.id.right_btn).setVisibility(View.GONE);
+
+        // BackBtn
+        LinearLayout backBtn = (LinearLayout) v.findViewById(R.id.back_btn);
+        backBtn.setVisibility(View.VISIBLE);
+        backBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().onBackPressed();
+            }
+        });
+
+
+        // Menu drawer onclicklistener
+        v.findViewById(R.id.drawer_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // open right drawer
+                MainActivity.drawer.openDrawer(GravityCompat.END);
+            }
+        });
 
         // Order collections
         v.findViewById(R.id.favorites_txt).setOnClickListener(this);

@@ -3,12 +3,14 @@ package com.clickaboom.letrasparavolar.activities;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.view.GravityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,6 +28,8 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import nl.siegmann.epublib.epub.Main;
 
 import static com.clickaboom.letrasparavolar.activities.MainActivity.db;
 import static com.clickaboom.letrasparavolar.activities.MainActivity.getStringFromListByCommas;
@@ -88,8 +92,28 @@ public class BookDetailsActivity extends AppCompatActivity {
         // Load Book Data
         loadItem(url, mItemId);
 
-        // Set toolbar_asistant title
+        // Menu drawer onclicklistener
+        findViewById(R.id.drawer_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // open right drawer
+                MainActivity.drawer.openDrawer(GravityCompat.END);
+            }
+        });
+
+        // Set toolbar_asistant gone
         findViewById(R.id.toolbar_asistant).setVisibility(View.GONE);
+        findViewById(R.id.toolbar).findViewById(R.id.drawer_button).setVisibility(View.GONE);
+
+        // BackBtn
+        LinearLayout backBtn = (LinearLayout) findViewById(R.id.back_btn);
+        backBtn.setVisibility(View.VISIBLE);
+        backBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
         // use a linear layout manager
         mGridLayoutManager = new GridLayoutManager(mContext, 3);

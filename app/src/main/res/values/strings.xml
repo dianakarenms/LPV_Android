@@ -65,4 +65,6 @@
     <string name="no_leyendas">No tienes leyendas marcadas como favoritas</string>
     <string name="no_leyendas_descargadas">No tienes leyendas descargadas</string>
     <string name="no_libros_descargados">No tienes libros descargados</string>
+    <string name="atras">Atrás</string>
+    <string name="jugar">¡Jugar!</string>
 </resources>

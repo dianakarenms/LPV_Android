@@ -84,6 +84,7 @@ public class MainActivity extends AppCompatActivity
     public static SQLiteDBHelper db;
     private DownloadFile.OnTaskCompleted mDownloadsListener;
     private ArrayList<String> mDefaultList = new ArrayList<>();
+    public static DrawerLayout drawer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,13 +99,18 @@ public class MainActivity extends AppCompatActivity
 
         db = SQLiteDBHelper.getInstance(this);
 
+        // Lateral Navigation View
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        // Drawer to control navigationView opening and closing
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        // Click listener of drawer button
         findViewById(R.id.drawer_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // open right drawer
-                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
                 drawer.openDrawer(GravityCompat.END);
             }
         });
@@ -290,18 +296,18 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void navOnClick(View v) {
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.END);
         switch (v.getId()) {
             case R.id.info_btn:
                 Fragment programInfoFragmentFrag = new InformationFragment();
                 replaceFragment(programInfoFragmentFrag);
-                DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-                drawer.closeDrawer(GravityCompat.END);
                 break;
             case R.id.news_btn:
                 Toast.makeText(getApplicationContext(), "news_btn", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.games_btn:
-                Toast.makeText(getApplicationContext(), "games_btn", Toast.LENGTH_SHORT).show();
+                startActivity(GamesActivity.newIntent(mContext));
                 break;
             case R.id.participate_btn:
                 Toast.makeText(getApplicationContext(), "participate_btn", Toast.LENGTH_SHORT).show();
@@ -329,6 +335,23 @@ public class MainActivity extends AppCompatActivity
             ft.addToBackStack(backStateName);
             ft.commit();
         }
+    }
+
+    public void presentFragment(Fragment fragment) {
+        String backStateName = fragment.getClass().getName();
+
+        FragmentManager manager = getSupportFragmentManager();
+        FragmentTransaction ft = manager.beginTransaction();
+        boolean fragmentPopped = manager.popBackStackImmediate (backStateName, 0);
+
+        // re-use the old fragment
+        if (!fragmentPopped && manager.findFragmentByTag(backStateName) == null){
+            ft.replace(R.id.fragment_container, fragment, backStateName);
+            ft.addToBackStack(backStateName);
+        } else { // If fragment doesn't exist yet, create one
+            ft.add(R.id.fragment_container, fragment);
+        }
+        ft.commit();
     }
 
     public static void addFragment(Fragment fragment, FragmentActivity activity){
@@ -496,6 +519,17 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onTaskCompleted() {
 
+    }
+
+    public void backToMain() {
+        // Clear all back stack.
+        int backStackCount = getSupportFragmentManager().getBackStackEntryCount();
+        for (int i = 0; i <= backStackCount; i++) {
+            // Get the back stack fragment id.
+            int backStackId = getSupportFragmentManager().getBackStackEntryAt(i).getId();
+            getFragmentManager().popBackStack(backStackId, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+
+        } /* end of for */
     }
 
     public static class NukeSSLCerts {
