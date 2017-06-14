@@ -3,7 +3,6 @@ package com.clickaboom.letrasparavolar.activities;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.view.GravityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -21,8 +20,8 @@ public class GamesActivity extends AppCompatActivity
         implements View.OnClickListener {
 
     private static final String TAG = "com.lpv.GamesActivity";
-    private static final String JUEGO_A = "nahuatlismos";
-    private static final String JUEGO_B = "curioseando";
+    public static final String JUEGO_A = "Nahuatlismos";
+    public static final String JUEGO_B = "Curioseando";
     //private static final String EXTRA_SEARCH_TYPE = "com.lpv.SearchType";
     private Context mContext;
     private RecyclerView mRecyclerView;

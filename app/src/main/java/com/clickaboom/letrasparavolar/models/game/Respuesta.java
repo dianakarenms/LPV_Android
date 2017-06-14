@@ -25,4 +25,5 @@ public class Respuesta implements Serializable {
     @SerializedName("preguntas_nahuatlismos_id")
     @Expose
     public String preguntasNahuatlismosId;
+    public boolean newLine;
 }

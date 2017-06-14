@@ -1,10 +1,12 @@
 package com.clickaboom.letrasparavolar.models.game;
 
+import java.io.Serializable;
+
 /**
  * Created by karen on 14/06/17.
  */
 
-public class Game {
+public class Game implements Serializable {
     public String title;
     public String subtitle;
     public int imgResource;

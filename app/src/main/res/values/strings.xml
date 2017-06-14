@@ -67,4 +67,5 @@
     <string name="no_libros_descargados">No tienes libros descargados</string>
     <string name="atras">Atrás</string>
     <string name="jugar">¡Jugar!</string>
+    <string name="siguiente">Siguiente</string>
 </resources>
