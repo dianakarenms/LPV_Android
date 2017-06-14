@@ -67,9 +67,9 @@ public class Colecciones implements Serializable {
     public List<Colecciones> librosRelacionados = new ArrayList<>();
 
     public Boolean favorito;
-    public String type = "";
+    public String mBookType;
 
-    public Colecciones(int id, String titulo, String fecha, String epub, String descripcion, String editorial, String length, ArrayList<Autores> autores, String imagen, ArrayList<Imagen> imagenes, ArrayList<Categoria> categorias, ArrayList<Etiqueta> etiquetas, ArrayList<Colecciones> librosRelacionados, Boolean favorito, String type) {
+    public Colecciones(int id, String titulo, String fecha, String epub, String descripcion, String editorial, String length, ArrayList<Autores> autores, String imagen, ArrayList<Imagen> imagenes, ArrayList<Categoria> categorias, ArrayList<Etiqueta> etiquetas, ArrayList<Colecciones> librosRelacionados, Boolean favorito, String bookType) {
         this.id = id;
         this.titulo = titulo;
         this.fecha = fecha;
@@ -84,7 +84,7 @@ public class Colecciones implements Serializable {
         this.etiquetas = etiquetas;
         this.librosRelacionados = librosRelacionados;
         this.favorito = favorito;
-        this.type = type;
+        mBookType = bookType;
     }
 
     @SerializedName("0")

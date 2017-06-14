@@ -2,7 +2,6 @@ package com.clickaboom.letrasparavolar.activities;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -10,7 +9,6 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,11 +36,12 @@ import static com.clickaboom.letrasparavolar.activities.MainActivity.getStringFr
 
 public class BookDetailsActivity extends AppCompatActivity {
 
-    private static final String EXTRA_ITEMID = "com.lpv.item";
+    private static final String EXTRA_ITEMID = "com.lpv.mItem";
     public static final String COLECCIONES = "colecciones";
     public static final String LEGENDS = "leyendas";
     private static final String EXTRA_COL_TYPE = "com.lpv.mColType";
     private static final String STATE_BOOKS_LIST = "com.lpv.mBooksList";
+    private static final int REQUEST_DOWNLOAD = 1;
 
     private RecyclerView mRecyclerView;
     private GridLayoutManager mGridLayoutManager;
@@ -54,6 +53,7 @@ public class BookDetailsActivity extends AppCompatActivity {
     private String mColType;
     private int mItemId;
     private ImageView starBtn;
+    private Colecciones mItem;
 
     public static Intent newIntent(Context packageContext, int id, String colType) {
         Intent i = new Intent(packageContext, BookDetailsActivity.class);
@@ -114,9 +114,9 @@ public class BookDetailsActivity extends AppCompatActivity {
                             public void onResponse(Object response) {
                                 Log.d(TAG, response.toString());
                                 List<Colecciones> res = ((ResDefaults) response).data;
-                                Colecciones item = res.get(0);
+                                mItem = res.get(0);
 
-                                updateUI(item);
+                                updateUI();
                             }
                         }, new Response.ErrorListener() {
                     @Override
@@ -126,80 +126,85 @@ public class BookDetailsActivity extends AppCompatActivity {
                         if(book.isEmpty())
                             Toast.makeText(mContext, "Error de conexión", Toast.LENGTH_SHORT).show();
                         else {
-                            updateUI(book.get(0));
+                            mItem = book.get(0);
+                            updateUI();
                         }
                     }
                 }));
 
     }
 
-    private void updateUI(final Colecciones item) {
+    private void updateUI() {
         // Item type for storing it in db
-        item.type = mColType;
-        item.favorito = false;
-        final ArrayList<Colecciones> localItem = db.getBookByePub(item.epub);
+        mItem.mBookType = mColType;
+        mItem.favorito = false;
+        final ArrayList<Colecciones> localItem = db.getBookByePub(mItem.epub);
 
         starBtn = (ImageView) findViewById(R.id.favorite_star);
 
         if(!localItem.isEmpty()) {
             ((TextView) findViewById(R.id.downloadBtn)).setText(getResources().getString(R.string.open));
             if(localItem.get(0).favorito) {
-                starBtn.setBackgroundColor(getResources().getColor(R.color.legends_nav_pressed));
+                starBtn.setImageResource(R.drawable.favorite_selected);
             }
         } else
-            ((TextView)findViewById(R.id.downloadBtn)).setText(getResources().getString(R.string.download));
+            ((TextView) findViewById(R.id.downloadBtn)).setText(getResources().getString(R.string.download));
 
         // Book title info
-        ((TextView)findViewById(R.id.title_txt)).setText(item.titulo);
-        String imgUrl = ApiConfig.collectionsImg + item.imagenes.get(0).imagen;
-        item.imagen = item.imagenes.get(0).imagen;
+        ((TextView)findViewById(R.id.title_txt)).setText(mItem.titulo);
+
+        if(!mItem.imagenes.isEmpty()) {
+            mItem.imagen = mItem.imagenes.get(0).imagen;
+        }
+        String imgUrl = ApiConfig.collectionsImg + mItem.imagen;
         ImageView image = (ImageView) findViewById(R.id.book_img);
         Picasso.with(mContext)
                 .load(imgUrl)
                 .resize(300,300)
                 .centerInside()
                 .into(image);
-        ((TextView)findViewById(R.id.date_title_txt)).setText(item.fecha);
+        ((TextView)findViewById(R.id.date_title_txt)).setText(mItem.fecha);
 
         // Subtitle Authors
         List<String> autoresList = new ArrayList<>();
-        for(int i = 0; i<item.autores.size(); i++) {
-            autoresList.add(item.autores.get(i).autor);
+        for(int i = 0; i< mItem.autores.size(); i++) {
+            autoresList.add(mItem.autores.get(i).autor);
         }
         ((TextView)findViewById(R.id.subtitle_txt)).setText(getStringFromListByCommas(autoresList));
-        ((TextView)findViewById(R.id.date_title_txt)).setText(item.fecha);
+        ((TextView)findViewById(R.id.date_title_txt)).setText(mItem.fecha);
 
         // Category Image
-        if(!item.categorias.isEmpty()) {
-            imgUrl = ApiConfig.catImgPath + item.categorias.get(0).icono;
+        if (!mItem.categorias.isEmpty()) {
+            imgUrl = ApiConfig.catImgPath + mItem.categorias.get(0).icono;
             image = (ImageView) findViewById(R.id.category_img);
             Picasso.with(mContext)
                     .load(imgUrl)
                     .resize(300, 300)
                     .centerInside()
                     .into(image);
-            ((TextView)findViewById(R.id.category_name)).setText(item.categorias.get(0).categoria);
-            ((TextView)findViewById(R.id.category_txt)).setText(item.categorias.get(0).categoria);
+            ((TextView) findViewById(R.id.category_name)).setText(mItem.categorias.get(0).categoria);
+            ((TextView) findViewById(R.id.category_txt)).setText(mItem.categorias.get(0).categoria);
         }
 
+
         // Book extra info
-        ((TextView)findViewById(R.id.description_txt)).setText(item.descripcion);
+        ((TextView)findViewById(R.id.description_txt)).setText(mItem.descripcion);
         ((TextView)findViewById(R.id.idiom_txt)).setText("Español");
-        ((TextView)findViewById(R.id.publisher_txt)).setText(item.editorial);
-        ((TextView)findViewById(R.id.date_txt)).setText(item.fecha);
-        ((TextView)findViewById(R.id.size_txt)).setText(item.length + " MB");
-        ((TextView)findViewById(R.id.pages_txt)).setText(item.length);
+        ((TextView)findViewById(R.id.publisher_txt)).setText(mItem.editorial);
+        ((TextView)findViewById(R.id.date_txt)).setText(mItem.fecha);
+        ((TextView)findViewById(R.id.size_txt)).setText(mItem.length + " MB");
+        ((TextView)findViewById(R.id.pages_txt)).setText(mItem.length);
 
         // Tags
         List<String> tagsList = new ArrayList<>();
-        for(int i = 0; i<item.etiquetas.size(); i++) {
-            autoresList.add(item.etiquetas.get(i).etiqueta);
+        for(int i = 0; i< mItem.etiquetas.size(); i++) {
+            autoresList.add(mItem.etiquetas.get(i).etiqueta);
         }
         ((TextView)findViewById(R.id.tags_txt)).setText(getStringFromListByCommas(tagsList));
 
         // show new collections on start
-        if(!item.librosRelacionados.isEmpty()) {
-            mBooksList.addAll(item.librosRelacionados);
+        if(!mItem.librosRelacionados.isEmpty()) {
+            mBooksList.addAll(mItem.librosRelacionados);
             mAdapter.notifyDataSetChanged();
         }
 
@@ -208,10 +213,22 @@ public class BookDetailsActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(!localItem.isEmpty()) {
-                    if(db.updateFavBook(item.epub, localItem.get(0).favorito ? 0 : 1))
-                        starBtn.setBackgroundColor(getResources().getColor(R.color.legends_nav_pressed));
-                    else
-                        starBtn.setBackgroundColor(Color.TRANSPARENT);
+                    if(localItem.get(0).favorito) {
+                        db.updateFavBook(mItem.epub, 0);
+                        localItem.get(0).favorito = false;
+                        starBtn.setImageResource(R.drawable.favorite_unselected);
+                    } else {
+                        db.updateFavBook(mItem.epub, 1);
+                        localItem.get(0).favorito = true;
+                        starBtn.setImageResource(R.drawable.favorite_selected);
+                    }
+
+                    /*if(db.updateFavBook(mItem.epub, localItem.get(0).favorito ? 0 : 1))
+                        starBtn.setImageResource(R.drawable.favorite_selected);
+                    else {
+                        db.updateFavBook(mItem.epub, localItem.get(0).favorito ? 0 : 1);
+                        starBtn.setImageResource(R.drawable.favorite_unselected);
+                    }*/
                 } else
                     Toast.makeText(mContext, "Descárgalo para poder marcarlo como favorito", Toast.LENGTH_SHORT).show();
             }
@@ -221,7 +238,7 @@ public class BookDetailsActivity extends AppCompatActivity {
         findViewById(R.id.downloadBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(EpubBookContentActivity2.newIntent(mContext, item));
+                startActivityForResult(EpubBookContentActivity2.newIntent(mContext, mItem), REQUEST_DOWNLOAD);
                                         /*// read epub
                                         try {
                                             EpubReader epubReader = new EpubReader();
@@ -240,5 +257,17 @@ public class BookDetailsActivity extends AppCompatActivity {
                                         }*/
             }
         });
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case REQUEST_DOWNLOAD:
+                if(resultCode == RESULT_OK) {
+                    updateUI();
+                }
+                break;
+        }
     }
 }

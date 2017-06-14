@@ -47,8 +47,8 @@ public class SQLiteDBHelper extends SQLiteOpenHelper {
     public static final String categorias = "categorias";
     public static final String etiquetas = "etiquetas";
     public static final String librosRelacionados = "librosRelacionados";
-    public static final String KEY_FAVORITO = "KEY_FAVORITO";
-    public static final String KEY_TYPE = "type";
+    public static final String KEY_FAVORITO = "favorito";
+    public static final String KEY_TYPE = "bookType";
 
     private SQLiteDBHelper(Context context) {
         super(context, DATABASE_NAME , null, DATABASE_VERSION);
@@ -81,8 +81,8 @@ public class SQLiteDBHelper extends SQLiteOpenHelper {
                 imagenes + " TEXT, " +
                 categorias + " TEXT, " +
                 etiquetas + " TEXT, " +
-                KEY_FAVORITO + " TEXT, " +
                 KEY_TYPE + " TEXT, " +
+                KEY_FAVORITO + " TEXT, " +
                 librosRelacionados + " TEXT);"
         );
     }
@@ -112,8 +112,8 @@ public class SQLiteDBHelper extends SQLiteOpenHelper {
         contentValues.put(categorias, gson.toJson(book.categorias));
         contentValues.put(etiquetas, gson.toJson(book.etiquetas));
         contentValues.put(librosRelacionados, gson.toJson(book.librosRelacionados));
+        contentValues.put(KEY_TYPE, book.mBookType);
         contentValues.put(KEY_FAVORITO, book.favorito ? 1 : 0);
-        contentValues.put(KEY_TYPE, book.type);
         try {
             db.insertOrThrow(tableName, null, contentValues);
         } catch (SQLiteConstraintException ex) {
@@ -195,10 +195,25 @@ public class SQLiteDBHelper extends SQLiteOpenHelper {
 
         while(rs.moveToNext()) {
             ArrayList<Autores> autoresList = gson.fromJson(rs.getString(rs.getColumnIndex(autores)), autType);
+            if(autoresList == null)
+                autoresList = new ArrayList<>();
+
             ArrayList<Imagen> imagenesList = gson.fromJson(rs.getString(rs.getColumnIndex(imagenes)), imgsType);
+            if(imagenesList == null)
+                imagenesList = new ArrayList<>();
+
             ArrayList<Etiqueta> etiquetasList = gson.fromJson(rs.getString(rs.getColumnIndex(etiquetas)), etType);
+            if(etiquetasList == null)
+                etiquetasList = new ArrayList<>();
+
             ArrayList<Categoria> categoriasList = gson.fromJson(rs.getString(rs.getColumnIndex(categorias)), catType);
+            if(categoriasList == null)
+                categoriasList = new ArrayList<>();
+
             ArrayList<Colecciones> librosRelacionadosList = gson.fromJson(rs.getString(rs.getColumnIndex(librosRelacionados)), colType);
+            if(librosRelacionadosList == null)
+                librosRelacionadosList = new ArrayList<>();
+
             mArrayList.add(new Colecciones(
                     Integer.valueOf(rs.getString(rs.getColumnIndex(KEY_ID))),
                     rs.getString(rs.getColumnIndex(titulo)),

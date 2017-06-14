@@ -1,7 +1,6 @@
 package com.clickaboom.letrasparavolar.fragments;
 
 import android.content.Intent;
-import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
@@ -16,16 +15,9 @@ import com.clickaboom.letrasparavolar.activities.BookDetailsActivity;
 import com.clickaboom.letrasparavolar.activities.MainActivity;
 import com.clickaboom.letrasparavolar.adapters.CollectionsAdapter;
 import com.clickaboom.letrasparavolar.adapters.LegendsAdapter;
-import com.clickaboom.letrasparavolar.models.Imagen;
-import com.clickaboom.letrasparavolar.models.collections.Autores;
-import com.clickaboom.letrasparavolar.models.collections.Categoria;
 import com.clickaboom.letrasparavolar.models.collections.Colecciones;
-import com.clickaboom.letrasparavolar.models.collections.Etiqueta;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +40,7 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
     private List<Colecciones> mCollectionsList, mLegendsList;
     private View v;
     private String url = "", params = "", mImgPath;
+    private TextView mEmptyLegends, mEmptyColecciones;
 
     public LibraryFragment() {
     }
@@ -70,6 +63,13 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+
+        loadCollections();
+    }
+
+    @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         /*if(savedInstanceState != null) {
@@ -82,7 +82,7 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        v = inflater.inflate(R.layout.fragment_library_2, container, false);
+        v = inflater.inflate(R.layout.fragment_library, container, false);
 
         // Set its bottomNavButton clicked
         ((MainActivity)getActivity()).restoreBottonNavColors();
@@ -107,6 +107,10 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
         mGridLayoutManager = new GridLayoutManager(getContext(), 3);
         mColeccionesRV.setLayoutManager(mGridLayoutManager);
 
+        // "is empty" texts
+        mEmptyLegends = (TextView) v.findViewById(R.id.empty_legends);
+        mEmptyColecciones = (TextView) v.findViewById(R.id.empty_collections);
+
         // specify an adapter (see also next example)
         mLegendsAdapter = new LegendsAdapter(mLegendsList, getContext());
         mLegendsAdapter.mColType = BookDetailsActivity.LEGENDS;
@@ -127,26 +131,46 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
         mLegendsList.clear();
         mCollectionsList.clear();
 
+        ArrayList<Colecciones> mArrayList = db.getAllBooks();
+
         if(params.equals(DOWNLOADED)) { // Request all downloaded Books
-            ArrayList<Colecciones> mArrayList = db.getAllBooks();
-            if (mArrayList != null) {
+            if (mArrayList != null) { // If there's data available in the db
                 for (Colecciones book : mArrayList) {
-                    if (book.type.equals(BookDetailsActivity.LEGENDS))
+                    if (book.mBookType.equals(BookDetailsActivity.LEGENDS))
                         mLegendsList.add(book);
-                    else
+                    else if (book.mBookType.equals(BookDetailsActivity.COLECCIONES))
                         mCollectionsList.add(book);
                 }
             }
-        } else { // Request just the favorite books
-            ArrayList<Colecciones> mArrayList = db.getAllBooks();
-            if (mArrayList != null) {
+            // Set empty text
+            mEmptyLegends.setText(getResources().getString(R.string.no_leyendas_descargadas));
+            mEmptyColecciones.setText(getResources().getString(R.string.no_libros_descargados));
+        } else if(params.equals(FAVORITES)){ // Request just the favorite books
+            if (mArrayList != null) { // If there's data available in the db
                 for (Colecciones book : mArrayList) {
-                    if (book.type.equals(BookDetailsActivity.LEGENDS) && book.favorito)
+                    if (book.mBookType.equals(BookDetailsActivity.LEGENDS) && book.favorito)
                         mLegendsList.add(book);
-                    else if (book.type.equals(BookDetailsActivity.COLECCIONES) && book.favorito)
+                    else if (book.mBookType.equals(BookDetailsActivity.COLECCIONES) && book.favorito)
                         mCollectionsList.add(book);
                 }
             }
+            // Set empty text
+            mEmptyLegends.setText(getResources().getString(R.string.no_leyendas));
+            mEmptyColecciones.setText(getResources().getString(R.string.no_libros));
+        }
+
+
+        // Show "is empty" text if needed,
+        if(mLegendsList.isEmpty()) {
+            mEmptyLegends.setVisibility(View.VISIBLE);
+        } else {
+            mEmptyLegends.setVisibility(View.GONE);
+        }
+
+        if(mCollectionsList.isEmpty()) {
+            mEmptyColecciones.setVisibility(View.VISIBLE);
+        } else {
+            mEmptyColecciones.setVisibility(View.GONE);
         }
 
         // Update Adapters

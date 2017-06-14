@@ -41,8 +41,6 @@ import nl.siegmann.epublib.domain.SpineReference;
 import nl.siegmann.epublib.epub.EpubReader;
 import nl.siegmann.epublib.service.MediatypeService;
 
-import static com.clickaboom.letrasparavolar.activities.MainActivity.db;
-
 /**
  * Created by clickaboom on 6/10/17.
  */
@@ -96,7 +94,12 @@ public class EpubBookContentActivity2 extends Activity implements DownloadFile.O
                 injectJavascript();
             }
         });
+    }
 
+    @Override
+    public void onBackPressed() {
+        setResult(RESULT_OK);
+        super.onBackPressed();
     }
 
     public void loadEpubFromStorage() {
@@ -180,6 +183,7 @@ public class EpubBookContentActivity2 extends Activity implements DownloadFile.O
 
                 if ((rs.getMediaType() == MediatypeService.NCX)
                         || (rs.getMediaType() == MediatypeService.OPENTYPE)
+                        || (rs.getMediaType() == MediatypeService.XHTML)
                         || (rs.getMediaType() == MediatypeService.XHTML)
                         || (rs.getMediaType() == MediatypeService.MP3)) {
 
@@ -272,9 +276,7 @@ public class EpubBookContentActivity2 extends Activity implements DownloadFile.O
     }
 
     public void descargar(String url, String fileName){
-        DownloadFile downloadFile =  new DownloadFile(mDownloadsListener);
-        downloadFile.context = mContext;
-        downloadFile.activity = EpubBookContentActivity2.this;
+        DownloadFile downloadFile = new DownloadFile(mDownloadsListener, mContext, EpubBookContentActivity2.this, true, mEpub);
         downloadFile.execute(url, fileName, fileName);
     }
 
@@ -306,9 +308,6 @@ public class EpubBookContentActivity2 extends Activity implements DownloadFile.O
 
         @Override
         protected Void doInBackground(Void... arg0) {
-            if(db.insertBook(mEpub)) {
-                Log.d("ebookContent", "stored in db");
-            }
             loadEpubFromStorage();
             return null;
         }

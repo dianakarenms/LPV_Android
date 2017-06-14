@@ -60,4 +60,9 @@
     <string name="program_title">Programa Universitario de Fomento a la Lectura Letras para volar</string>
     <string name="title_activity_maps">Map</string>
     <string name="open">Abrir</string>
+    <string name="books_title">Libros</string>
+    <string name="no_libros">No tienes libros marcados como favoritos</string>
+    <string name="no_leyendas">No tienes leyendas marcadas como favoritas</string>
+    <string name="no_leyendas_descargadas">No tienes leyendas descargadas</string>
+    <string name="no_libros_descargados">No tienes libros descargados</string>
 </resources>

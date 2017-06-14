@@ -6,90 +6,115 @@
               android:layout_height="match_parent"
               android:background="@drawable/fondo_grecas">
 
-    <include layout="@layout/toolbar_full" />
-
-    <android.support.v4.widget.NestedScrollView
+    <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-        <LinearLayout
+        android:layout_height="match_parent">
+
+        <include layout="@layout/toolbar_full" />
+
+        <com.clickaboom.letrasparavolar.views.StickyScrollView
+            android:id="@+id/nested_scroll"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:weightSum="10"
-            android:orientation="vertical">
+            android:layout_height="wrap_content"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical"
-                android:paddingTop="10dp"
-                android:paddingBottom="10dp">
+                android:weightSum="10"
+                android:orientation="vertical">
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:tag="sticky">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@color/white"
+                        android:weightSum="2"
+                        android:layout_marginBottom="5dp"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp">
+                        <TextView
+                            android:id="@+id/favorites_txt"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:paddingTop="7dp"
+                            android:paddingBottom="7dp"
+                            android:text="@string/favorites"
+                            android:textColor="@color/white"
+                            android:textSize="@dimen/mini_text"
+                            android:textStyle="bold"
+                            android:background="@drawable/nav_subcategories_button"
+                            android:gravity="center"
+                            android:textAllCaps="true"
+                            android:clickable="true"/>
+                        <TextView
+                            android:id="@+id/downloaded_txt"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:paddingTop="7dp"
+                            android:paddingBottom="7dp"
+                            android:text="@string/downloaded"
+                            android:textSize="@dimen/mini_text"
+                            android:textColor="@color/white"
+                            android:textStyle="bold"
+                            android:background="@drawable/nav_subcategories_button"
+                            android:gravity="center"
+                            android:textAllCaps="true"
+                            android:clickable="true"/>
+                    </LinearLayout>
+                </RelativeLayout>
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@color/white"
-                    android:weightSum="2"
-                    android:layout_marginBottom="5dp"
-                    android:layout_marginLeft="10dp"
-                    android:layout_marginRight="10dp">
-                    <TextView
-                        android:id="@+id/favorites_txt"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:paddingTop="7dp"
-                        android:paddingBottom="7dp"
-                        android:text="@string/favorites"
-                        android:textColor="@color/white"
-                        android:textSize="@dimen/mini_text"
-                        android:textStyle="bold"
-                        android:background="@drawable/nav_subcategories_button"
-                        android:gravity="center"
-                        android:textAllCaps="true"
-                        android:clickable="true"/>
-                    <TextView
-                        android:id="@+id/downloaded_txt"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:paddingTop="7dp"
-                        android:paddingBottom="7dp"
-                        android:text="@string/downloaded"
-                        android:textSize="@dimen/mini_text"
-                        android:textColor="@color/white"
-                        android:textStyle="bold"
-                        android:background="@drawable/nav_subcategories_button"
-                        android:gravity="center"
-                        android:textAllCaps="true"
-                        android:clickable="true"/>
-                </LinearLayout>
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="@dimen/small_padding"
-                    android:text="@string/legends_title"
-                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
-                <android.support.v7.widget.RecyclerView
-                    android:id="@+id/legends_recycler"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:nestedScrollingEnabled="false"
-                    android:layout_marginLeft="@dimen/extra_small_padding"
-                    android:layout_marginRight="@dimen/extra_small_padding"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="@dimen/small_padding"
-                    android:text="@string/collections_title"
-                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
-                <android.support.v7.widget.RecyclerView
-                    android:id="@+id/collections_recycler"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:nestedScrollingEnabled="false"
-                    android:layout_marginLeft="@dimen/extra_small_padding"
-                    android:layout_marginRight="@dimen/extra_small_padding"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="@dimen/small_padding"
+                        android:text="@string/legends_title"
+                        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/legends_recycler"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false"
+                        android:layout_marginLeft="@dimen/extra_small_padding"
+                        android:layout_marginRight="@dimen/extra_small_padding"/>
+                    <TextView
+                        android:id="@+id/empty_legends"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/large_padding"
+                        android:text="@string/no_leyendas"
+                        android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                        android:visibility="gone"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="@dimen/small_padding"
+                        android:text="@string/collections_title"
+                        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/collections_recycler"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false"
+                        android:layout_marginLeft="@dimen/extra_small_padding"
+                        android:layout_marginRight="@dimen/extra_small_padding"/>
+                    <TextView
+                        android:id="@+id/empty_collections"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/large_padding"
+                        android:text="@string/no_libros"
+                        android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                        android:visibility="gone"/>
+                </LinearLayout>
             </LinearLayout>
-        </LinearLayout>
-    </android.support.v4.widget.NestedScrollView>
+        </com.clickaboom.letrasparavolar.views.StickyScrollView>
+    </android.support.design.widget.CoordinatorLayout>
 </LinearLayout>

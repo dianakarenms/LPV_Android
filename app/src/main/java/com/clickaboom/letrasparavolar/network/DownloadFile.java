@@ -14,6 +14,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
+import com.clickaboom.letrasparavolar.models.collections.Colecciones;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -22,6 +24,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+
+import static com.clickaboom.letrasparavolar.activities.MainActivity.db;
 
 /**
  * Created by clickaboom on 2/23/17.
@@ -32,12 +36,14 @@ public class DownloadFile extends AsyncTask<String, Void, Void> {
 
     private static final String TAG = "Ext_Storage_Permission";
     private static final int PERMISSION_REQUEST_CODE = 1;
+    private final Colecciones mEpub;
     private Boolean success, localStored, permissionNotGranted;
     private ProgressDialog barProgressDialog;
-    public Context context;
+    private Context context;
+    private Activity activity;
+    private boolean showProgress;
 
     private Intent intent;
-    public Activity activity;
 
     File pdfFile;
     File folder;
@@ -46,8 +52,12 @@ public class DownloadFile extends AsyncTask<String, Void, Void> {
 
     private OnTaskCompleted listener;
 
-    public DownloadFile(OnTaskCompleted listener){
+    public DownloadFile(OnTaskCompleted listener, Context context, Activity activity, boolean showProgress, Colecciones ePub){
         this.listener = listener;
+        this.context = context;
+        this.activity = activity;
+        this.showProgress = showProgress;
+        mEpub = ePub;
     }
 
     public interface OnTaskCompleted {
@@ -62,7 +72,8 @@ public class DownloadFile extends AsyncTask<String, Void, Void> {
         barProgressDialog.setProgressStyle(barProgressDialog.STYLE_SPINNER);
         barProgressDialog.setIndeterminate(true);
         barProgressDialog.setCancelable(false);
-        barProgressDialog.show();
+        if(showProgress)
+            barProgressDialog.show();
     }
 
     @Override
@@ -113,9 +124,15 @@ public class DownloadFile extends AsyncTask<String, Void, Void> {
     @Override
     protected void onPostExecute(Void aVoid) {
         super.onPostExecute(aVoid);
-        barProgressDialog.dismiss();
+        if(barProgressDialog.isShowing())
+            barProgressDialog.dismiss();
+
         if(!permissionNotGranted) {
             if (success && !localStored) {
+
+                if(db.insertBook(mEpub)) {
+                    Log.d("ebookContent", "stored in db");
+                }
 
                 listener.onTaskCompleted();
 

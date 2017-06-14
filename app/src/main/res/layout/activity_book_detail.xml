@@ -71,9 +71,8 @@
                         android:id="@+id/favorite_star"
                         android:layout_width="@dimen/small_icon"
                         android:layout_height="@dimen/small_icon"
-                        android:padding="@dimen/extra_small_padding"
-                        android:background="@drawable/square_border"
-                        android:src="@drawable/star_gray"/>
+                        android:background="@null"
+                        android:src="@drawable/favorite_unselected"/>
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"

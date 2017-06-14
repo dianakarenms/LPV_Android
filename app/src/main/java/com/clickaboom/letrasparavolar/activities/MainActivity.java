@@ -37,14 +37,15 @@ import com.clickaboom.letrasparavolar.fragments.ColeccionesFragment;
 import com.clickaboom.letrasparavolar.fragments.InformationFragment;
 import com.clickaboom.letrasparavolar.fragments.LegendsFragment;
 import com.clickaboom.letrasparavolar.fragments.LibraryFragment;
-import com.clickaboom.letrasparavolar.network.SQLiteDBHelper;
 import com.clickaboom.letrasparavolar.models.banners.Banner;
 import com.clickaboom.letrasparavolar.models.banners.ResBanners;
 import com.clickaboom.letrasparavolar.models.collections.Colecciones;
 import com.clickaboom.letrasparavolar.models.defaults.ResDefaults;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
 import com.clickaboom.letrasparavolar.network.ApiSingleton;
+import com.clickaboom.letrasparavolar.network.DownloadFile;
 import com.clickaboom.letrasparavolar.network.GsonRequest;
+import com.clickaboom.letrasparavolar.network.SQLiteDBHelper;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
@@ -63,7 +64,7 @@ import javax.net.ssl.X509TrustManager;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        View.OnClickListener {
+        View.OnClickListener, DownloadFile.OnTaskCompleted {
 
     public RelativeLayout legendsBtn, collectionsBtn, libraryBtn;
     public static List<String> mLocalEpubsList = new ArrayList<>();
@@ -81,6 +82,8 @@ public class MainActivity extends AppCompatActivity
     private Context mContext;
     private List<Colecciones> mLegendsList = new ArrayList<>(), mCollectionsList = new ArrayList<>();;
     public static SQLiteDBHelper db;
+    private DownloadFile.OnTaskCompleted mDownloadsListener;
+    private ArrayList<String> mDefaultList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +94,7 @@ public class MainActivity extends AppCompatActivity
         /*new NukeSSLCerts().nuke();*/
 
         mContext = this;
+        mDownloadsListener = this;
 
         db = SQLiteDBHelper.getInstance(this);
 
@@ -104,9 +108,6 @@ public class MainActivity extends AppCompatActivity
                 drawer.openDrawer(GravityCompat.END);
             }
         });
-
-        //Toolbar toolbar = (Toolbar)findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
 
         // Set toolbar_asistant title
         ((TextView)findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.news_title));
@@ -396,11 +397,13 @@ public class MainActivity extends AppCompatActivity
 
                                 mLegendsList.clear();
                                 mLegendsList.addAll(res);
-                                /*for(Collections item : res) {
-                                    mLegendsList.add(item); // Add main book to list
+
+                                mLegendsAdapter.notifyDataSetChanged();
+                                for(Colecciones item: mLegendsList) {
+                                    item.favorito = false;
+                                    item.mBookType = BookDetailsActivity.LEGENDS;
+                                    descargar(ApiConfig.epubs + item.epub, item.epub, item);
                                 }
-*/                                mLegendsAdapter.notifyDataSetChanged();
-                                //mNestedScroll.scrollTo(0, 0);
                             }
                         }, new Response.ErrorListener() {
                     @Override
@@ -427,12 +430,13 @@ public class MainActivity extends AppCompatActivity
 
                                 mCollectionsList.clear();
                                 mCollectionsList.addAll(res);
-                                /*for(Collections item : res) {
-                                    mCollectionsList.add(item); // Add main book to list
-                                }*/
 
                                 mCollectionsAdapter.notifyDataSetChanged();
-                                //mNestedScroll.scrollTo(0, 0);
+                                for(Colecciones item: mCollectionsList) {
+                                    item.favorito = false;
+                                    item.mBookType = BookDetailsActivity.COLECCIONES;
+                                    descargar(ApiConfig.epubs + item.epub, item.epub, item);
+                                }
                             }
                         }, new Response.ErrorListener() {
                     @Override
@@ -487,6 +491,11 @@ public class MainActivity extends AppCompatActivity
                 }).start();
             }
         }).setDuration(6000).start();
+    }
+
+    @Override
+    public void onTaskCompleted() {
+
     }
 
     public static class NukeSSLCerts {
@@ -548,5 +557,10 @@ public class MainActivity extends AppCompatActivity
             }
         }
         return epubsList;
+    }
+
+    public void descargar(String url, String fileName, Colecciones ePub){
+        DownloadFile downloadFile = new DownloadFile(mDownloadsListener, mContext, MainActivity.this, false, ePub);
+        downloadFile.execute(url, fileName, fileName);
     }
 }
