@@ -69,14 +69,16 @@ public class GamesActivity extends AppCompatActivity
                 "Nahuatlismos",
                 "Relaciona las palabras de origen prehispánico con su significado.",
                 R.drawable.juego_1,
-                JUEGO_A));
+                JUEGO_A,
+                R.color.nahuatlismos_btn));
 
         // Curioseando
          mGamesList.add(new Game(
                  "Curioseando",
                  "Contesta los diferentes tests que tenemos para ti.",
                  R.drawable.juego_2,
-                 JUEGO_B));
+                 JUEGO_B,
+                 R.color.curioseando_btn));
 
         // specify an adapter (see also next example)
         mAdapter = new GamesListAdapter(mGamesList, mContext);

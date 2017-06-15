@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#202020</color>
+    <color name="colorPrimary">#666666</color>
     <color name="colorPrimaryDark">#000</color>
     <color name="colorAccent">#cf3683</color>
     <color name="legends_nav">#c6528e</color>
@@ -22,8 +22,14 @@
     <color name="lilac">#AB79AC</color>
     <color name="dark_lilac">#9c78a7</color>
     <color name="light_gray">#d4d4d4</color>
+    <color name="gray">#b7b7b7</color>
     <color name="medium_gray">#797979</color>
     <color name="dark_gray">#616161</color>
     <color name="black">#000</color>
-    <color name="nahuatlismos_btn">#33AFC8</color>
+    <color name="nahuatlismos_btn">#5699b7</color>
+    <color name="curioseando_btn">#b997c1</color>
+    <color name="border">#b8b6b9</color>
+    <color name="repeat_test_btn">#5699b7</color>
+    <color name="finish_test_btn">#c6528e</color>
+    <color name="share_test_btn">#dfa934</color>
 </resources>

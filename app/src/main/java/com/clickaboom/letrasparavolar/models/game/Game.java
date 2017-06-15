@@ -11,11 +11,13 @@ public class Game implements Serializable {
     public String subtitle;
     public int imgResource;
     public String gameType;
+    public int btnColor;
 
-    public Game(String title, String subtitle, int imgResource, String gameType) {
+    public Game(String title, String subtitle, int imgResource, String gameType, int btnColor) {
         this.title = title;
         this.subtitle = subtitle;
         this.imgResource = imgResource;
         this.gameType = gameType;
+        this.btnColor = btnColor;
     }
 }

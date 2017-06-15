@@ -4,7 +4,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Created by karen on 14/06/17.
@@ -22,5 +22,5 @@ public class Pregunta implements Serializable {
     public String status;
     @SerializedName("respuestas")
     @Expose
-    public List<Respuesta> respuestas = null;
+    public ArrayList<Respuesta> respuestas = null;
 }

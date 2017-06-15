@@ -68,4 +68,8 @@
     <string name="atras">Atrás</string>
     <string name="jugar">¡Jugar!</string>
     <string name="siguiente">Siguiente</string>
+    <string name="volver_a_jugar">Volver a jugar</string>
+    <string name="terminar">Terminar</string>
+    <string name="compartir">Compartir puntuación</string>
+    <string name="puntuacion">Puntuación:</string>
 </resources>

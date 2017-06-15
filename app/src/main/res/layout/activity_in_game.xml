@@ -10,37 +10,47 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:weightSum="10"
-        android:orientation="vertical"
-        android:paddingRight="@dimen/extra_small_padding"
-        android:paddingLeft="@dimen/extra_small_padding"
-        android:paddingBottom="@dimen/extra_small_padding">
-        <TextView
-            android:id="@+id/question_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:padding="@dimen/small_padding"
-            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium" />
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/answers_recycler"
+        android:layout_height="match_parent">
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@+id/question_title"
-            android:layout_above="@+id/next_btn"
-            android:nestedScrollingEnabled="false"/>
+            android:weightSum="10"
+            android:orientation="vertical"
+            android:paddingRight="@dimen/extra_small_padding"
+            android:paddingLeft="@dimen/extra_small_padding"
+            android:paddingBottom="@dimen/extra_small_padding">
+            <TextView
+                android:id="@+id/question_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/small_padding"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium" />
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/answers_recycler"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/question_title"
+                android:layout_above="@+id/next_btn"
+                android:nestedScrollingEnabled="false"/>
 
-        <Button
-            android:id="@+id/next_btn"
+            <Button
+                android:id="@+id/next_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/small_padding"
+                android:layout_alignParentBottom="true"
+                android:text="@string/siguiente"
+                android:textColor="@color/white"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                android:textStyle="bold"
+                android:background="@color/nahuatlismos_btn"
+                android:onClick="onClick"/>
+        </RelativeLayout>
+
+        <include android:id="@+id/modal_game_over"
+            layout="@layout/modal_game_over"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/small_padding"
-            android:layout_alignParentBottom="true"
-            android:text="@string/siguiente"
-            android:textColor="@color/white"
-            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-            android:textStyle="bold"
-            android:background="@color/nahuatlismos_btn"
-            android:onClick="onClick"/>
+            android:layout_height="match_parent"
+            android:visibility="gone"/>
     </RelativeLayout>
 </LinearLayout>

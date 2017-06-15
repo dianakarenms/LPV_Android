@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+    android:padding="@dimen/extra_large_padding"
+    android:background="@color/transp_back">
+
+    <LinearLayout
+        android:id="@+id/nahuatlismos_result"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_alignParentTop="true"
+        android:background="@color/transp_back">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:weightSum="5"
+            android:gravity="center">
+            <ImageView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:maxHeight="100dp"
+                android:adjustViewBounds="true"
+                android:src="@drawable/modal_juego1"/>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="4"
+                android:layout_marginLeft="@dimen/small_padding"
+                android:text="@string/puntuacion"
+                android:textColor="@color/colorPrimary"
+                android:textSize="@dimen/large_text"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/puntua_txt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/small_padding"
+            android:layout_marginTop="@dimen/large_padding"
+            android:textColor="@color/repeat_test_btn"
+            android:textSize="@dimen/jumbo_text"
+            android:gravity="center"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/small_padding"
+            android:text="¡Lo hiciste muy bien!"
+            android:textColor="@color/colorPrimary"
+            android:textSize="@dimen/medium_text"
+            android:gravity="center_horizontal"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/return_options"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_alignParentBottom="true">
+
+        <Button
+            android:id="@+id/repeat_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/small_padding"
+            android:layout_alignParentBottom="true"
+            android:text="@string/volver_a_jugar"
+            android:textColor="@color/white"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+            android:textStyle="bold"
+            android:background="@color/repeat_test_btn"
+            android:onClick="onClick"/>
+
+        <Button
+            android:id="@+id/finish_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/small_padding"
+            android:layout_alignParentBottom="true"
+            android:text="@string/terminar"
+            android:textColor="@color/white"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+            android:textStyle="bold"
+            android:background="@color/finish_test_btn"
+            android:onClick="onClick"/>
+
+        <Button
+            android:id="@+id/share_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/small_padding"
+            android:layout_alignParentBottom="true"
+            android:text="@string/compartir"
+            android:textColor="@color/white"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+            android:textStyle="bold"
+            android:background="@color/share_test_btn"
+            android:onClick="onClick"/>
+    </LinearLayout>
+
+</RelativeLayout>
