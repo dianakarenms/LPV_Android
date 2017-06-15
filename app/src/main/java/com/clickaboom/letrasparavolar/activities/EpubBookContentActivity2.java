@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -29,6 +30,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -91,7 +93,7 @@ public class EpubBookContentActivity2 extends Activity implements DownloadFile.O
         mWebView.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NARROW_COLUMNS);
         mWebView.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, String url) {
-                injectJavascript();
+                //injectJavascript();
             }
         });
     }
@@ -169,6 +171,80 @@ public class EpubBookContentActivity2 extends Activity implements DownloadFile.O
 
         mWebView.loadUrl(js);
         mWebView.loadUrl("javascript:initialize()");
+    }
+
+    public void copyEpubReaderToDevice() {
+        System.out.println("Copy Book to donwload folder in phone");
+        try
+        {
+            InputStream localInputStream = getAssets().open("epub_reader");
+            String path = basePath;
+            FileOutputStream localFileOutputStream = new FileOutputStream(path);
+
+            byte[] arrayOfByte = new byte[1024];
+            int offset;
+            while ((offset = localInputStream.read(arrayOfByte))>0)
+            {
+                localFileOutputStream.write(arrayOfByte, 0, offset);
+            }
+            localFileOutputStream.close();
+            localInputStream.close();
+            Log.d(TAG, "epub_reader copied to phone");
+
+        }
+        catch (IOException localIOException)
+        {
+            localIOException.printStackTrace();
+            Log.d(TAG, "failed to copy");
+            return;
+        }
+    }
+
+    public void copyFileOrDir(String path) {
+        AssetManager assetManager = this.getAssets();
+        String assets[] = null;
+        try {
+            assets = assetManager.list(path);
+            if (assets.length == 0) {
+                copyFile(path);
+            } else {
+                String fullPath = "/data/data/" + this.getPackageName() + "/" + path;
+                File dir = new File(fullPath);
+                if (!dir.exists())
+                    dir.mkdir();
+                for (int i = 0; i < assets.length; ++i) {
+                    copyFileOrDir(path + "/" + assets[i]);
+                }
+            }
+        } catch (IOException ex) {
+            Log.e("tag", "I/O Exception", ex);
+        }
+    }
+
+    private void copyFile(String filename) {
+        AssetManager assetManager = this.getAssets();
+
+        InputStream in = null;
+        OutputStream out = null;
+        try {
+            in = assetManager.open(filename);
+            String newFileName = "/data/data/" + this.getPackageName() + "/" + filename;
+            out = new FileOutputStream(newFileName);
+
+            byte[] buffer = new byte[1024];
+            int read;
+            while ((read = in.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
+            }
+            in.close();
+            in = null;
+            out.flush();
+            out.close();
+            out = null;
+        } catch (Exception e) {
+            Log.e("tag", e.getMessage());
+        }
+
     }
 
     private void DownloadResource(String directory) {
@@ -308,6 +384,7 @@ public class EpubBookContentActivity2 extends Activity implements DownloadFile.O
 
         @Override
         protected Void doInBackground(Void... arg0) {
+            copyFileOrDir("epub_reader/");
             loadEpubFromStorage();
             return null;
         }
@@ -315,7 +392,8 @@ public class EpubBookContentActivity2 extends Activity implements DownloadFile.O
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            mWebView.loadDataWithBaseURL("file://" + basePath + "/", linez, "text/html", "utf-8", null);
+            //mWebView.loadDataWithBaseURL("file://" + basePath + "/", linez, "text/html", "utf-8", null);
+            mWebView.loadDataWithBaseURL("file://" + basePath + "/", "index.html", "text/html", "utf-8", null);
             barProgressDialog.dismiss();
         }
     }
