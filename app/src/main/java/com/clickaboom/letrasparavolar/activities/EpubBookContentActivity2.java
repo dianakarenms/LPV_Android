@@ -93,7 +93,7 @@ public class EpubBookContentActivity2 extends Activity implements DownloadFile.O
         mWebView.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NARROW_COLUMNS);
         mWebView.setWebViewClient(new WebViewClient() {
             public void onPageFinished(WebView view, String url) {
-                //injectJavascript();
+                injectJavascript();
             }
         });
     }
@@ -384,7 +384,7 @@ public class EpubBookContentActivity2 extends Activity implements DownloadFile.O
 
         @Override
         protected Void doInBackground(Void... arg0) {
-            copyFileOrDir("epub_reader/");
+            //copyFileOrDir("epub_reader/");
             loadEpubFromStorage();
             return null;
         }
@@ -392,8 +392,8 @@ public class EpubBookContentActivity2 extends Activity implements DownloadFile.O
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            //mWebView.loadDataWithBaseURL("file://" + basePath + "/", linez, "text/html", "utf-8", null);
-            mWebView.loadDataWithBaseURL("file://" + basePath + "/", "index.html", "text/html", "utf-8", null);
+            mWebView.loadDataWithBaseURL("file://" + basePath + "/", linez, "text/html", "utf-8", null);
+            //mWebView.loadDataWithBaseURL("file://" + basePath + "/", "index.html", "text/html", "utf-8", null);
             barProgressDialog.dismiss();
         }
     }

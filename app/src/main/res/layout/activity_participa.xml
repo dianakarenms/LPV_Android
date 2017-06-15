@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:background="@drawable/fondo_papel">
+
+    <include layout="@layout/toolbar_full" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:weightSum="10"
+            android:orientation="vertical"
+            android:paddingRight="@dimen/extra_small_padding"
+            android:paddingLeft="@dimen/extra_small_padding"
+            android:paddingBottom="@dimen/extra_small_padding"
+            android:gravity="center_horizontal">
+            <TextView
+                android:id="@+id/question_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:padding="@dimen/small_padding"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium" />
+
+            <Button
+                android:id="@+id/next_btn"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/small_padding"
+                android:text="@string/enviar"
+                android:textColor="@color/white"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                android:background="@color/participa_send"
+                android:layout_centerInParent="true"
+                android:onClick="onClick"/>
+        </LinearLayout>
+
+        <include android:id="@+id/modal_game_over"
+            layout="@layout/modal_game_over"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"/>
+    </RelativeLayout>
+</LinearLayout>

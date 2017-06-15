@@ -32,4 +32,5 @@
     <color name="repeat_test_btn">#5699b7</color>
     <color name="finish_test_btn">#c6528e</color>
     <color name="share_test_btn">#dfa934</color>
+    <color name="participa_send">#dea934</color>
 </resources>
