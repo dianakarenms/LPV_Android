@@ -73,4 +73,14 @@
     <string name="compartir">Compartir puntuación</string>
     <string name="puntuacion">Puntuación:</string>
     <string name="enviar">ENVIAR</string>
+    <string name="unete">¡Únete a nuestro equipo!</string>
+    <string name="inscribete">Inscríbete como voluntario o realiza tu servicio social con nosotros. Puedes impartir talleres a los niños en escuelas u hospitales, formar parte del círculo de lectura o hacer tus prácticas profesionales. También puedes formar parte del programa de internacionalización.</string>
+    <string name="nombre">Nombre</string>
+    <string name="correo">Correo electrónico</string>
+    <string name="procedencia">Escuela o lugar de procedencia</string>
+    <string name="mensaje">Mensaje</string>
+    <string name="mensaje_enviado">Se ha enviado tu mensaje</string>
+    <string name="required_field">Campo requerido</string>
+    <string name="participa">Participa</string>
+    <string name="tests">Curioseando</string>
 </resources>

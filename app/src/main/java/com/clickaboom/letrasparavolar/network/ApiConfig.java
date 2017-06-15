@@ -44,4 +44,7 @@ public class ApiConfig {
     public static final String curioseandoTests = baseUrl + "/api/curioseando/tests/";
     public static final String curioseandoTestQuestions = baseUrl + "/api/curioseando/preguntas/";
 
+    // Participa
+    public static final String participa = baseUrl + "/api/participa/save/";
+
 }

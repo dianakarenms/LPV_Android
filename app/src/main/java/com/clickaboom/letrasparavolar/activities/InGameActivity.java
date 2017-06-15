@@ -110,6 +110,8 @@ public class InGameActivity extends AppCompatActivity
 
         if(mGame.gameType.equals(GamesActivity.JUEGO_A))
             loadNahuatlismosQuestions();
+        else
+            loadCurioseandoQuestions();
 
     }
 
@@ -177,6 +179,28 @@ public class InGameActivity extends AppCompatActivity
 
     }
 
+    private void loadCurioseandoQuestions() {
+        // Access the RequestQueue through your singleton class.
+        ApiSingleton.getInstance(mContext)
+                .addToRequestQueue(new GsonRequest(ApiConfig.curioseandoTests,
+                        ResNahuatlismos.class,
+                        Request.Method.GET,
+                        null, null,
+                        new Response.Listener() {
+                            @Override
+                            public void onResponse(Object response) {
+                                Log.d(TAG, response.toString());
+                                mPregList = ((ResNahuatlismos) response).data;
+                                setQuestion(mPregList.get(mQuestionIndex));
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d(TAG, error.toString());
+                    }
+                }));
+    }
+
     private void setQuestion(Pregunta pregunta){
         ((TextView)findViewById(R.id.question_title)).setText(pregunta.pregunta);
         mRespList.clear();
@@ -195,8 +219,6 @@ public class InGameActivity extends AppCompatActivity
             InGameAdapter.ViewHolder holder = (InGameAdapter.ViewHolder)mRecyclerView.findViewHolderForAdapterPosition(correctPos);
             holder.mCheckImg.setImageResource(R.drawable.checked);
         }
-
-        //Toast.makeText(mContext, "correct: " + mCorrectCounter, Toast.LENGTH_SHORT).show();
     }
 
     private void shareImage(){

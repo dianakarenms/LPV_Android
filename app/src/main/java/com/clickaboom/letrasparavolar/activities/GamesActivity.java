@@ -99,7 +99,7 @@ public class GamesActivity extends AppCompatActivity
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.search_back:
+            case R.id.back_btn:
                 finish();
                 break;
         }

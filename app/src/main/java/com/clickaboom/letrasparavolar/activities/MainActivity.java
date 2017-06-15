@@ -310,7 +310,7 @@ public class MainActivity extends AppCompatActivity
                 startActivity(GamesActivity.newIntent(mContext));
                 break;
             case R.id.participate_btn:
-                Toast.makeText(getApplicationContext(), "participate_btn", Toast.LENGTH_SHORT).show();
+                startActivity(ParticipaActivity.newIntent(mContext));
                 break;
             case R.id.portal_btn:
                 startActivity(WebviewActivity.newIntent(

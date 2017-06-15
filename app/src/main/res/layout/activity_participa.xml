@@ -6,9 +6,12 @@
               android:layout_height="match_parent"
               android:background="@drawable/fondo_papel">
 
-    <include layout="@layout/toolbar_full" />
+    <include layout="@layout/toolbar_full_no_scroll" />
 
-    <RelativeLayout
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
         <LinearLayout
@@ -21,15 +24,114 @@
             android:paddingBottom="@dimen/extra_small_padding"
             android:gravity="center_horizontal">
             <TextView
-                android:id="@+id/question_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
                 android:padding="@dimen/small_padding"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium" />
+                android:text="@string/unete"
+                android:textColor="@color/colorPrimary"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Large"
+                android:gravity="center"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/extra_small_padding"
+                android:text="@string/inscribete"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                android:gravity="center"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/extra_small_padding"
+                    android:text="@string/nombre"
+                    android:textStyle="bold"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"/>
+                <EditText
+                    android:id="@+id/nombre_field"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapWords"
+                    android:imeOptions="actionDone"
+                    android:lines="1"
+                    android:background="@drawable/participa_edittext"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                    android:padding="@dimen/extra_small_padding"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/extra_small_padding"
+                    android:text="@string/correo"
+                    android:textStyle="bold"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"/>
+                <EditText
+                    android:id="@+id/correo_field"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textEmailAddress"
+                    android:imeOptions="actionDone"
+                    android:lines="1"
+                    android:background="@drawable/participa_edittext"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                    android:padding="@dimen/extra_small_padding"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/extra_small_padding"
+                    android:text="@string/procedencia"
+                    android:textStyle="bold"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"/>
+                <EditText
+                    android:id="@+id/procedencia_field"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapWords"
+                    android:imeOptions="actionDone"
+                    android:lines="1"
+                    android:background="@drawable/participa_edittext"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                    android:padding="@dimen/extra_small_padding"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/extra_small_padding"
+                    android:text="@string/mensaje"
+                    android:textStyle="bold"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"/>
+                <EditText
+                    android:id="@+id/mensaje_field"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/participa_edittext"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                    android:padding="@dimen/extra_small_padding"/>
+            </LinearLayout>
 
             <Button
-                android:id="@+id/next_btn"
+                android:id="@+id/enviar_btn"
                 android:layout_width="200dp"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/small_padding"
@@ -47,4 +149,5 @@
             android:layout_height="match_parent"
             android:visibility="gone"/>
     </RelativeLayout>
+    </ScrollView>
 </LinearLayout>

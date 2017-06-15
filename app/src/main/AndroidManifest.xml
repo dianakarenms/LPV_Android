@@ -68,6 +68,12 @@
 
         <activity android:name=".activities.InGameActivity"
                   android:theme="@style/AppTheme.NoActionBar"/>
+
+        <activity android:name=".activities.ParticipaActivity"
+                  android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity android:name=".activities.CurioseandoTestsListActivity"
+                  android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>

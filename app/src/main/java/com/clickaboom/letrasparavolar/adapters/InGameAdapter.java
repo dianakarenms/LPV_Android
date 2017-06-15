@@ -15,6 +15,7 @@ import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.models.game.Respuesta;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
 import com.clickaboom.letrasparavolar.network.ApiSingleton;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -41,7 +42,7 @@ public class InGameAdapter extends RecyclerView.Adapter<InGameAdapter.ViewHolder
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         public TextView mTitle;
-        public NetworkImageView mImage;
+        public ImageView mImage;
         public ImageView mCheckImg, mCorrectImgView;
         public Respuesta mItem;
         public RelativeLayout mItemView;
@@ -50,7 +51,7 @@ public class InGameAdapter extends RecyclerView.Adapter<InGameAdapter.ViewHolder
             super(v);
             v.setOnClickListener(this);
             mTitle = (TextView) v.findViewById(R.id.res_title);
-            mImage = (NetworkImageView) v.findViewById(R.id.res_img);
+            mImage = (ImageView) v.findViewById(R.id.res_img);
             mCheckImg = (ImageView) v.findViewById(R.id.check_img);
             mItemView = (RelativeLayout) v.findViewById(R.id.parent);
         }
@@ -114,10 +115,16 @@ public class InGameAdapter extends RecyclerView.Adapter<InGameAdapter.ViewHolder
 
         // Image
         holder.mImage.setImageResource(R.drawable.book_placeholder); // Initial empty value
-        String imgUrl = ApiConfig.interImg + respuesta.imagen;
-        imageLoader = ApiSingleton.getInstance(mContext).getImageLoader();
-        imageLoader.get(imgUrl, ImageLoader.getImageListener(holder.mImage, R.drawable.book_placeholder, android.R.drawable.ic_dialog_alert));
-        holder.mImage.setImageUrl(imgUrl, imageLoader);
+        String imgUrl = ApiConfig.interImg + "thumb_" + respuesta.imagen;
+//        imageLoader = ApiSingleton.getInstance(mContext).getImageLoader();
+//        imageLoader.get(imgUrl, ImageLoader.getImageListener(holder.mImage, R.drawable.book_placeholder, android.R.drawable.ic_dialog_alert));
+//        holder.mImage.setImageUrl(imgUrl, imageLoader);
+        Picasso.with(mContext)
+                .load(imgUrl)
+                .resize(400,400)
+                .centerInside()
+                .placeholder(R.drawable.book_placeholder)
+                .into(holder.mImage);
 
         // Reset mcheckedimg value
         holder.mCheckImg.setImageResource(0); // Initial empty value

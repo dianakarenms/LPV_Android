@@ -12,6 +12,8 @@ import android.widget.Toast;
 
 import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.activities.BookDetailsActivity;
+import com.clickaboom.letrasparavolar.activities.CurioseandoTestsListActivity;
+import com.clickaboom.letrasparavolar.activities.GamesActivity;
 import com.clickaboom.letrasparavolar.activities.InGameActivity;
 import com.clickaboom.letrasparavolar.activities.MainActivity;
 import com.clickaboom.letrasparavolar.models.collections.Colecciones;
@@ -77,7 +79,11 @@ public class GamesListAdapter extends RecyclerView.Adapter<GamesListAdapter.View
             @Override
             public void onClick(View v) {
                 //Toast.makeText(mContext, game.gameType, Toast.LENGTH_SHORT).show();
-                mContext.startActivity(InGameActivity.newIntent(mContext, game));
+                if(game.gameType.equals(GamesActivity.JUEGO_A))
+                    mContext.startActivity(InGameActivity.newIntent(mContext, game));
+                else if(game.gameType.equals(GamesActivity.JUEGO_B))
+                    mContext.startActivity(CurioseandoTestsListActivity.newIntent(mContext, game));
+
             }
         });
     }
