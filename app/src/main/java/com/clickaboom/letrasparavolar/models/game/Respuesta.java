@@ -10,6 +10,7 @@ import java.io.Serializable;
  */
 
 public class Respuesta implements Serializable {
+
     @SerializedName("id")
     @Expose
     public String id;
@@ -25,5 +26,4 @@ public class Respuesta implements Serializable {
     @SerializedName("preguntas_nahuatlismos_id")
     @Expose
     public String preguntasNahuatlismosId;
-    public boolean newLine;
 }

@@ -94,6 +94,7 @@ public class InGameActivity extends AppCompatActivity
 
         // specify an adapter (see also next example)
         mAdapter = new InGameAdapter(mRespList, mContext, mListener, mRecyclerView);
+        mAdapter.setGameType(mGame.gameType);
         mRecyclerView.setAdapter(mAdapter);
 
        /* // Modal buttons controller
@@ -111,7 +112,7 @@ public class InGameActivity extends AppCompatActivity
         if(mGame.gameType.equals(GamesActivity.JUEGO_A))
             loadNahuatlismosQuestions();
         else
-            loadCurioseandoQuestions();
+            loadCurioseandoQuestions(mGame.id);
 
     }
 
@@ -120,7 +121,7 @@ public class InGameActivity extends AppCompatActivity
         mNextBtn.setBackgroundColor(getResources().getColor(R.color.gray));
     }
 
-    private void validNahuatlNextBtn(int btnColor) {
+    private void validNextBtn(int btnColor) {
         mNextBtn.setClickable(true);
         mNextBtn.setBackgroundColor(getResources().getColor(btnColor));
     }
@@ -179,10 +180,10 @@ public class InGameActivity extends AppCompatActivity
 
     }
 
-    private void loadCurioseandoQuestions() {
+    private void loadCurioseandoQuestions(int testId) {
         // Access the RequestQueue through your singleton class.
         ApiSingleton.getInstance(mContext)
-                .addToRequestQueue(new GsonRequest(ApiConfig.curioseandoTests,
+                .addToRequestQueue(new GsonRequest(ApiConfig.curioseandoTestQuestions + "?test=" + testId,
                         ResNahuatlismos.class,
                         Request.Method.GET,
                         null, null,
@@ -212,12 +213,16 @@ public class InGameActivity extends AppCompatActivity
 
     @Override
     public void OnItemClicked(Respuesta res, int correctPos) {
-        validNahuatlNextBtn(mGame.btnColor);
-        if(res.isCorrecta.equals("SI"))
-            mCorrectCounter ++;
-        else {
-            InGameAdapter.ViewHolder holder = (InGameAdapter.ViewHolder)mRecyclerView.findViewHolderForAdapterPosition(correctPos);
-            holder.mCheckImg.setImageResource(R.drawable.checked);
+        validNextBtn(mGame.btnColor);
+        if(mGame.gameType.equals(JUEGO_A)) {
+            if (res.isCorrecta.equals("SI"))
+                mCorrectCounter++;
+            else {
+                InGameAdapter.NahuatlismosHolder holder = (InGameAdapter.NahuatlismosHolder) mRecyclerView.findViewHolderForAdapterPosition(correctPos);
+                holder.mCheckImg.setImageResource(R.drawable.checked);
+            }
+        } else if(mGame.gameType.equals(JUEGO_B)) {
+
         }
     }
 

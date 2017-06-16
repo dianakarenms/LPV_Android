@@ -12,7 +12,6 @@ import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.activities.InGameActivity;
 import com.clickaboom.letrasparavolar.models.game.Game;
 import com.clickaboom.letrasparavolar.models.game.TestCurioseando;
-import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -62,6 +61,7 @@ public class TestsListAdapter extends RecyclerView.Adapter<TestsListAdapter.View
             @Override
             public void onClick(View v) {
                 //Toast.makeText(mContext, game.gameType, Toast.LENGTH_SHORT).show();
+                sGame.id = test.id;
                 mContext.startActivity(InGameActivity.newIntent(mContext, sGame));
             }
         });

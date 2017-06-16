@@ -10,11 +10,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.NetworkImageView;
 import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.models.game.Respuesta;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
-import com.clickaboom.letrasparavolar.network.ApiSingleton;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -23,7 +21,9 @@ import java.util.List;
  * Created by Karencita on 13/05/2017.
  */
 
-public class InGameAdapter extends RecyclerView.Adapter<InGameAdapter.ViewHolder> {
+public class InGameAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+    private static final int ITEM_NAHUATLISMOS = 0;
+    private static final int ITEM_CURIOSEANDO = 1;
     private static Context mContext;
     private static List<Respuesta> sGameList;
     public static String mColType;
@@ -31,6 +31,7 @@ public class InGameAdapter extends RecyclerView.Adapter<InGameAdapter.ViewHolder
     public ImageLoader imageLoader;
     public static boolean mAnswerClicked = false;
     public static View sParentView;
+    public static String mGameType;
 
     // Provide a suitable constructor (depends on the kind of dataset)
     public InGameAdapter(List<Respuesta> bookList, Context context, OnClickListener listener, View parentView) {
@@ -40,14 +41,19 @@ public class InGameAdapter extends RecyclerView.Adapter<InGameAdapter.ViewHolder
         sParentView = parentView;
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public void setGameType(String gameType) {
+        mGameType = gameType;
+    }
+
+
+    public static class NahuatlismosHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         public TextView mTitle;
         public ImageView mImage;
         public ImageView mCheckImg, mCorrectImgView;
         public Respuesta mItem;
         public RelativeLayout mItemView;
 
-        public ViewHolder(View v) {
+        public NahuatlismosHolder(View v) {
             super(v);
             v.setOnClickListener(this);
             mTitle = (TextView) v.findViewById(R.id.res_title);
@@ -83,58 +89,134 @@ public class InGameAdapter extends RecyclerView.Adapter<InGameAdapter.ViewHolder
         }
     }
 
+    public static class CurioseandoHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+        public TextView mTitle;
+        public Respuesta mItem;
+        public RelativeLayout mItemView;
+
+        public CurioseandoHolder(View v) {
+            super(v);
+            v.setOnClickListener(this);
+            mTitle = (TextView) v.findViewById(R.id.res_title);
+            mItemView = (RelativeLayout) v.findViewById(R.id.parent);
+        }
+
+        @Override
+        public void onClick(View v) {
+            sListener.OnItemClicked(mItem, getAdapterPosition());
+
+        }
+
+        public void setItem(Respuesta item) {
+            mItem = item;
+        }
+    }
+
     @Override
-    public InGameAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_game_nahuatlismos, parent, false);
-        ViewHolder viewHolder = new ViewHolder(v);
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View v;
+        RecyclerView.ViewHolder viewHolder;
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        switch (viewType) {
+            case ITEM_NAHUATLISMOS:
+                v = inflater
+                        .inflate(R.layout.item_game_nahuatlismos, parent, false);
+                viewHolder = new NahuatlismosHolder(v);
+            break;
+            case ITEM_CURIOSEANDO:
+                v = inflater
+                        .inflate(R.layout.item_game_curioseando, parent, false);
+                viewHolder = new CurioseandoHolder(v);
+            break;
+            default:
+                v = inflater
+                        .inflate(R.layout.item_game_curioseando, parent, false);
+                viewHolder = new CurioseandoHolder(v);
+                break;
+        }
         return viewHolder;
     }
 
     @Override
-    public void onBindViewHolder(InGameAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         final Respuesta respuesta = sGameList.get(position);
-        holder.setItem(respuesta);
 
-        // Holder size settings to fit screen
-        RelativeLayout.LayoutParams params = new
-                RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT);
+        switch (getItemViewType(position)) {
+            case ITEM_NAHUATLISMOS:
+                NahuatlismosHolder nahuaHolder = (NahuatlismosHolder) holder;
+                nahuaHolder.setItem(respuesta);
 
-        // Set the height by params
-        params.height = sParentView.getHeight() / 2;
-        //params.p(10, 10, 10, 10);
+                // Holder size settings to fit screen
+                RelativeLayout.LayoutParams params = new
+                        RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT);
 
-        // set height of RecyclerView
-        holder.itemView.setLayoutParams(params);
-        holder.itemView.setPadding(15, 15, 15, 15);
-        //holder.itemView.setBackgroundResource(R.drawable.square_border);
+                // Set the height by params
+                params.height = sParentView.getHeight() / 2;
+                //params.p(10, 10, 10, 10);
 
-        // Title
-        holder.mTitle.setText(respuesta.respuesta);
+                // set height of RecyclerView
+                nahuaHolder.itemView.setLayoutParams(params);
+                nahuaHolder .itemView.setPadding(15, 15, 15, 15);
+                //holder.itemView.setBackgroundResource(R.drawable.square_border);
 
-        // Image
-        holder.mImage.setImageResource(R.drawable.book_placeholder); // Initial empty value
-        String imgUrl = ApiConfig.interImg + "thumb_" + respuesta.imagen;
-//        imageLoader = ApiSingleton.getInstance(mContext).getImageLoader();
-//        imageLoader.get(imgUrl, ImageLoader.getImageListener(holder.mImage, R.drawable.book_placeholder, android.R.drawable.ic_dialog_alert));
-//        holder.mImage.setImageUrl(imgUrl, imageLoader);
-        Picasso.with(mContext)
-                .load(imgUrl)
-                .resize(400,400)
-                .centerInside()
-                .placeholder(R.drawable.book_placeholder)
-                .into(holder.mImage);
+                // Title
+                nahuaHolder.mTitle.setText(respuesta.respuesta);
 
-        // Reset mcheckedimg value
-        holder.mCheckImg.setImageResource(0); // Initial empty value
+                // Image
+                nahuaHolder.mImage.setImageResource(R.drawable.book_placeholder); // Initial empty value
+                String imgUrl = ApiConfig.interImg + "thumb_" + respuesta.imagen;
+                //        imageLoader = ApiSingleton.getInstance(mContext).getImageLoader();
+                //        imageLoader.get(imgUrl, ImageLoader.getImageListener(holder.mImage, R.drawable.book_placeholder, android.R.drawable.ic_dialog_alert));
+                //        holder.mImage.setImageUrl(imgUrl, imageLoader);
+                Picasso.with(mContext)
+                        .load(imgUrl)
+                        .resize(400, 400)
+                        .centerInside()
+                        .placeholder(R.drawable.book_placeholder)
+                        .into(nahuaHolder.mImage);
+
+                // Reset mcheckedimg value
+                nahuaHolder.mCheckImg.setImageResource(0); // Initial empty value
+                break;
+
+            case ITEM_CURIOSEANDO:
+                CurioseandoHolder curioHolder = (CurioseandoHolder) holder;
+                curioHolder.setItem(respuesta);
+
+                // Holder size settings to fit screen
+                RelativeLayout.LayoutParams params2 = new
+                        RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT);
+
+                // Set the height by params
+                params2.height = sParentView.getHeight() / 3;
+                //params.p(10, 10, 10, 10);
+
+                // set height of RecyclerView
+                curioHolder.itemView.setLayoutParams(params2);
+                curioHolder.itemView.setPadding(15, 15, 15, 15);
+                //holder.itemView.setBackgroundResource(R.drawable.square_border);
+
+                // Title
+                curioHolder.mTitle.setText(respuesta.respuesta);
+                break;
+        }
     }
-
     @Override
     public int getItemCount() {
         return sGameList.size();
     }
 
+    @Override
+    public int getItemViewType(int position) {
+        if(mGameType
+                .equals(mContext.getResources().getString(R.string.nahuatlismos))) {
+            return ITEM_NAHUATLISMOS;
+        } else {
+            return ITEM_CURIOSEANDO;
+        }
+    }
 
     public interface OnClickListener {
         void OnItemClicked(Respuesta res, int correctPos);

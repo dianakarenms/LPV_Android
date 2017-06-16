@@ -5,6 +5,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by karen on 14/06/17.
@@ -23,4 +24,10 @@ public class Pregunta implements Serializable {
     @SerializedName("respuestas")
     @Expose
     public ArrayList<Respuesta> respuestas = null;
+    @SerializedName("preguntas_curioseando_id")
+    @Expose
+    public String preguntasCurioseandoId;
+    @SerializedName("resultados")
+    @Expose
+    public List<Resultado> resultados = null;
 }

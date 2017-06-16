@@ -66,6 +66,7 @@ public class GamesActivity extends AppCompatActivity
 
         // Nahuatlismos
         mGamesList.add(new Game(
+                -1,
                 "Nahuatlismos",
                 "Relaciona las palabras de origen prehispánico con su significado.",
                 R.drawable.juego_1,
@@ -74,6 +75,7 @@ public class GamesActivity extends AppCompatActivity
 
         // Curioseando
          mGamesList.add(new Game(
+                 -1,
                  "Curioseando",
                  "Contesta los diferentes tests que tenemos para ti.",
                  R.drawable.juego_2,

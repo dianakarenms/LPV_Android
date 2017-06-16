@@ -12,7 +12,7 @@ import java.io.Serializable;
 public class TestCurioseando implements Serializable {
     @SerializedName("id")
     @Expose
-    public String id;
+    public int id;
     @SerializedName("nombre")
     @Expose
     public String nombre;

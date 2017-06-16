@@ -228,7 +228,8 @@
                 android:weightSum="5"
                 android:gravity="center"
                 android:clickable="true"
-                android:onClick="navOnClick">
+                android:onClick="navOnClick"
+                android:visibility="gone">
                 <com.clickaboom.letrasparavolar.views.SquareImageButtonHeight
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
