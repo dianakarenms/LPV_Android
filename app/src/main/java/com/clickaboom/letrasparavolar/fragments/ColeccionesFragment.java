@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.NestedScrollView;
@@ -52,14 +53,15 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
     private static final String LIST_STATE_KEY = "listState";
     private RecyclerView mCategoriesRV, mCollectionsRV;
     private CollectionsAdapter mCollectionsAdapter;
-    private List<Colecciones> mCollectionsList;
-    private List<Categoria> mCategoriesList;
+    private List<Colecciones> mCollectionsList = new ArrayList<>();
+    private List<Categoria> mCategoriesList = new ArrayList<>();
     private View v;
-    private String url = "", params = "", mImgPath;
+    private String url = "", params = "", mImgPath = "";
     private CategoriesAdapter mCategoriesAdapter;
     private GridLayoutManager mGridLayoutManager;
     private Parcelable mListState;
     private NestedScrollView mNestedScroll;
+    private CoordinatorLayout mCoordinatorLayout;
 
     public static ColeccionesFragment newInstance() {
         ColeccionesFragment fragment = new ColeccionesFragment();
@@ -98,10 +100,9 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
         ((MainActivity)getActivity()).collectionsBtn.
                 setBackgroundColor(getResources().getColor(R.color.bottom_nav_pressed));
 
+        // ScrollView setup
         mNestedScroll = (NestedScrollView) v.findViewById(R.id.nested_scroll);
-        mCollectionsList = new ArrayList<>();
-        mCategoriesList = new ArrayList<>();
-        mImgPath = "";
+        mCoordinatorLayout = (CoordinatorLayout) v.findViewById(R.id.coordinator_lay);
 
         // Set toolbar_asistant title
         ((TextView)v.findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.collections_title));
@@ -239,6 +240,9 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
 
                                 mCollectionsAdapter.notifyDataSetChanged();
                                 mNestedScroll.scrollTo(0, 0);
+                                if(mNestedScroll.getHeight() < mCoordinatorLayout.getHeight()) {
+                                    mNestedScroll.setMinimumHeight(mCoordinatorLayout.getHeight());
+                                }
                             }
                         }, new Response.ErrorListener() {
                     @Override

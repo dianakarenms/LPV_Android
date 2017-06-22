@@ -2,8 +2,10 @@ package com.clickaboom.letrasparavolar.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -43,6 +45,8 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
     private View v;
     private String url = "", params = "", mImgPath;
     private TextView mEmptyLegends, mEmptyColecciones;
+    private NestedScrollView mNestedScroll;
+    private CoordinatorLayout mCoordinatorLayout;
 
     public LibraryFragment() {
     }
@@ -96,6 +100,10 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
         v.findViewById(R.id.left_btn).setVisibility(View.GONE);
         v.findViewById(R.id.right_btn).setVisibility(View.GONE);
 
+        // ScrollView setup
+        mNestedScroll = (NestedScrollView) v.findViewById(R.id.nested_scroll);
+        mCoordinatorLayout = (CoordinatorLayout) v.findViewById(R.id.coordinator_lay);
+
         // BackBtn
         LinearLayout backBtn = (LinearLayout) v.findViewById(R.id.back_btn);
         backBtn.setVisibility(View.VISIBLE);
@@ -143,7 +151,7 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
         mColeccionesRV.setAdapter(mCollectionsAdapter);
 
         // Load favorites at fragment visible
-        v.findViewById(R.id.favorites_txt).performClick();
+        v.findViewById(R.id.downloaded_txt).performClick();
 
         return v;
     }
@@ -198,6 +206,10 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
         // Update Adapters
         mLegendsAdapter.notifyDataSetChanged();
         mCollectionsAdapter.notifyDataSetChanged();
+
+        if(mNestedScroll.getHeight() < mCoordinatorLayout.getHeight()) {
+            mNestedScroll.setMinimumHeight(mCoordinatorLayout.getHeight());
+        }
     }
 
     @Override

@@ -7,6 +7,7 @@
               android:background="@drawable/fondo_grecas">
 
     <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/coordinator_lay"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -16,6 +17,7 @@
             android:id="@+id/nested_scroll"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:fillViewport="true"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
             <LinearLayout
                 android:layout_width="match_parent"
@@ -38,8 +40,6 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@id/categories_recycler"
                         android:background="@color/white"
-                        android:layout_marginRight="@dimen/small_padding"
-                        android:layout_marginLeft="@dimen/small_padding"
                         android:layout_marginBottom="@dimen/mini_padding"
                         android:weightSum="4">
                         <TextView

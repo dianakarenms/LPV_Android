@@ -3,6 +3,7 @@ package com.clickaboom.letrasparavolar.fragments;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.NestedScrollView;
@@ -51,13 +52,14 @@ public class LegendsFragment extends Fragment implements View.OnClickListener {
     private static final String LIST_STATE_KEY = "listState";
     private RecyclerView mCategoriesRV, mCollectionsRV;
     private LegendsAdapter mLegendsAdapter;
-    private List<Colecciones> mLegendsList;
-    private List<Categoria> mCategoriesList;
+    private List<Colecciones> mLegendsList = new ArrayList<>();
+    private List<Categoria> mCategoriesList = new ArrayList<>();
     private View v;
-    private String url = "", params = "", mImgPath;
+    private String url = "", params = "", mImgPath = "";
     private CategoriesAdapter mCategoriesAdapter;
     private GridLayoutManager mGridLayoutManager;
     private NestedScrollView mNestedScroll;
+    private CoordinatorLayout mCoordinatorLayout;
 
     public static LegendsFragment newInstance() {
         LegendsFragment fragment = new LegendsFragment();
@@ -96,10 +98,13 @@ public class LegendsFragment extends Fragment implements View.OnClickListener {
         ((MainActivity)getActivity()).legendsBtn.
                 setBackgroundColor(getResources().getColor(R.color.bottom_nav_pressed));
 
+        // ScrollView setup
         mNestedScroll = (NestedScrollView) v.findViewById(R.id.nested_scroll);
-        mLegendsList = new ArrayList<>();
+        mCoordinatorLayout = (CoordinatorLayout) v.findViewById(R.id.coordinator_lay);
+
+       /* mLegendsList = new ArrayList<>();
         mCategoriesList = new ArrayList<>();
-        mImgPath = "";
+        mImgPath = "";*/
 
         // Set toolbar_asistant title
 
@@ -232,6 +237,9 @@ public class LegendsFragment extends Fragment implements View.OnClickListener {
 
                                 mLegendsAdapter.notifyDataSetChanged();
                                 mNestedScroll.scrollTo(0, 0);
+                                if(mNestedScroll.getHeight() < mCoordinatorLayout.getHeight()) {
+                                    mNestedScroll.setMinimumHeight(mCoordinatorLayout.getHeight());
+                                }
                             }
                         }, new Response.ErrorListener() {
                     @Override
