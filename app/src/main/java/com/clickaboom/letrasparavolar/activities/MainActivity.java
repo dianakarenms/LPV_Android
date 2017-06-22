@@ -331,7 +331,7 @@ public class MainActivity extends AppCompatActivity
 
         if (!fragmentPopped && manager.findFragmentByTag(backStateName) == null){ //fragment not in back stack, create it.
             FragmentTransaction ft = manager.beginTransaction();
-            ft.replace(R.id.fragment_container, fragment, backStateName);
+            ft.add(R.id.fragment_container, fragment, backStateName);
             ft.addToBackStack(backStateName);
             ft.commit();
         }

@@ -130,6 +130,7 @@ public class DownloadFile extends AsyncTask<String, Void, Void> {
         if(!permissionNotGranted) {
             if (success && !localStored) {
 
+                mEpub.descargado = true;
                 if(db.insertBook(mEpub)) {
                     Log.d("ebookContent", "stored in db");
                 }
@@ -174,6 +175,7 @@ public class DownloadFile extends AsyncTask<String, Void, Void> {
             // if localStored
             if(db.getBookByePub(mEpub.epub).isEmpty()) {
                 // Epub was already downloaded but not yet added to database
+                mEpub.descargado = true;
                 if (db.insertBook(mEpub)) {
                     Log.d("ebookContent", "stored in db");
                 }

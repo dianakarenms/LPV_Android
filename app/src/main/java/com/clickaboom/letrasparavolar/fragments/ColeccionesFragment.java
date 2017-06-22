@@ -1,5 +1,6 @@
 package com.clickaboom.letrasparavolar.fragments;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -17,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -40,6 +42,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
+import static com.clickaboom.letrasparavolar.activities.MainActivity.db;
 
 /**
  * Created by Karencita on 15/05/2017.
@@ -62,6 +65,7 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
     private Parcelable mListState;
     private NestedScrollView mNestedScroll;
     private CoordinatorLayout mCoordinatorLayout;
+    private Context mContext;
 
     public static ColeccionesFragment newInstance() {
         ColeccionesFragment fragment = new ColeccionesFragment();
@@ -88,13 +92,15 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setRetainInstance(true);
+        setRetainInstance(true);
+        mCollectionsAdapter = new CollectionsAdapter(mCollectionsList, getContext());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         v = inflater.inflate(R.layout.fragment_collections, container, false);
 
+        mContext = getContext();
         // Set its bottomNavButton clicked
         ((MainActivity)getActivity()).restoreBottonNavColors();
         ((MainActivity)getActivity()).collectionsBtn.
@@ -179,7 +185,6 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
         mGridLayoutManager = new GridLayoutManager(getContext(), 3);
         mCollectionsRV.setLayoutManager(mGridLayoutManager);
         mCollectionsRV.setHasFixedSize(true);
-        mCollectionsAdapter = new CollectionsAdapter(mCollectionsList, getContext());
         mCollectionsAdapter.mColType = BookDetailsActivity.COLECCIONES;
         mCollectionsRV.setAdapter(mCollectionsAdapter);
 
@@ -236,6 +241,7 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
                                 mCollectionsList.clear();
                                 for(List<Colecciones> item : res) {
                                     mCollectionsList.addAll(item); // Add main book to list
+                                    db.addAllBooks(item, BookDetailsActivity.COLECCIONES);
                                 }
 
                                 mCollectionsAdapter.notifyDataSetChanged();
@@ -248,7 +254,17 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.d(TAG, error.toString());
-                    }
+                        ArrayList<Colecciones> allBooks = db.getAllBooks();
+                        if(allBooks.isEmpty())
+                            Toast.makeText(mContext, "Error de conexión", Toast.LENGTH_SHORT).show();
+                        else {
+                            for(Colecciones book: allBooks) {
+                                if(book.mBookType.equals(BookDetailsActivity.COLECCIONES))
+                                    mCollectionsList.add(book);
+                            }
+                        }
+                        mCollectionsAdapter.notifyDataSetChanged();
+                        }
                 }));
 
     }

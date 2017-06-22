@@ -66,10 +66,11 @@ public class Colecciones implements Serializable {
     @Expose
     public List<Colecciones> librosRelacionados = new ArrayList<>();
 
-    public Boolean favorito;
+    public Boolean favorito = false;
+    public Boolean descargado = false;
     public String mBookType;
 
-    public Colecciones(int id, String titulo, String fecha, String epub, String descripcion, String editorial, String length, ArrayList<Autores> autores, String imagen, ArrayList<Imagen> imagenes, ArrayList<Categoria> categorias, ArrayList<Etiqueta> etiquetas, ArrayList<Colecciones> librosRelacionados, Boolean favorito, String bookType) {
+    public Colecciones(int id, String titulo, String fecha, String epub, String descripcion, String editorial, String length, ArrayList<Autores> autores, String imagen, ArrayList<Imagen> imagenes, ArrayList<Categoria> categorias, ArrayList<Etiqueta> etiquetas, ArrayList<Colecciones> librosRelacionados, Boolean favorito, Boolean descargado, String bookType) {
         this.id = id;
         this.titulo = titulo;
         this.fecha = fecha;
@@ -84,6 +85,7 @@ public class Colecciones implements Serializable {
         this.etiquetas = etiquetas;
         this.librosRelacionados = librosRelacionados;
         this.favorito = favorito;
+        this.descargado = descargado;
         mBookType = bookType;
     }
 

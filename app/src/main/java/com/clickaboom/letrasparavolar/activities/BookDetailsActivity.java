@@ -161,13 +161,17 @@ public class BookDetailsActivity extends AppCompatActivity {
     private void updateUI() {
         // Item type for storing it in db
         mItem.mBookType = mColType;
-        mItem.favorito = false;
-        final ArrayList<Colecciones> localItem = db.getBookByePub(mItem.epub);
+//        mItem.favorito = false;
+//        mItem.descargado = false;
 
         starBtn = (ImageView) findViewById(R.id.favorite_star);
 
+        // If item is stored on db...
+        final ArrayList<Colecciones> localItem = db.getBookByePub(mItem.epub);
         if(!localItem.isEmpty()) {
-            ((TextView) findViewById(R.id.downloadBtn)).setText(getResources().getString(R.string.open));
+            if(localItem.get(0).descargado) {
+                ((TextView) findViewById(R.id.downloadBtn)).setText(getResources().getString(R.string.open));
+            }
             if(localItem.get(0).favorito) {
                 starBtn.setImageResource(R.drawable.favorite_selected);
             }

@@ -166,9 +166,9 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
         if(params.equals(DOWNLOADED)) { // Request all downloaded Books
             if (mArrayList != null) { // If there's data available in the db
                 for (Colecciones book : mArrayList) {
-                    if (book.mBookType.equals(BookDetailsActivity.LEGENDS))
+                    if (book.mBookType.equals(BookDetailsActivity.LEGENDS) && book.descargado)
                         mLegendsList.add(book);
-                    else if (book.mBookType.equals(BookDetailsActivity.COLECCIONES))
+                    else if (book.mBookType.equals(BookDetailsActivity.COLECCIONES) && book.descargado)
                         mCollectionsList.add(book);
                 }
             }

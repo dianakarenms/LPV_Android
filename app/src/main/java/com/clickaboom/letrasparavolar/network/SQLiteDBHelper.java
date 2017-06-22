@@ -18,6 +18,10 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static com.clickaboom.letrasparavolar.R.string.downloaded;
 
 /**
  * Created by karen on 25/04/17.
@@ -48,6 +52,7 @@ public class SQLiteDBHelper extends SQLiteOpenHelper {
     public static final String etiquetas = "etiquetas";
     public static final String librosRelacionados = "librosRelacionados";
     public static final String KEY_FAVORITO = "favorito";
+    public static final String KEY_DOWNLOADED = "descargado";
     public static final String KEY_TYPE = "bookType";
 
     private SQLiteDBHelper(Context context) {
@@ -83,6 +88,7 @@ public class SQLiteDBHelper extends SQLiteOpenHelper {
                 etiquetas + " TEXT, " +
                 KEY_TYPE + " TEXT, " +
                 KEY_FAVORITO + " TEXT, " +
+                KEY_DOWNLOADED + " TEXT, " +
                 librosRelacionados + " TEXT);"
         );
     }
@@ -114,6 +120,7 @@ public class SQLiteDBHelper extends SQLiteOpenHelper {
         contentValues.put(librosRelacionados, gson.toJson(book.librosRelacionados));
         contentValues.put(KEY_TYPE, book.mBookType);
         contentValues.put(KEY_FAVORITO, book.favorito ? 1 : 0);
+        contentValues.put(KEY_DOWNLOADED, book.descargado ? 1 : 0);
         try {
             db.insertOrThrow(tableName, null, contentValues);
         } catch (SQLiteConstraintException ex) {
@@ -122,12 +129,12 @@ public class SQLiteDBHelper extends SQLiteOpenHelper {
         return true;
     }
 
-    public boolean updateFavBook(String key, int favorite) {
+    public boolean updateFavBook(String key, int value) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put(KEY_FAVORITO, favorite);
+        contentValues.put(KEY_FAVORITO, value);
         db.update(tableName, contentValues, BOOK_KEY + " = ? ", new String[] { key } );
-        return favorite == 1;
+        return value == 1;
     }
 
     public ArrayList<Colecciones> getBookByePub(String key) {
@@ -229,6 +236,7 @@ public class SQLiteDBHelper extends SQLiteOpenHelper {
                     etiquetasList,
                     librosRelacionadosList,
                     rs.getInt(rs.getColumnIndex(KEY_FAVORITO)) > 0,
+                    rs.getInt(rs.getColumnIndex(KEY_DOWNLOADED)) > 0,
                     rs.getString(rs.getColumnIndex(KEY_TYPE))
             )); //add the item
         }
@@ -236,13 +244,16 @@ public class SQLiteDBHelper extends SQLiteOpenHelper {
         return mArrayList;
     }
 
-    /*public void addLanguageLabels(List<Label> labels) {
-        eraseTableData();
-        for (Label label : labels) {
-            insertLabel(label.code, label.title);
+    public void addAllBooks(List<Colecciones> books, String type) {
+        //eraseTableData();
+        for (Colecciones book : books) {
+            book.favorito = false;
+            book.descargado = false;
+            book.mBookType = type;
+            insertBook(book);
         }
         getAllBooks();
-    }*/
+    }
 
     public boolean isDataAlreadyInDB() {
         SQLiteDatabase db = this.getReadableDatabase();
