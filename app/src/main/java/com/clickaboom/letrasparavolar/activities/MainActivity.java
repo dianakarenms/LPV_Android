@@ -39,6 +39,7 @@ import com.clickaboom.letrasparavolar.fragments.LegendsFragment;
 import com.clickaboom.letrasparavolar.fragments.LibraryFragment;
 import com.clickaboom.letrasparavolar.models.banners.Banner;
 import com.clickaboom.letrasparavolar.models.banners.ResBanners;
+import com.clickaboom.letrasparavolar.models.collections.Categoria;
 import com.clickaboom.letrasparavolar.models.collections.Colecciones;
 import com.clickaboom.letrasparavolar.models.defaults.ResDefaults;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
@@ -205,7 +206,7 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.END)) {
             drawer.closeDrawer(GravityCompat.END);
         } else {
-            // If there're available fragments pop them from backstack
+            /*// If there're available fragments pop them from backstack
             // by overriding the backbutton
             FragmentManager fm = getSupportFragmentManager();
             if(fm.getBackStackEntryCount() > 0) {
@@ -216,7 +217,11 @@ public class MainActivity extends AppCompatActivity
             // unselect all bottomNavView buttons
             if(fm.getBackStackEntryCount() == 0) {
                 restoreBottonNavColors();
-            }
+            }*/
+            // Pop all fragments from backstack
+            FragmentManager fm = getSupportFragmentManager();
+            fm.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+            restoreBottonNavColors();
         }
     }
 
@@ -283,14 +288,14 @@ public class MainActivity extends AppCompatActivity
 
         switch (v.getId()) {
             case R.id.legends_btn:
-                replaceFragment(LegendsFragment.newInstance());
+                presentFragment(LegendsFragment.newInstance());
                 break;
             case R.id.collections_btn:
-                replaceFragment(ColeccionesFragment.newInstance());
+                presentFragment(ColeccionesFragment.newInstance());
                 break;
             case R.id.library_btn:
                 Fragment libFrag = new LibraryFragment();
-                replaceFragment(libFrag);
+                presentFragment(libFrag);
                 break;
         }
     }
@@ -323,7 +328,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public void replaceFragment(Fragment fragment){
+    /*public void replaceFragment(Fragment fragment){
         String backStateName = fragment.getClass().getName();
 
         FragmentManager manager = getSupportFragmentManager();
@@ -335,6 +340,22 @@ public class MainActivity extends AppCompatActivity
             ft.addToBackStack(backStateName);
             ft.commit();
         }
+    }*/
+
+    private void replaceFragment (Fragment fragment){
+        String backStateName = fragment.getClass().getName();
+        String fragmentTag = backStateName;
+
+        FragmentManager manager = getSupportFragmentManager();
+        boolean fragmentPopped = manager.popBackStackImmediate (backStateName, 0);
+
+        if (!fragmentPopped && manager.findFragmentByTag(fragmentTag) == null){ //fragment not in back stack, create it.
+            FragmentTransaction ft = manager.beginTransaction();
+            ft.replace(R.id.fragment_container, fragment, fragmentTag);
+            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+            ft.addToBackStack(backStateName);
+            ft.commit();
+        }
     }
 
     public void presentFragment(Fragment fragment) {
@@ -342,14 +363,15 @@ public class MainActivity extends AppCompatActivity
 
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction ft = manager.beginTransaction();
-        boolean fragmentPopped = manager.popBackStackImmediate (backStateName, 0);
 
         // re-use the old fragment
-        if (!fragmentPopped && manager.findFragmentByTag(backStateName) == null){
-            ft.replace(R.id.fragment_container, fragment, backStateName);
-            ft.addToBackStack(backStateName);
-        } else { // If fragment doesn't exist yet, create one
+        if (manager.findFragmentByTag(backStateName) == null){
             ft.add(R.id.fragment_container, fragment);
+            ft.addToBackStack(backStateName);
+            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+            ft.show(fragment);
+        } else {
+            manager.popBackStack(backStateName, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         }
         ft.commit();
     }
@@ -432,6 +454,18 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.d(TAG, error.toString());
+                        ArrayList<Colecciones> allBooks = db.getAllBooks();
+                        if(allBooks.isEmpty())
+                            Toast.makeText(mContext, "Error de conexión", Toast.LENGTH_SHORT).show();
+                        else {
+                            for(Colecciones book: allBooks) {
+                                if(book.mBookType.equals(BookDetailsActivity.LEGENDS))
+                                    mLegendsList.add(book);
+                            }
+
+                            Toast.makeText(mContext, "Sin conexión", Toast.LENGTH_SHORT).show();
+                        }
+                        mLegendsAdapter.notifyDataSetChanged();
                     }
                 }));
 
@@ -465,6 +499,17 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.d(TAG, error.toString());
+                        ArrayList<Colecciones> allBooks = db.getAllBooks();
+                        if(allBooks.isEmpty())
+                            Toast.makeText(mContext, "Error de conexión", Toast.LENGTH_SHORT).show();
+                        else {
+                            for(Colecciones book: allBooks) {
+                                if(book.mBookType.equals(BookDetailsActivity.COLECCIONES))
+                                    mCollectionsList.add(book);
+                            }
+                            Toast.makeText(mContext, "Sin conexión", Toast.LENGTH_SHORT).show();
+                        }
+                        mCollectionsAdapter.notifyDataSetChanged();
                     }
                 }));
 

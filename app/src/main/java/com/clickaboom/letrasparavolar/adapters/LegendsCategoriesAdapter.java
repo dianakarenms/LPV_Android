@@ -2,6 +2,7 @@ package com.clickaboom.letrasparavolar.adapters;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +15,8 @@ import com.android.volley.toolbox.ImageLoader;
 import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.models.collections.Categoria;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
+import com.squareup.picasso.Callback;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -23,7 +26,7 @@ import java.util.List;
  * Created by Karencita on 13/05/2017.
  */
 
-public class CategoriesAdapter extends RecyclerView.Adapter<CategoriesAdapter.ViewHolder> {
+public class LegendsCategoriesAdapter extends RecyclerView.Adapter<LegendsCategoriesAdapter.ViewHolder> {
     private static Context mContext;
     private static List<Categoria> mList;
     private final int mPressedColor;
@@ -32,7 +35,7 @@ public class CategoriesAdapter extends RecyclerView.Adapter<CategoriesAdapter.Vi
     private ImageLoader imageLoader;
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public CategoriesAdapter(List<Categoria> list, String imgPath, int pressedColor, Context context, RecyclerViewClickListener itemListener) {
+    public LegendsCategoriesAdapter(List<Categoria> list, String imgPath, int pressedColor, Context context, RecyclerViewClickListener itemListener) {
         mList = list;
         mImgPath = imgPath;
         mPressedColor = pressedColor;
@@ -53,7 +56,7 @@ public class CategoriesAdapter extends RecyclerView.Adapter<CategoriesAdapter.Vi
     }
 
     @Override
-    public CategoriesAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public LegendsCategoriesAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.item_nav_categories, parent, false);
         ViewHolder viewHolder = new ViewHolder(v);
@@ -61,20 +64,34 @@ public class CategoriesAdapter extends RecyclerView.Adapter<CategoriesAdapter.Vi
     }
 
     @Override
-    public void onBindViewHolder(CategoriesAdapter.ViewHolder holder, final int position) {
+    public void onBindViewHolder(final LegendsCategoriesAdapter.ViewHolder holder, final int position) {
         final Categoria category = mList.get(position);
         holder.mTitle.setText(category.nombre);
         //holder.mImage.setDefaultImageResId(R.drawable.book_placeholder);
-        String imgUrl = ApiConfig.baseUrl + mImgPath + category.icono;
+        final String imgUrl = ApiConfig.catImgPath + category.icono;
         /*
         imageLoader = ApiSingleton.getInstance(mContext).getImageLoader();
         imageLoader.get(imgUrl, ImageLoader.getImageListener(holder.mImage, R.mipmap.ic_launcher, android.R.drawable.ic_dialog_alert));
         holder.mImage.setImageUrl(imgUrl, imageLoader);*/
         Picasso.with(mContext)
                 .load(imgUrl)
+                .networkPolicy(NetworkPolicy.OFFLINE)
                 .resize(100, 100)
                 .centerInside()
-                .into(holder.mImage);
+                .into(holder.mImage, new Callback() {
+                    @Override
+                    public void onSuccess() {
+
+                    }
+
+                    @Override
+                    public void onError() {
+                        // Try again online if cache failed
+                        Picasso.with(mContext)
+                                .load(Uri.parse(imgUrl))
+                                .into(holder.mImage);
+                    }
+                });
 //        holder.mImage.setDefaultImageResId(R.drawable.book_placeholder);
 //        String imgUrl = ApiConfig.baseUrl + mImgPath + category.icono;
 //        holder.mImage.setImageUrl(imgUrl, ApiSingleton.getInstance(mContext).getImageLoader());

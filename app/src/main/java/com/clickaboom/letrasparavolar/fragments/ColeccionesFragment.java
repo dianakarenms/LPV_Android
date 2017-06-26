@@ -28,7 +28,8 @@ import com.clickaboom.letrasparavolar.activities.BookDetailsActivity;
 import com.clickaboom.letrasparavolar.activities.MainActivity;
 import com.clickaboom.letrasparavolar.activities.MapsActivity;
 import com.clickaboom.letrasparavolar.activities.SearchActivity;
-import com.clickaboom.letrasparavolar.adapters.CategoriesAdapter;
+import com.clickaboom.letrasparavolar.adapters.ColeccionesCategoriesAdapter;
+import com.clickaboom.letrasparavolar.adapters.LegendsCategoriesAdapter;
 import com.clickaboom.letrasparavolar.adapters.CollectionsAdapter;
 import com.clickaboom.letrasparavolar.models.collections.Categoria;
 import com.clickaboom.letrasparavolar.models.collections.Colecciones;
@@ -60,7 +61,7 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
     private List<Categoria> mCategoriesList = new ArrayList<>();
     private View v;
     private String url = "", params = "", mImgPath = "";
-    private CategoriesAdapter mCategoriesAdapter;
+    private ColeccionesCategoriesAdapter mColeccionesCategoriesAdapter;
     private GridLayoutManager mGridLayoutManager;
     private Parcelable mListState;
     private NestedScrollView mNestedScroll;
@@ -94,6 +95,15 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
         mCollectionsAdapter = new CollectionsAdapter(mCollectionsList, getContext());
+        mColeccionesCategoriesAdapter = new ColeccionesCategoriesAdapter(mCategoriesList, mImgPath, R.color.collections_nav_pressed, getContext(), new ColeccionesCategoriesAdapter.RecyclerViewClickListener() {
+            @Override
+            public void recyclerViewListClicked(Integer categoryId) {
+                url = ApiConfig.searchCollections;
+                params = "?categoria=" + categoryId;
+                loadCollections(url, params);
+                restoreOrderColors();
+            }
+        });
     }
 
     @Override
@@ -166,16 +176,7 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
         mCategoriesRV = (RecyclerView) v.findViewById(R.id.categories_recycler);
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
         mCategoriesRV.setLayoutManager(mLayoutManager);
-        mCategoriesAdapter = new CategoriesAdapter(mCategoriesList, mImgPath, R.color.collections_nav_pressed, getContext(), new CategoriesAdapter.RecyclerViewClickListener() {
-            @Override
-            public void recyclerViewListClicked(Integer categoryId) {
-                url = ApiConfig.searchCollections;
-                params = "?categoria=" + categoryId;
-                loadCollections(url, params);
-                restoreOrderColors();
-            }
-        });
-        mCategoriesRV.setAdapter(mCategoriesAdapter);
+        mCategoriesRV.setAdapter(mColeccionesCategoriesAdapter);
         if(mCategoriesList.isEmpty() || mImgPath.isEmpty()) {
             loadCategories();
         }
@@ -214,24 +215,24 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
                                     db.addAllCategories(categorias, BookDetailsActivity.COLECCIONES);
                                 }
                                 mImgPath = ((ResCategories) response).pathIconos + "/";
-                                mCategoriesAdapter.setImgPath(mImgPath);
-                                mCategoriesAdapter.notifyDataSetChanged();
+                                mColeccionesCategoriesAdapter.setImgPath(mImgPath);
+                                mColeccionesCategoriesAdapter.notifyDataSetChanged();
                             }
                         }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.d(TAG, error.toString());
                         ArrayList<Categoria> allCategories = db.getAllCategories();
-                        if(allCategories.isEmpty())
-                            Toast.makeText(mContext, "Error de conexión", Toast.LENGTH_SHORT).show();
-                        else {
+                        if(allCategories.isEmpty()) {
+                            //Toast.makeText(mContext, "Error de conexión", Toast.LENGTH_SHORT).show();
+                        } else {
                             for(Categoria categoria: allCategories) {
                                 if(categoria.categoryType.equals(BookDetailsActivity.COLECCIONES))
                                     mCategoriesList.add(categoria);
                             }
-                            Toast.makeText(mContext, "Sin conexión", Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(mContext, "Sin conexión", Toast.LENGTH_SHORT).show();
                         }
-                        mCategoriesAdapter.notifyDataSetChanged();
+                        mColeccionesCategoriesAdapter.notifyDataSetChanged();
                     }
                 }));
 
@@ -253,7 +254,7 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
                                 mCollectionsList.clear();
                                 for(List<Colecciones> item : res) {
                                     mCollectionsList.addAll(item); // Add main book to list
-                                    db.addAllBooks(item, BookDetailsActivity.COLECCIONES);
+                                    //db.addAllBooks(item, BookDetailsActivity.COLECCIONES);
                                 }
 
                                 mCollectionsAdapter.notifyDataSetChanged();
@@ -303,8 +304,8 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
         }
         v.setBackgroundColor(getResources().getColor(R.color.order_back_pressed));
         loadCollections(url, params);
-        mCategoriesAdapter.clearActive();
-        mCategoriesAdapter.notifyDataSetChanged();
+        mColeccionesCategoriesAdapter.clearActive();
+        mColeccionesCategoriesAdapter.notifyDataSetChanged();
     }
 
     private void restoreOrderColors() {
