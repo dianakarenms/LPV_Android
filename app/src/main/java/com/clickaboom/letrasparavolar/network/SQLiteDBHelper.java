@@ -13,15 +13,13 @@ import com.clickaboom.letrasparavolar.models.collections.Autores;
 import com.clickaboom.letrasparavolar.models.collections.Categoria;
 import com.clickaboom.letrasparavolar.models.collections.Colecciones;
 import com.clickaboom.letrasparavolar.models.collections.Etiqueta;
+import com.clickaboom.letrasparavolar.models.collections.categories.Subcategoria;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-
-import static com.clickaboom.letrasparavolar.R.string.downloaded;
 
 /**
  * Created by karen on 25/04/17.
@@ -30,12 +28,11 @@ import static com.clickaboom.letrasparavolar.R.string.downloaded;
 public class SQLiteDBHelper extends SQLiteOpenHelper {
     // Instance for singleton
     private static SQLiteDBHelper sInstance = null;
-    public String tableName = "books";
 
     // DATABASE init
     public static final String DATABASE_NAME = "SQLiteDatabase.db";
     private static final int DATABASE_VERSION = 1;
-    public static final String BOOKS_TABLE = "books";
+    public static final String TABLE_BOOKS = "books";
     public static final String BOOK_KEY = "ID_epubCodeName";
 
     public static final String KEY_ID = "id";
@@ -72,7 +69,25 @@ public class SQLiteDBHelper extends SQLiteOpenHelper {
     // Called whenever a new db is created
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE " + BOOKS_TABLE + "(" +
+        createBooksTable(db);
+        createCategoriesTable(db);
+    }
+
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        // on upgrade drop older tables
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_BOOKS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_CATEGORIES);
+
+        // create new tables
+        onCreate(db);
+    }
+
+    /**
+     * Books Table Methods
+     */
+    private void createBooksTable(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE " + TABLE_BOOKS + "(" +
                 BOOK_KEY + " TEXT PRIMARY KEY, " +
                 KEY_ID + " TEXT, " +
                 titulo + " TEXT, " +
@@ -91,12 +106,6 @@ public class SQLiteDBHelper extends SQLiteOpenHelper {
                 KEY_DOWNLOADED + " TEXT, " +
                 librosRelacionados + " TEXT);"
         );
-    }
-
-    @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + tableName);
-        onCreate(db);
     }
 
     public boolean insertBook(Colecciones book) {
@@ -122,7 +131,7 @@ public class SQLiteDBHelper extends SQLiteOpenHelper {
         contentValues.put(KEY_FAVORITO, book.favorito ? 1 : 0);
         contentValues.put(KEY_DOWNLOADED, book.descargado ? 1 : 0);
         try {
-            db.insertOrThrow(tableName, null, contentValues);
+            db.insertOrThrow(TABLE_BOOKS, null, contentValues);
         } catch (SQLiteConstraintException ex) {
             Log.e("insertLabel", ex.getMessage());
         }
@@ -133,23 +142,23 @@ public class SQLiteDBHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(KEY_FAVORITO, value);
-        db.update(tableName, contentValues, BOOK_KEY + " = ? ", new String[] { key } );
+        db.update(TABLE_BOOKS, contentValues, BOOK_KEY + " = ? ", new String[] { key } );
         return value == 1;
     }
 
     public ArrayList<Colecciones> getBookByePub(String key) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor rs = db.rawQuery( "SELECT * FROM " + tableName + " WHERE " +
+        Cursor rs = db.rawQuery( "SELECT * FROM " + TABLE_BOOKS + " WHERE " +
                 BOOK_KEY + "=?", new String[] { key} );
-        return arrayListFromCursor(rs);
+        return getBookDetails(rs);
     }
 
     public ArrayList<Colecciones> getBookById(String id, String type) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor rs = db.rawQuery( "SELECT * FROM " + tableName + " WHERE " +
+        Cursor rs = db.rawQuery( "SELECT * FROM " + TABLE_BOOKS + " WHERE " +
                 KEY_ID + "=?" + " AND " + KEY_TYPE + "=?",
                 new String[] {id, type} );
-        return arrayListFromCursor(rs);
+        return getBookDetails(rs);
     }
 
     /*public String getBook(String key) {
@@ -170,27 +179,27 @@ public class SQLiteDBHelper extends SQLiteOpenHelper {
     }*/
 
     public ArrayList<Colecciones> getAllBooks() {
-        if(isDataAlreadyInDB()) {
+        if(isDataAlreadyInBooks()) {
             SQLiteDatabase db = this.getReadableDatabase();
-            Cursor rs = db.rawQuery("SELECT * FROM " + tableName, null);
-            return arrayListFromCursor(rs);
-        } else return null;
+            Cursor rs = db.rawQuery("SELECT * FROM " + TABLE_BOOKS, null);
+            return getBookDetails(rs);
+        } else return new ArrayList<>();
     }
 
     public Integer deleteBook(String key) {
         SQLiteDatabase db = this.getWritableDatabase();
-        return db.delete(tableName,
+        return db.delete(TABLE_BOOKS,
                 BOOK_KEY + " = ? ",
                 new String[] { key });
     }
 
     public void eraseTableData() {
         SQLiteDatabase db = this.getWritableDatabase();
-        db.execSQL("DELETE FROM "+ tableName);
+        db.execSQL("DELETE FROM "+ TABLE_BOOKS);
         db.execSQL("VACUUM");
     }
 
-    private ArrayList<Colecciones> arrayListFromCursor(Cursor rs) {
+    private ArrayList<Colecciones> getBookDetails(Cursor rs) {
         ArrayList<Colecciones> mArrayList = new ArrayList<>();
 
         Gson gson = new Gson();
@@ -255,14 +264,120 @@ public class SQLiteDBHelper extends SQLiteOpenHelper {
         getAllBooks();
     }
 
-    public boolean isDataAlreadyInDB() {
+    public boolean isDataAlreadyInBooks() {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery( "SELECT * FROM " + tableName, null );
+        Cursor cursor = db.rawQuery( "SELECT * FROM " + TABLE_BOOKS, null );
         if(cursor.getCount() <= 0){
             cursor.close();
             return false;
         }
         cursor.close();
         return true;
+    }
+
+    /**
+     * Categories Table Methods
+     */
+    public static final String TABLE_CATEGORIES = "categories";
+    public static final String KEY_CAT_ID = "id";
+    public static final String KEY_CAT_NAME = "nombre";
+    public static final String KEY_CAT_DESCRIPTION = "descripcion";
+    public static final String KEY_CAT_ICON = "icono";
+    public static final String KEY_CAT_SUBCATEGORIES = "subcategorias";
+    public static final String KEY_CAT_COLID = "categorias_colecciones_id";
+    public static final String KEY_CAT_CATEGORY = "categoria";
+    public static final String KEY_CAT_CATID = "categorias_id";
+    public static final String KEY_CAT_TYPE = "cat_type";
+
+    private void createCategoriesTable(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE " + TABLE_CATEGORIES + "(" +
+                KEY_CAT_ID + " TEXT PRIMARY KEY, " +
+                KEY_CAT_NAME + " TEXT, " +
+                KEY_CAT_DESCRIPTION + " TEXT, " +
+                KEY_CAT_ICON + " TEXT, " +
+                KEY_CAT_SUBCATEGORIES + " TEXT, " +
+                KEY_CAT_COLID + " TEXT, " +
+                KEY_CAT_CATEGORY + " TEXT, " +
+                KEY_CAT_TYPE + " TEXT, " +
+                KEY_CAT_CATID + " TEXT);"
+        );
+    }
+
+    public ArrayList<Categoria> getAllCategories() {
+        if(isDataAlreadyInCategories()) {
+            SQLiteDatabase db = this.getReadableDatabase();
+            Cursor rs = db.rawQuery("SELECT * FROM " + TABLE_CATEGORIES, null);
+            return getCategoryDetails(rs);
+        } else return new ArrayList<>();
+    }
+
+    public boolean isDataAlreadyInCategories() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery( "SELECT * FROM " + TABLE_CATEGORIES, null );
+        if(cursor.getCount() <= 0){
+            cursor.close();
+            return false;
+        }
+        cursor.close();
+        return true;
+    }
+
+    public void addAllCategories(List<Categoria> categorias, String type) {
+        //eraseTableData();
+        for (Categoria categoria : categorias) {
+            categoria.categoryType = type;
+            insertCategory(categoria);
+        }
+        getAllBooks();
+    }
+
+    public boolean insertCategory(Categoria categoria) {
+        Gson gson = new Gson();
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(KEY_CAT_ID, String.valueOf(categoria.id));
+        contentValues.put(KEY_CAT_NAME, categoria.nombre);
+        contentValues.put(KEY_CAT_DESCRIPTION, categoria.descripcion);
+        contentValues.put(KEY_CAT_ICON, categoria.icono);
+        contentValues.put(KEY_CAT_SUBCATEGORIES, gson.toJson(categoria.subcategorias));
+        contentValues.put(KEY_CAT_COLID, categoria.categoriasColeccionesId);
+        contentValues.put(KEY_CAT_CATEGORY, categoria.categoria);
+        contentValues.put(KEY_CAT_CATID, categoria.categoriasId);
+        contentValues.put(KEY_CAT_TYPE, categoria.categoryType);
+
+        try {
+            db.insertOrThrow(TABLE_CATEGORIES, null, contentValues);
+        } catch (SQLiteConstraintException ex) {
+            Log.e("insertLabel", ex.getMessage());
+        }
+        return true;
+    }
+
+    private ArrayList<Categoria> getCategoryDetails(Cursor rs) {
+        ArrayList<Categoria> mArrayList = new ArrayList<>();
+
+        Gson gson = new Gson();
+        Type subCatType = new TypeToken<ArrayList<Subcategoria>>() {}.getType();
+
+        while(rs.moveToNext()) {
+            ArrayList<Subcategoria> subcategorias = gson.fromJson(rs.getString(rs.getColumnIndex(KEY_CAT_SUBCATEGORIES)), subCatType);
+            if(subcategorias == null)
+                subcategorias = new ArrayList<>();
+
+            mArrayList.add(new Categoria(
+                    Integer.valueOf(rs.getString(rs.getColumnIndex(KEY_ID))),
+                    rs.getString(rs.getColumnIndex(KEY_CAT_NAME)),
+                    rs.getString(rs.getColumnIndex(KEY_CAT_DESCRIPTION)),
+                    rs.getString(rs.getColumnIndex(KEY_CAT_ICON)),
+                    subcategorias,
+                    rs.getString(rs.getColumnIndex(KEY_CAT_COLID)),
+                    rs.getString(rs.getColumnIndex(KEY_CAT_CATEGORY)),
+                    rs.getString(rs.getColumnIndex(KEY_CAT_COLID)),
+                    rs.getString(rs.getColumnIndex(KEY_CAT_TYPE)))
+            ); //add the item
+        }
+
+        return mArrayList;
     }
 }

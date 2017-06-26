@@ -165,7 +165,7 @@ public class LegendsFragment extends Fragment implements View.OnClickListener {
         mCategoriesRV.setLayoutManager(mLayoutManager);
         mCategoriesAdapter = new CategoriesAdapter(mCategoriesList, mImgPath, R.color.legends_nav_pressed, getContext(), new CategoriesAdapter.RecyclerViewClickListener() {
             @Override
-            public void recyclerViewListClicked(String categoryId) {
+            public void recyclerViewListClicked(Integer categoryId) {
                 url = ApiConfig.searchLegends;
                 params = "?categoria=" + categoryId;
                 loadLegends(url, params);
@@ -208,6 +208,7 @@ public class LegendsFragment extends Fragment implements View.OnClickListener {
                                 List<List<Categoria>> res = ((ResCategories) response).data;
                                 for(List<Categoria> categorias : res) {
                                     mCategoriesList.addAll(categorias); // Add main book to list
+                                    db.addAllCategories(categorias, BookDetailsActivity.LEGENDS);
                                 }
                                 mImgPath = ((ResCategories) response).pathIconos + "/";
                                 mCategoriesAdapter.setImgPath(mImgPath);
@@ -217,6 +218,17 @@ public class LegendsFragment extends Fragment implements View.OnClickListener {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.d(TAG, error.toString());
+                        ArrayList<Categoria> allCategories = db.getAllCategories();
+                        if(allCategories.isEmpty())
+                            Toast.makeText(mContext, "Error de conexión", Toast.LENGTH_SHORT).show();
+                        else {
+                            for(Categoria categoria: allCategories) {
+                                if(categoria.categoryType.equals(BookDetailsActivity.LEGENDS))
+                                    mCategoriesList.add(categoria);
+                            }
+                            Toast.makeText(mContext, "Sin conexión", Toast.LENGTH_SHORT).show();
+                        }
+                        mCategoriesAdapter.notifyDataSetChanged();
                     }
                 }));
 
@@ -260,6 +272,8 @@ public class LegendsFragment extends Fragment implements View.OnClickListener {
                                 if(book.mBookType.equals(BookDetailsActivity.LEGENDS))
                                     mLegendsList.add(book);
                             }
+
+                            Toast.makeText(mContext, "Sin conexión", Toast.LENGTH_SHORT).show();
                         }
                         mLegendsAdapter.notifyDataSetChanged();
                     }

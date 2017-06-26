@@ -109,7 +109,7 @@ public class CategoriesAdapter extends RecyclerView.Adapter<CategoriesAdapter.Vi
     }
 
     public interface RecyclerViewClickListener {
-        public void recyclerViewListClicked(String categoryId);
+        public void recyclerViewListClicked(Integer categoryId);
     }
 
     public void setImgPath(String imgPath) {

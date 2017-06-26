@@ -14,7 +14,7 @@ import java.util.List;
 public class Categoria implements Serializable {
     @SerializedName("id")
     @Expose
-    public String id;
+    public Integer id;
     @SerializedName("nombre")
     @Expose
     public String nombre;
@@ -40,4 +40,17 @@ public class Categoria implements Serializable {
     public String categoriasId;
 
     public boolean active = false;
+    public String categoryType;
+
+    public Categoria(Integer id, String nombre, String descripcion, String icono, List<Subcategoria> subcategorias, String categoriasColeccionesId, String categoria, String categoriasId, String categoryType) {
+        this.id = id;
+        this.nombre = nombre;
+        this.descripcion = descripcion;
+        this.icono = icono;
+        this.subcategorias = subcategorias;
+        this.categoriasColeccionesId = categoriasColeccionesId;
+        this.categoria = categoria;
+        this.categoriasId = categoriasId;
+        this.categoryType = categoryType;
+    }
 }

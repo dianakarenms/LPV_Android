@@ -168,7 +168,7 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
         mCategoriesRV.setLayoutManager(mLayoutManager);
         mCategoriesAdapter = new CategoriesAdapter(mCategoriesList, mImgPath, R.color.collections_nav_pressed, getContext(), new CategoriesAdapter.RecyclerViewClickListener() {
             @Override
-            public void recyclerViewListClicked(String categoryId) {
+            public void recyclerViewListClicked(Integer categoryId) {
                 url = ApiConfig.searchCollections;
                 params = "?categoria=" + categoryId;
                 loadCollections(url, params);
@@ -211,6 +211,7 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
                                 List<List<Categoria>> res = ((ResCategories) response).data;
                                 for(List<Categoria> categorias : res) {
                                     mCategoriesList.addAll(categorias); // Add main book to list
+                                    db.addAllCategories(categorias, BookDetailsActivity.COLECCIONES);
                                 }
                                 mImgPath = ((ResCategories) response).pathIconos + "/";
                                 mCategoriesAdapter.setImgPath(mImgPath);
@@ -220,6 +221,17 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.d(TAG, error.toString());
+                        ArrayList<Categoria> allCategories = db.getAllCategories();
+                        if(allCategories.isEmpty())
+                            Toast.makeText(mContext, "Error de conexión", Toast.LENGTH_SHORT).show();
+                        else {
+                            for(Categoria categoria: allCategories) {
+                                if(categoria.categoryType.equals(BookDetailsActivity.COLECCIONES))
+                                    mCategoriesList.add(categoria);
+                            }
+                            Toast.makeText(mContext, "Sin conexión", Toast.LENGTH_SHORT).show();
+                        }
+                        mCategoriesAdapter.notifyDataSetChanged();
                     }
                 }));
 
@@ -262,6 +274,7 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
                                 if(book.mBookType.equals(BookDetailsActivity.COLECCIONES))
                                     mCollectionsList.add(book);
                             }
+                            Toast.makeText(mContext, "Sin conexión", Toast.LENGTH_SHORT).show();
                         }
                         mCollectionsAdapter.notifyDataSetChanged();
                         }
