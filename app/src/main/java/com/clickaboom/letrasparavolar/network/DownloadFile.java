@@ -103,7 +103,7 @@ public class DownloadFile extends AsyncTask<String, Void, Void> {
                 folder.mkdir();
             }
 
-            folder = new File(extStorageDirectory, "LPV_eBooks/" + fileFolder);
+            folder = new File(extStorageDirectory, "LPV_eBooks/epub_reader/epubs/" + fileFolder);
             folder.mkdir();
             pdfFile = new File(folder, fileName);
 
@@ -131,6 +131,7 @@ public class DownloadFile extends AsyncTask<String, Void, Void> {
             if (success && !localStored) {
 
                 mEpub.descargado = true;
+                mEpub.favorito = false;
                 if(db.insertBook(mEpub)) {
                     Log.d("ebookContent", "stored in db");
                 }

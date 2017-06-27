@@ -1,6 +1,7 @@
 package com.clickaboom.letrasparavolar.activities;
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
@@ -49,6 +50,10 @@ import com.clickaboom.letrasparavolar.network.GsonRequest;
 import com.clickaboom.letrasparavolar.network.SQLiteDBHelper;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.SecureRandom;
@@ -157,8 +162,7 @@ public class MainActivity extends AppCompatActivity
         mCollectionsAdapter.mColType = BookDetailsActivity.COLECCIONES;
         mRecyclerView2.setAdapter(mCollectionsAdapter);
 
-        loadLegends();
-        loadCollections();
+        copyFileOrDir("epub_reader");
 
         view1 = (ViewPager)findViewById(R.id.banner);
         view1.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -191,7 +195,6 @@ public class MainActivity extends AppCompatActivity
         loadBanners();
 
         mLocalEpubsList = getDownloadedEpubs();
-
         Log.d("MainActivity", mLocalEpubsList.toString());
     }
     
@@ -641,5 +644,78 @@ public class MainActivity extends AppCompatActivity
     public void descargar(String url, String fileName, Colecciones ePub){
         DownloadFile downloadFile = new DownloadFile(mDownloadsListener, mContext, MainActivity.this, false, ePub);
         downloadFile.execute(url, fileName, fileName);
+    }
+
+    final static String TARGET_BASE_PATH = "/sdcard/LPV_eBooks/";
+
+    private void copyFilesToSdCard() {
+        copyFileOrDir(""); // copy all files in assets folder in my project
+    }
+
+    public void copyFileOrDir(String path) {
+        AssetManager assetManager = this.getAssets();
+        String assets[] = null;
+        try {
+            Log.i("tag", "copyFileOrDir() "+path);
+            assets = assetManager.list(path);
+            if (assets.length == 0) {
+                copyFile(path);
+            } else {
+                String fullPath =  TARGET_BASE_PATH + path;
+                Log.i("tag", "path="+fullPath);
+                File dir = new File(fullPath);
+                if (!dir.exists() && !path.startsWith("images") && !path.startsWith("sounds") && !path.startsWith("webkit"))
+                    if (!dir.mkdirs())
+                        Log.i("tag", "could not create dir "+fullPath);
+                for (int i = 0; i < assets.length; ++i) {
+                    String p;
+                    if (path.equals(""))
+                        p = "";
+                    else
+                        p = path + "/";
+
+                    if (!path.startsWith("images") && !path.startsWith("sounds") && !path.startsWith("webkit"))
+                        copyFileOrDir( p + assets[i]);
+                }
+
+                loadLegends();
+                loadCollections();
+
+            }
+        } catch (IOException ex) {
+            Log.e("tag", "I/O Exception", ex);
+        }
+    }
+
+    private void copyFile(String filename) {
+        AssetManager assetManager = this.getAssets();
+
+        InputStream in = null;
+        OutputStream out = null;
+        String newFileName = null;
+        try {
+            Log.i("tag", "copyFile() "+filename);
+            in = assetManager.open(filename);
+            if (filename.endsWith(".jpg")) // extension was added to avoid compression on APK file
+                newFileName = TARGET_BASE_PATH + filename.substring(0, filename.length()-4);
+            else
+                newFileName = TARGET_BASE_PATH + filename;
+            out = new FileOutputStream(newFileName);
+
+            byte[] buffer = new byte[1024];
+            int read;
+            while ((read = in.read(buffer)) != -1) {
+                out.write(buffer, 0, read);
+            }
+            in.close();
+            in = null;
+            out.flush();
+            out.close();
+            out = null;
+        } catch (Exception e) {
+            Log.e("tag", "Exception in copyFile() of "+newFileName);
+            Log.e("tag", "Exception in copyFile() "+e.toString());
+        }
+
     }
 }

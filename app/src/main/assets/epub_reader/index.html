@@ -12,14 +12,26 @@
     </head>
     <body>
         <div id="main">
-          <div id="prev" onclick="Book.prevPage();" class="arrow">‹</div>
-          <div id="area"></div>
-          <div id="next" onclick="Book.nextPage();" class="arrow">›</div>
+            <h1>nooooooo</h1>
+            <div id="prev" onclick="Book.prevPage();" class="arrow">‹</div>
+            <div id="area"></div>
+            <div id="next" onclick="Book.nextPage();" class="arrow">›</div>
         </div>
         <script>
-            "use strict";
-            var Book = ePub("epubs/lpv1/");
-            Book.renderTo("area");
+            var bookName = getUrlVars()["book"];
+            if (bookName != null){
+                var urlBook = ePub("epubs/"+bookName+"/");
+                urlBook.renderTo("area");
+            }else{
+                alert("no parametro 'book' en la url");
+            }
+            function getUrlVars() {
+            var vars = {};
+            var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+            vars[key] = value;
+            });
+            return vars;
+            }
         </script>
     </body>
 </html>
