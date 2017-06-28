@@ -21,5 +21,5 @@ public class Resultado implements Serializable {
     public String resultadosCurioseandoId;
     @SerializedName("valor")
     @Expose
-    public String valor;
+    public Integer valor;
 }

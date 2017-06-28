@@ -4,6 +4,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Created by karen on 14/06/17.
@@ -26,4 +27,10 @@ public class Respuesta implements Serializable {
     @SerializedName("preguntas_nahuatlismos_id")
     @Expose
     public String preguntasNahuatlismosId;
+    @SerializedName("preguntas_curioseando_id")
+    @Expose
+    public String preguntasCurioseandoId;
+    @SerializedName("resultados")
+    @Expose
+    public List<Resultado> resultados = null;
 }

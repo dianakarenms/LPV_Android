@@ -24,10 +24,4 @@ public class Pregunta implements Serializable {
     @SerializedName("respuestas")
     @Expose
     public ArrayList<Respuesta> respuestas = null;
-    @SerializedName("preguntas_curioseando_id")
-    @Expose
-    public String preguntasCurioseandoId;
-    @SerializedName("resultados")
-    @Expose
-    public List<Resultado> resultados = null;
 }

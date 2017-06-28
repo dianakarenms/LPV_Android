@@ -35,12 +35,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import static android.media.CamcorderProfile.get;
+
 public class InGameActivity extends AppCompatActivity
         implements View.OnClickListener, InGameAdapter.OnClickListener {
 
     private static final String TAG = "com.lpv.GamesActivity";
-    private static final String JUEGO_A = "nahuatlismos";
-    private static final String JUEGO_B = "curioseando";
     private static final String EXTRA_GAME = "mGame";
     //private static final String EXTRA_SEARCH_TYPE = "com.lpv.SearchType";
     private Context mContext;
@@ -214,15 +214,15 @@ public class InGameActivity extends AppCompatActivity
     @Override
     public void OnItemClicked(Respuesta res, int correctPos) {
         validNextBtn(mGame.btnColor);
-        if(mGame.gameType.equals(JUEGO_A)) {
+        if(mGame.gameType.equals(GamesActivity.JUEGO_A)) {
             if (res.isCorrecta.equals("SI"))
                 mCorrectCounter++;
             else {
                 InGameAdapter.NahuatlismosHolder holder = (InGameAdapter.NahuatlismosHolder) mRecyclerView.findViewHolderForAdapterPosition(correctPos);
                 holder.mCheckImg.setImageResource(R.drawable.checked);
             }
-        } else if(mGame.gameType.equals(JUEGO_B)) {
-
+        } else if(mGame.gameType.equals(GamesActivity.JUEGO_B)) {
+            mCorrectCounter += res.resultados.get(0).valor;
         }
     }
 
@@ -239,7 +239,6 @@ public class InGameActivity extends AppCompatActivity
         values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
         Uri uri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
                 values);
-
 
         OutputStream outstream;
         try {
