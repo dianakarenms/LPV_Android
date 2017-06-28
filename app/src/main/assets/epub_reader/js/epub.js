@@ -3507,20 +3507,7 @@ EPUBJS.Book.prototype.nextPage = function(defer){
 };
 
 EPUBJS.Book.prototype.prevPage = function(defer) {
-    var defer = defer || new RSVP.defer();
-
-	if (!this.isRendered) {
-        this._q.enqueue("prevPage", [defer]);
-        return defer.promise;
-    }
-
-	var prev = this.renderer.prevPage();
-	if (!prev){
-		return this.prevChapter(defer);
-	}
-
-    defer.resolve(true);
-    return defer.promise;
+    alert("wqeytyt");
 };
 
 EPUBJS.Book.prototype.nextChapter = function(defer) {
