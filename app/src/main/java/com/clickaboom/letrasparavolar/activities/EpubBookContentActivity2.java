@@ -101,6 +101,19 @@ public class EpubBookContentActivity2 extends Activity implements DownloadFile.O
         super.onBackPressed();
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        mWebView.loadUrl("file:///android_asset/nonexistent.html");
+        mWebView.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mWebView.onResume();
+    }
+
     public void loadEpubFromStorage() {
         try {
             decom(mEpub.epub, basePath + "/");
