@@ -16,7 +16,7 @@ import com.clickaboom.letrasparavolar.models.game.Game;
 
 import java.util.ArrayList;
 
-public class GamesActivity extends AppCompatActivity
+public class JuegosActivity extends AppCompatActivity
         implements View.OnClickListener {
 
     private static final String TAG = "com.lpv.GamesActivity";
@@ -30,7 +30,7 @@ public class GamesActivity extends AppCompatActivity
     private ArrayList<Game> mGamesList = new ArrayList<>();
 
     public static Intent newIntent(Context packageContext) {
-        Intent i = new Intent(packageContext, GamesActivity.class);
+        Intent i = new Intent(packageContext, JuegosActivity.class);
         //i.putExtra(EXTRA_SEARCH_TYPE, searchType);
         return i;
     }

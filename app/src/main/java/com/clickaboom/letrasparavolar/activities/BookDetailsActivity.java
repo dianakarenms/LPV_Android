@@ -29,8 +29,6 @@ import com.squareup.picasso.Picasso;
 import java.util.ArrayList;
 import java.util.List;
 
-import nl.siegmann.epublib.epub.Main;
-
 import static com.clickaboom.letrasparavolar.activities.MainActivity.db;
 import static com.clickaboom.letrasparavolar.activities.MainActivity.getStringFromListByCommas;
 
@@ -266,7 +264,7 @@ public class BookDetailsActivity extends AppCompatActivity {
         findViewById(R.id.downloadBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivityForResult(EpubBookContentActivity2.newIntent(mContext, mItem), REQUEST_DOWNLOAD);
+                startActivityForResult(EpubBookContentActivity.newIntent(mContext, mItem), REQUEST_DOWNLOAD);
                                         /*// read epub
                                         try {
                                             EpubReader epubReader = new EpubReader();

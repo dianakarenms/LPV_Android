@@ -1,50 +1,44 @@
 package com.clickaboom.letrasparavolar.activities;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.AssetManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Point;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
-import android.view.Display;
-import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ProgressBar;
 
 import com.clickaboom.letrasparavolar.R;
+import com.clickaboom.letrasparavolar.models.collections.Colecciones;
+import com.clickaboom.letrasparavolar.network.ApiConfig;
+import com.clickaboom.letrasparavolar.network.DownloadFile;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.Enumeration;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 import nl.siegmann.epublib.domain.Book;
-import nl.siegmann.epublib.domain.Resource;
-import nl.siegmann.epublib.domain.Resources;
-import nl.siegmann.epublib.domain.Spine;
-import nl.siegmann.epublib.domain.SpineReference;
-import nl.siegmann.epublib.epub.EpubReader;
-import nl.siegmann.epublib.service.MediatypeService;
+
+import static com.clickaboom.letrasparavolar.R.id.webView;
 
 /**
  * Created by clickaboom on 6/10/17.
  */
 
-public class EpubBookContentActivity extends Activity {
+public class EpubBookContentActivity extends Activity implements DownloadFile.OnTaskCompleted {
 
     private static final String TAG = "EpubBookContentActivity";
+    private static final String EXTRA_EPUB = "lpv.epub.name";
     WebView mWebView;
 
     Book book;
@@ -53,9 +47,18 @@ public class EpubBookContentActivity extends Activity {
 
     String line;
     int i = 0;
+    private Context mContext;
+    private Colecciones mEpub;
+    private DownloadFile.OnTaskCompleted mDownloadsListener;
+    private ProgressDialog barProgressDialog;
+    private String linez;
+    private String basePath;
+    private ProgressBar progressBar;
+    private String mEpubBaseURL;
 
-    public static Intent newIntent(Context packageContext) {
+    public static Intent newIntent(Context packageContext, Colecciones epub) {
         Intent i = new Intent(packageContext, EpubBookContentActivity.class);
+        i.putExtra(EXTRA_EPUB, epub);
         return i;
     }
 
@@ -64,88 +67,76 @@ public class EpubBookContentActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ebook);
 
-        mWebView = (WebView) findViewById(R.id.webView1);
+        mContext = this;
+        mDownloadsListener = this;
+
+        mEpub = (Colecciones) getIntent().getSerializableExtra(EXTRA_EPUB);
+        basePath = Environment.getExternalStorageDirectory() + "/LPV_eBooks/epub_reader/epubs/" + mEpub.epub;
+
+        mWebView = (WebView) findViewById(webView);
         mWebView.getSettings().setJavaScriptEnabled(true);
         mWebView.getSettings().setLoadWithOverviewMode(true);
         mWebView.getSettings().setDomStorageEnabled(true);
         mWebView.setWebChromeClient(new WebChromeClient());
+        mWebView.getSettings().setAllowFileAccessFromFileURLs(true);
+        mWebView.getSettings().setAllowUniversalAccessFromFileURLs(true);
         mWebView.getSettings().setLayoutAlgorithm(WebSettings.LayoutAlgorithm.NARROW_COLUMNS);
+        mWebView.setWebViewClient(new WebViewClient() {
+            public void onPageFinished(WebView view, String url) {
+                //mWebView.loadUrl(mEpubBaseURL);
+            }
 
-        AssetManager assetManager = getAssets();
-        String[] files;
+        });
 
+        File file = new File(basePath);
+        if(!file.exists())
+            descargar(ApiConfig.epubs + mEpub.epub, mEpub.epub);
+        else
+            loadEpubFromStorage();
+    }
+
+    @Override
+    public void onBackPressed() {
+        setResult(RESULT_OK);
+        super.onBackPressed();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mWebView.loadUrl("file:///android_asset/nonexistent.html");
+        mWebView.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mWebView.onResume();
+    }
+
+    public void loadEpubFromStorage() {
         try {
+            decom(mEpub.epub, basePath + "/");
 
-            files = assetManager.list("books");
-            List<String> list = Arrays.asList(files);
-
-            if (!this.makeDirectory("books")) {
-                debug("faild to make books directory");
-            }
-
-            //copyBookToDevice(list.get(position));
-
-            String basePath = Environment.getExternalStorageDirectory() + "/books/";
-
-            InputStream epubInputStream = assetManager.open("books/"+list.get(position));
-
-            book = (new EpubReader()).readEpub(epubInputStream);
-
-            DownloadResource(basePath);
-
-            String linez = "";
-            Spine spine = book.getSpine();
-            List<SpineReference> spineList = spine.getSpineReferences() ;
-            int count = spineList.size();
-
-            StringBuilder string = new StringBuilder();
-            for (int i = 0; count > i; i++) {
-
-                Resource res = spine.getResource(i);
-
-                try {
-                    InputStream is = res.getInputStream();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-                    try {
-                        while ((line = reader.readLine()) != null) {
-                            linez =   string.append(line + "\n").toString();
-                        }
-
-                    } catch (IOException e) {e.printStackTrace();}
-
-
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-            }
-
-            linez = linez.replace("../", "");
-
-            mWebView.setWebViewClient(new WebViewClient() {
-                public void onPageFinished(WebView view, String url) {
-                    // Column Count is just the number of 'screens' of text. Add one for partial 'screens'
-                    double columnCount = Math.floor(view.getHeight() / view.getWidth())+1;
-
-                    // Must be expressed as a percentage. If not set then the WebView will not stretch to give the desired effect.
-                    double columnWidth = columnCount * 100;
-
-                    injectJavascript();
-                }
-            });
-            mWebView.loadDataWithBaseURL("file://"+Environment.getExternalStorageDirectory()+"/books/", linez, "text/html", "utf-8", null);
-
+            mEpubBaseURL = "file://" + Environment.getExternalStorageDirectory() + "/LPV_eBooks/epub_reader/index.html?book=" + mEpub.epub;
+            mWebView.loadUrl(mEpubBaseURL);
         } catch (IOException e) {
-            Log.e("epublib exception", e.getMessage());
+            e.printStackTrace();
         }
     }
 
-    class JsObject {
-        @JavascriptInterface
-        public String toString() { return "injectedObject"; }
+    public void injectJavascript() {
+        String js = "javascript:function initialize() { " +
+                "\"use strict\";" +
+                "var Book = ePub(\"epubs/rf0g18genz-6.epub/\");" +
+                "Book.renderTo(\"area\");" +
+                "}";
+
+        mWebView.loadUrl(js);
+        mWebView.loadUrl("javascript:initialize()");
     }
 
-    public void injectJavascript() {
+    /*public void injectJavascript() {
         String js = "javascript:function initialize() { " +
                 "var d = document.getElementsByTagName('body')[0];" +
                 "var ourH = window.innerHeight; " +
@@ -164,170 +155,13 @@ public class EpubBookContentActivity extends Activity {
                 "viewPortTag.name = 'viewport';" +
                 "viewPortTag.content = 'width=device-width, initial-scale=1.0; maximum-scale=1.0; user-scalable=0;';" +
                 "document.getElementsByTagName('head')[0].appendChild(viewPortTag);" +
-                "alert('Hola mundo');" +
-//                            "var meta = document.createElement('meta');" +
-//                            "meta.name = 'viewport'" +
-//                            "meta.content = 'width=device-width, initial-scale=1.0'" +
-//                            "document.getElementsByTagName('head')[0].appendChild(meta);" +
                 "}";
 
         mWebView.loadUrl(js);
         mWebView.loadUrl("javascript:initialize()");
-    }
-
-    public boolean makeDirectory(String dirName) {
-        boolean res;
-
-        String filePath = new String(Environment.getExternalStorageDirectory()+"/"+dirName);
-
-        debug(filePath);
-        File file = new File(filePath);
-        if (!file.exists()) {
-            res = file.mkdirs();
-        }else {
-            res = false;
-        }
-        return res;
-    }
-
-    public void debug(String msg) {
-        //      if (Setting.isDebug()) {
-        Log.d("EPub", msg);
-        //      }
-    }
-
-    public void copyBookToDevice(String fileName) {
-        System.out.println("Copy Book to donwload folder in phone");
-        try
-        {
-            InputStream localInputStream = getAssets().open("books/"+fileName);
-            String path = Environment.getExternalStorageDirectory() + "/books/"+fileName;
-            FileOutputStream localFileOutputStream = new FileOutputStream(path);
-
-            byte[] arrayOfByte = new byte[1024];
-            int offset;
-            while ((offset = localInputStream.read(arrayOfByte))>0)
-            {
-                localFileOutputStream.write(arrayOfByte, 0, offset);
-            }
-            localFileOutputStream.close();
-            localInputStream.close();
-            Log.d(TAG, fileName+" copied to phone");
-
-        }
-        catch (IOException localIOException)
-        {
-            localIOException.printStackTrace();
-            Log.d(TAG, "failed to copy");
-            return;
-        }
-    }
-
-
-
-    private void DownloadResource(String directory) {
-        try {
-
-            Resources rst = book.getResources();
-            Collection<Resource> clrst = rst.getAll();
-            Iterator<Resource> itr = clrst.iterator();
-
-            while (itr.hasNext()) {
-                Resource rs = itr.next();
-
-                if ((rs.getMediaType() == MediatypeService.NCX)
-                        || (rs.getMediaType() == MediatypeService.OPENTYPE)
-                        || (rs.getMediaType() == MediatypeService.XHTML)
-                        || (rs.getMediaType() == MediatypeService.MP3)) {
-
-                    Log.d(TAG, rs.getHref());
-
-                    File oppath1 = new File(directory, rs.getHref().replace("OEBPS/", ""));
-
-                    oppath1.getParentFile().mkdirs();
-                    oppath1.createNewFile();
-
-                    System.out.println("Path : "+oppath1.getParentFile().getAbsolutePath());
-
-
-                    FileOutputStream fos1 = new FileOutputStream(oppath1);
-                    fos1.write(rs.getData());
-                    fos1.close();
-
-                } else if (rs.getMediaType() == MediatypeService.CSS) {
-
-                    File oppath = new File(directory, rs.getHref());
-
-                    oppath.getParentFile().mkdirs();
-                    oppath.createNewFile();
-
-                    FileOutputStream fos = new FileOutputStream(oppath);
-                    fos.write(rs.getData());
-                    fos.close();
-
-                } else if ((rs.getMediaType() == MediatypeService.JPG)
-                        || (rs.getMediaType() == MediatypeService.PNG)) {
-
-                    Log.d(TAG, rs.getHref());
-
-                    File oppath2 = new File(directory, rs.getHref().replace("OEBPS/", ""));
-
-                    oppath2.getParentFile().mkdirs();
-                    oppath2.createNewFile();
-
-                    System.out.println("Path : "+oppath2.getParentFile().getAbsolutePath());
-
-//                    FileOutputStream fos1 = new FileOutputStream(oppath2);
-//                    fos1.write(rs.getData());
-//                    fos1.close();
-
-                    // Get display dimensions
-                    Display display = getWindowManager().getDefaultDisplay();
-                    Point size = new Point();
-                    display.getSize(size);
-                    int width = size.x;
-                    int height = size.y;
-
-                    Bitmap b = BitmapFactory.decodeByteArray(rs.getData(), 0, rs.getData().length);
-//                    Bitmap out = Bitmap.createScaledBitmap(b, width, height, false);
-
-                    Bitmap out = getResizedBitmap(b, width, height);
-
-                    FileOutputStream fOut;
-                    try {
-                        fOut = new FileOutputStream(oppath2);
-                        out.compress(Bitmap.CompressFormat.PNG, 100, fOut);
-                        fOut.flush();
-                        fOut.close();
-                        b.recycle();
-                        out.recycle();
-                    } catch (Exception e) {}
-
-                }
-
-            }
-
-        } catch (Exception e) {
-            Log.e("EpubBook", e.getMessage());
-        }
-    }
+    }*/
 
     public Bitmap getResizedBitmap(Bitmap image, int maxWidth, int maxHeight) {
-        /*int width = bm.getWidth();
-        int height = bm.getHeight();
-        float scaleWidth = ((float) newWidth) / width;
-        float scaleHeight = ((float) newHeight) / height;
-        // CREATE A MATRIX FOR THE MANIPULATION
-        Matrix matrix = new Matrix();
-        // RESIZE THE BIT MAP
-        matrix.postScale(scaleWidth, scaleHeight);
-
-        // "RECREATE" THE NEW BITMAP
-        Bitmap resizedBitmap = Bitmap.createBitmap(
-                bm, 0, 0, width, height, matrix, false);
-        bm.recycle();
-        return resizedBitmap;*/
-
         if (maxHeight > 0 && maxWidth > 0) {
             int width = image.getWidth();
             int height = image.getHeight();
@@ -346,5 +180,47 @@ public class EpubBookContentActivity extends Activity {
         } else {
             return image;
         }
+    }
+
+    public void descargar(String url, String fileName){
+        DownloadFile downloadFile = new DownloadFile(mDownloadsListener, mContext, EpubBookContentActivity.this, true, mEpub);
+        downloadFile.execute(url, fileName, fileName);
+    }
+
+    @Override
+    public void onTaskCompleted() {
+        loadEpubFromStorage();
+    }
+
+    private void decom(String zipname, String path) throws IOException {
+        ZipFile zipFile = new ZipFile(path + zipname);
+        //String path = Environment.getExternalStorageDirectory() + "/unzipped10/";
+
+        Enumeration<?> files = zipFile.entries();
+        while (files.hasMoreElements()) {
+            ZipEntry entry = (ZipEntry) files.nextElement();
+            Log.d(TAG, "ZipEntry: "+entry);
+            Log.d(TAG, "isDirectory: " + entry.isDirectory());
+
+            if (entry.isDirectory()) {
+                File file = new File(path + entry.getName());
+                file.mkdir();
+                Log.d(TAG, "Create dir " + entry.getName());
+            } else {
+                String filepath = path + entry.getName();
+                File f = new File(filepath);
+                f.getParentFile().mkdirs();
+                FileOutputStream fos = new FileOutputStream(f);
+                InputStream is = zipFile.getInputStream(entry);
+                byte[] buffer = new byte[1024];
+                int bytesRead = 0;
+                while ((bytesRead = is.read(buffer)) != -1) {
+                    fos.write(buffer, 0, bytesRead);
+                }
+                fos.close();
+                Log.d(TAG, "Create File " + entry.getName());
+            }
+        }
+        Log.d(TAG, "Done extracting epub file");
     }
 }

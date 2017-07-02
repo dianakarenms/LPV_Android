@@ -32,7 +32,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.adapters.BannerPagerAdapter;
-import com.clickaboom.letrasparavolar.adapters.CollectionsDefaultAdapter;
+import com.clickaboom.letrasparavolar.adapters.ColeccionesDefaultAdapter;
 import com.clickaboom.letrasparavolar.adapters.LegendsDefaultAdapter;
 import com.clickaboom.letrasparavolar.fragments.ColeccionesFragment;
 import com.clickaboom.letrasparavolar.fragments.InformationFragment;
@@ -40,7 +40,6 @@ import com.clickaboom.letrasparavolar.fragments.LegendsFragment;
 import com.clickaboom.letrasparavolar.fragments.LibraryFragment;
 import com.clickaboom.letrasparavolar.models.banners.Banner;
 import com.clickaboom.letrasparavolar.models.banners.ResBanners;
-import com.clickaboom.letrasparavolar.models.collections.Categoria;
 import com.clickaboom.letrasparavolar.models.collections.Colecciones;
 import com.clickaboom.letrasparavolar.models.defaults.ResDefaults;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
@@ -78,7 +77,7 @@ public class MainActivity extends AppCompatActivity
     private static final String TAG = "com.lpv.MainActivity";
     private RecyclerView mRecyclerView, mRecyclerView2;
     private LinearLayoutManager mLayoutManager;
-    private CollectionsDefaultAdapter mCollectionsAdapter;
+    private ColeccionesDefaultAdapter mCollectionsAdapter;
     private LegendsDefaultAdapter mLegendsAdapter;
     private ViewPager view1;
     private BannerPagerAdapter mBannerAdapter;
@@ -158,7 +157,7 @@ public class MainActivity extends AppCompatActivity
         mLegendsAdapter.mColType = BookDetailsActivity.LEGENDS;
         mRecyclerView.setAdapter(mLegendsAdapter);
 
-        mCollectionsAdapter = new CollectionsDefaultAdapter(mCollectionsList, mContext);
+        mCollectionsAdapter = new ColeccionesDefaultAdapter(mCollectionsList, mContext);
         mCollectionsAdapter.mColType = BookDetailsActivity.COLECCIONES;
         mRecyclerView2.setAdapter(mCollectionsAdapter);
 
@@ -315,7 +314,7 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(getApplicationContext(), "news_btn", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.games_btn:
-                startActivity(GamesActivity.newIntent(mContext));
+                startActivity(JuegosActivity.newIntent(mContext));
                 break;
             case R.id.participate_btn:
                 startActivity(ParticipaActivity.newIntent(mContext));
@@ -326,7 +325,7 @@ public class MainActivity extends AppCompatActivity
                         "http://letrasparavolar.org/"));
                 break;
             case R.id.magazine_btn:
-                Toast.makeText(getApplicationContext(), "magazine_btn", Toast.LENGTH_SHORT).show();
+                startActivity(GacetitaActivity.newIntent(mContext));
                 break;
         }
     }

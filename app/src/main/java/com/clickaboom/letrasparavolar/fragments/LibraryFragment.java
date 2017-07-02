@@ -17,7 +17,7 @@ import android.widget.TextView;
 import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.activities.BookDetailsActivity;
 import com.clickaboom.letrasparavolar.activities.MainActivity;
-import com.clickaboom.letrasparavolar.adapters.CollectionsAdapter;
+import com.clickaboom.letrasparavolar.adapters.ColeccionesAdapter;
 import com.clickaboom.letrasparavolar.adapters.LegendsAdapter;
 import com.clickaboom.letrasparavolar.models.collections.Colecciones;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
@@ -39,7 +39,7 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
     private static final String FAVORITES = "favorites";
     private static final String DOWNLOADED = "downloaded";
     private RecyclerView mLegendsRV, mColeccionesRV;
-    private CollectionsAdapter mCollectionsAdapter;
+    private ColeccionesAdapter mColeccionesAdapter;
     private LegendsAdapter mLegendsAdapter;
     private List<Colecciones> mCollectionsList, mLegendsList;
     private View v;
@@ -146,9 +146,9 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
         mLegendsAdapter.mColType = BookDetailsActivity.LEGENDS;
         mLegendsRV.setAdapter(mLegendsAdapter);
 
-        mCollectionsAdapter = new CollectionsAdapter(mCollectionsList, getContext());
-        mCollectionsAdapter.mColType = BookDetailsActivity.COLECCIONES;
-        mColeccionesRV.setAdapter(mCollectionsAdapter);
+        mColeccionesAdapter = new ColeccionesAdapter(mCollectionsList, getContext());
+        mColeccionesAdapter.mColType = BookDetailsActivity.COLECCIONES;
+        mColeccionesRV.setAdapter(mColeccionesAdapter);
 
         // Load favorites at fragment visible
         v.findViewById(R.id.downloaded_txt).performClick();
@@ -205,7 +205,7 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
 
         // Update Adapters
         mLegendsAdapter.notifyDataSetChanged();
-        mCollectionsAdapter.notifyDataSetChanged();
+        mColeccionesAdapter.notifyDataSetChanged();
 
         if(mNestedScroll.getHeight() < mCoordinatorLayout.getHeight()) {
             mNestedScroll.setMinimumHeight(mCoordinatorLayout.getHeight());

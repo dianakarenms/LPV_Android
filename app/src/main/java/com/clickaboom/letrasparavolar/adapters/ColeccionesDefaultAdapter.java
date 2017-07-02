@@ -22,19 +22,20 @@ import java.util.List;
  * Created by Karencita on 13/05/2017.
  */
 
-public class CollectionsAdapter extends RecyclerView.Adapter<CollectionsAdapter.ViewHolder> {
+public class ColeccionesDefaultAdapter extends RecyclerView.Adapter<ColeccionesDefaultAdapter.ViewHolder> {
     private static Context mContext;
     private static List<Colecciones> mBookList;
     public static String mColType;
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public CollectionsAdapter(List<Colecciones> bookList, Context context) {
+    public ColeccionesDefaultAdapter(List<Colecciones> bookList, Context context) {
         mContext = context;
         mBookList = bookList;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         public TextView mTitle, mSubtitle;
+        //public NetworkImageView mImage;
         public ImageButton mImage;
         public ViewHolder(View v) {
             super(v);
@@ -42,6 +43,7 @@ public class CollectionsAdapter extends RecyclerView.Adapter<CollectionsAdapter.
             mTitle = (TextView) v.findViewById(R.id.title_txt);
             mSubtitle = (TextView) v.findViewById(R.id.subtitle_id);
             mImage = (ImageButton)v.findViewById(R.id.book_img);
+            //mImage = (NetworkImageView)v.findViewById(R.id.book_img);
         }
 
         @Override
@@ -53,15 +55,15 @@ public class CollectionsAdapter extends RecyclerView.Adapter<CollectionsAdapter.
     }
 
     @Override
-    public CollectionsAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ColeccionesDefaultAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_book, parent, false);
+                .inflate(R.layout.item_book_home, parent, false);
         ViewHolder viewHolder = new ViewHolder(v);
         return viewHolder;
     }
 
     @Override
-    public void onBindViewHolder(CollectionsAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(ColeccionesDefaultAdapter.ViewHolder holder, int position) {
         // Title
         holder.mTitle.setText(mBookList.get(position).titulo);
 
@@ -78,7 +80,12 @@ public class CollectionsAdapter extends RecyclerView.Adapter<CollectionsAdapter.
                 .load(imgUrl)
                 .resize(200,200)
                 .centerInside()
+                //.memoryPolicy(MemoryPolicy.NO_CACHE)
                 .into(holder.mImage);
+        /*
+        imageLoader = ApiSingleton.getInstance(mContext).getImageLoader();
+        imageLoader.get(imgUrl, ImageLoader.getImageListener(holder.mImage, R.drawable.book_placeholder, android.R.drawable.ic_dialog_alert));
+        holder.mImage.setImageUrl(imgUrl, imageLoader);*/
     }
 
     @Override

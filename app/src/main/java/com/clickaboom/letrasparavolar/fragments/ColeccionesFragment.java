@@ -27,10 +27,9 @@ import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.activities.BookDetailsActivity;
 import com.clickaboom.letrasparavolar.activities.MainActivity;
 import com.clickaboom.letrasparavolar.activities.MapsActivity;
-import com.clickaboom.letrasparavolar.activities.SearchActivity;
+import com.clickaboom.letrasparavolar.activities.BuscarActivity;
 import com.clickaboom.letrasparavolar.adapters.ColeccionesCategoriesAdapter;
-import com.clickaboom.letrasparavolar.adapters.LegendsCategoriesAdapter;
-import com.clickaboom.letrasparavolar.adapters.CollectionsAdapter;
+import com.clickaboom.letrasparavolar.adapters.ColeccionesAdapter;
 import com.clickaboom.letrasparavolar.models.collections.Categoria;
 import com.clickaboom.letrasparavolar.models.collections.Colecciones;
 import com.clickaboom.letrasparavolar.models.collections.ResCollections;
@@ -56,7 +55,7 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
     public static final String RESULT_SEARCH = "searchText";
     private static final String LIST_STATE_KEY = "listState";
     private RecyclerView mCategoriesRV, mCollectionsRV;
-    private CollectionsAdapter mCollectionsAdapter;
+    private ColeccionesAdapter mColeccionesAdapter;
     private List<Colecciones> mCollectionsList = new ArrayList<>();
     private List<Categoria> mCategoriesList = new ArrayList<>();
     private View v;
@@ -94,7 +93,7 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-        mCollectionsAdapter = new CollectionsAdapter(mCollectionsList, getContext());
+        mColeccionesAdapter = new ColeccionesAdapter(mCollectionsList, getContext());
         mColeccionesCategoriesAdapter = new ColeccionesCategoriesAdapter(mCategoriesList, mImgPath, R.color.collections_nav_pressed, getContext(), new ColeccionesCategoriesAdapter.RecyclerViewClickListener() {
             @Override
             public void recyclerViewListClicked(Integer categoryId) {
@@ -134,7 +133,7 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
             @Override
             public void onClick(View v) {
                 startActivityForResult(
-                        SearchActivity.newIntent(getContext()),
+                        BuscarActivity.newIntent(getContext()),
                         REQUEST_SEARCH);
             }
         });
@@ -186,8 +185,8 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
         mGridLayoutManager = new GridLayoutManager(getContext(), 3);
         mCollectionsRV.setLayoutManager(mGridLayoutManager);
         mCollectionsRV.setHasFixedSize(true);
-        mCollectionsAdapter.mColType = BookDetailsActivity.COLECCIONES;
-        mCollectionsRV.setAdapter(mCollectionsAdapter);
+        mColeccionesAdapter.mColType = BookDetailsActivity.COLECCIONES;
+        mCollectionsRV.setAdapter(mColeccionesAdapter);
 
         // show new collections on start
         if(mCollectionsList.isEmpty()) {
@@ -257,7 +256,7 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
                                     //db.addAllBooks(item, BookDetailsActivity.COLECCIONES);
                                 }
 
-                                mCollectionsAdapter.notifyDataSetChanged();
+                                mColeccionesAdapter.notifyDataSetChanged();
                                 mNestedScroll.scrollTo(0, 0);
                                 if(mNestedScroll.getHeight() < mCoordinatorLayout.getHeight()) {
                                     mNestedScroll.setMinimumHeight(mCoordinatorLayout.getHeight());
@@ -277,7 +276,7 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
                             }
                             Toast.makeText(mContext, "Sin conexión", Toast.LENGTH_SHORT).show();
                         }
-                        mCollectionsAdapter.notifyDataSetChanged();
+                        mColeccionesAdapter.notifyDataSetChanged();
                         }
                 }));
 

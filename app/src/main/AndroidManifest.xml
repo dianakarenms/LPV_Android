@@ -31,7 +31,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.SearchActivity"
+            android:name=".activities.BuscarActivity"
             android:theme="@style/Theme.Transparent"
             android:windowSoftInputMode="adjustPan|stateVisible"/>
         <activity
@@ -60,19 +60,22 @@
             android:label="@string/title_activity_maps">
         </activity>
 
-        <activity android:name=".activities.EpubBookContentActivity2"
+        <activity android:name=".activities.EpubBookContentActivity"
                   android:theme="@style/AppTheme.NoActionBar"/>
 
-        <activity android:name=".activities.GamesActivity"
+        <activity android:name=".activities.JuegosActivity"
                   android:theme="@style/AppTheme.NoActionBar"/>
 
-        <activity android:name=".activities.InGameActivity"
+        <activity android:name=".activities.JuegosInternoActivity"
                   android:theme="@style/AppTheme.NoActionBar"/>
 
         <activity android:name=".activities.ParticipaActivity"
                   android:theme="@style/AppTheme.NoActionBar" />
 
         <activity android:name=".activities.CurioseandoTestsListActivity"
+                  android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity android:name=".activities.GacetitaActivity"
                   android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
