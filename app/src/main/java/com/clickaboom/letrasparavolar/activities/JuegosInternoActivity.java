@@ -37,7 +37,7 @@ import java.util.List;
 
 import static android.media.CamcorderProfile.get;
 
-public class InGameActivity extends AppCompatActivity
+public class JuegosInternoActivity extends AppCompatActivity
         implements View.OnClickListener, InGameAdapter.OnClickListener {
 
     private static final String TAG = "com.lpv.GamesActivity";
@@ -56,7 +56,7 @@ public class InGameActivity extends AppCompatActivity
     private Button mRepeatBtn, mFinishBtn, mShareBtn;
 
     public static Intent newIntent(Context packageContext, Game game) {
-        Intent i = new Intent(packageContext, InGameActivity.class);
+        Intent i = new Intent(packageContext, JuegosInternoActivity.class);
         i.putExtra(EXTRA_GAME, (Serializable) game);
         return i;
     }
@@ -109,7 +109,7 @@ public class InGameActivity extends AppCompatActivity
         mNextBtn = (Button) findViewById(R.id.next_btn);
         invalidNextBtn();
 
-        if(mGame.gameType.equals(GamesActivity.JUEGO_A))
+        if(mGame.gameType.equals(JuegosActivity.JUEGO_A))
             loadNahuatlismosQuestions();
         else
             loadCurioseandoQuestions(mGame.id);
@@ -214,14 +214,14 @@ public class InGameActivity extends AppCompatActivity
     @Override
     public void OnItemClicked(Respuesta res, int correctPos) {
         validNextBtn(mGame.btnColor);
-        if(mGame.gameType.equals(GamesActivity.JUEGO_A)) {
+        if(mGame.gameType.equals(JuegosActivity.JUEGO_A)) {
             if (res.isCorrecta.equals("SI"))
                 mCorrectCounter++;
             else {
                 InGameAdapter.NahuatlismosHolder holder = (InGameAdapter.NahuatlismosHolder) mRecyclerView.findViewHolderForAdapterPosition(correctPos);
                 holder.mCheckImg.setImageResource(R.drawable.checked);
             }
-        } else if(mGame.gameType.equals(GamesActivity.JUEGO_B)) {
+        } else if(mGame.gameType.equals(JuegosActivity.JUEGO_B)) {
             mCorrectCounter += res.resultados.get(0).valor;
         }
     }

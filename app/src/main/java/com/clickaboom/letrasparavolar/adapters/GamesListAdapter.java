@@ -5,23 +5,16 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.clickaboom.letrasparavolar.R;
-import com.clickaboom.letrasparavolar.activities.BookDetailsActivity;
 import com.clickaboom.letrasparavolar.activities.CurioseandoTestsListActivity;
-import com.clickaboom.letrasparavolar.activities.GamesActivity;
-import com.clickaboom.letrasparavolar.activities.InGameActivity;
-import com.clickaboom.letrasparavolar.activities.MainActivity;
-import com.clickaboom.letrasparavolar.models.collections.Colecciones;
+import com.clickaboom.letrasparavolar.activities.JuegosActivity;
+import com.clickaboom.letrasparavolar.activities.JuegosInternoActivity;
 import com.clickaboom.letrasparavolar.models.game.Game;
-import com.clickaboom.letrasparavolar.network.ApiConfig;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -79,9 +72,9 @@ public class GamesListAdapter extends RecyclerView.Adapter<GamesListAdapter.View
             @Override
             public void onClick(View v) {
                 //Toast.makeText(mContext, game.gameType, Toast.LENGTH_SHORT).show();
-                if(game.gameType.equals(GamesActivity.JUEGO_A))
-                    mContext.startActivity(InGameActivity.newIntent(mContext, game));
-                else if(game.gameType.equals(GamesActivity.JUEGO_B))
+                if(game.gameType.equals(JuegosActivity.JUEGO_A))
+                    mContext.startActivity(JuegosInternoActivity.newIntent(mContext, game));
+                else if(game.gameType.equals(JuegosActivity.JUEGO_B))
                     mContext.startActivity(CurioseandoTestsListActivity.newIntent(mContext, game));
 
             }

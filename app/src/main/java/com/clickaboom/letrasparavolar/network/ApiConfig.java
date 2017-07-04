@@ -40,11 +40,16 @@ public class ApiConfig {
 
     // Games
     public static final String nahuatlismosGame = baseUrl + "/api/nahuatlismos/";
-
     public static final String curioseandoTests = baseUrl + "/api/curioseando/tests/";
     public static final String curioseandoTestQuestions = baseUrl + "/api/curioseando/preguntas/";
 
     // Participa
     public static final String participa = baseUrl + "/api/participa/save/";
+
+    // Gacetita
+    public static final String gacetitas = baseUrl + "/api/gacetita/";
+    public static final String gacetitaImg = baseUrl + "/uploads/images/pdfportadas/";
+    public static final String gacetitaPdf = baseUrl + "/uploads/pdfs/";
+
 
 }

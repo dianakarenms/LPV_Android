@@ -13,7 +13,7 @@ import android.widget.TextView;
 import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.fragments.ColeccionesFragment;
 
-public class SearchActivity extends AppCompatActivity
+public class BuscarActivity extends AppCompatActivity
         implements View.OnClickListener {
 
     private static final String TAG = "com.lpv.SearchActivity";
@@ -21,7 +21,7 @@ public class SearchActivity extends AppCompatActivity
     private Context mCxt;
 
     public static Intent newIntent(Context packageContext) {
-        Intent i = new Intent(packageContext, SearchActivity.class);
+        Intent i = new Intent(packageContext, BuscarActivity.class);
         //i.putExtra(EXTRA_SEARCH_TYPE, searchType);
         return i;
     }

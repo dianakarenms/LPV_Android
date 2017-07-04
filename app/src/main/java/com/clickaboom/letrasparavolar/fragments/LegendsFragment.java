@@ -26,7 +26,7 @@ import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.activities.BookDetailsActivity;
 import com.clickaboom.letrasparavolar.activities.MainActivity;
 import com.clickaboom.letrasparavolar.activities.MapsActivity;
-import com.clickaboom.letrasparavolar.activities.SearchActivity;
+import com.clickaboom.letrasparavolar.activities.BuscarActivity;
 import com.clickaboom.letrasparavolar.adapters.LegendsCategoriesAdapter;
 import com.clickaboom.letrasparavolar.adapters.LegendsAdapter;
 import com.clickaboom.letrasparavolar.models.collections.Categoria;
@@ -137,7 +137,7 @@ public class LegendsFragment extends Fragment implements View.OnClickListener {
             @Override
             public void onClick(View v) {
                 startActivityForResult(
-                        SearchActivity.newIntent(getContext()),
+                        BuscarActivity.newIntent(getContext()),
                         REQUEST_SEARCH);
             }
         })
