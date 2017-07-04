@@ -82,7 +82,8 @@ public class DownloadFile extends AsyncTask<String, Void, Void> {
         String fileFolder = strings[1];   // -> maven
         String fileName = strings[2];  // -> maven.pdf
         String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
-        folder = new File(extStorageDirectory, "LPV_eBooks");
+        //folder = new File(extStorageDirectory, "LPV_eBooks");
+        folder = new File(extStorageDirectory, "LPV_eBooks/epub_reader/epubs/" + fileFolder);
 
         if(isStoragePermissionGranted()) {
             if (folder.exists()) {
@@ -99,11 +100,11 @@ public class DownloadFile extends AsyncTask<String, Void, Void> {
                     return null;
                 }
             } else {
-                folder = new File(extStorageDirectory, "LPV_eBooks");
+                folder = new File(extStorageDirectory, "LPV_eBooks/epub_reader/epubs/" + fileFolder);
                 folder.mkdir();
             }
 
-            folder = new File(extStorageDirectory, "LPV_eBooks/epub_reader/epubs/" + fileFolder);
+            //folder = new File(extStorageDirectory, "LPV_eBooks/epub_reader/epubs/" + fileFolder);
             folder.mkdir();
             pdfFile = new File(folder, fileName);
 
@@ -136,28 +137,6 @@ public class DownloadFile extends AsyncTask<String, Void, Void> {
                     Log.d("ebookContent", "stored in db");
                 }
 
-                listener.onTaskCompleted();
-
-                /*AlertDialog.Builder alert = new AlertDialog.Builder(context);
-                alert.setTitle("Descarga finalizada");
-                alert.setMessage("Guardado en la carpeta Guia_de_emprendedores_UDG");
-                alert.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                });
-                alert.setPositiveButton("Abrir", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent();
-                        intent.setAction(Intent.ACTION_VIEW);
-                        Uri uri = Uri.fromFile(pdfFile);
-                        intent.setDataAndType(uri, "application/pdf");
-                        context.startActivity(intent);
-                    }
-                });
-                alert.show();*/
             } else if (!success && !localStored) {
                 AlertDialog.Builder alert = new AlertDialog.Builder(context);
                 alert.setTitle("Descarga fallida");
@@ -173,14 +152,6 @@ public class DownloadFile extends AsyncTask<String, Void, Void> {
                 DeleteRecursive(folder);
             }
 
-            // if localStored
-            if(db.getBookByePub(mEpub.epub).isEmpty()) {
-                // Epub was already downloaded but not yet added to database
-                mEpub.descargado = true;
-                if (db.insertBook(mEpub)) {
-                    Log.d("ebookContent", "stored in db");
-                }
-            }
             // Return to calling activity
             listener.onTaskCompleted();
         }

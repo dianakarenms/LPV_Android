@@ -29,7 +29,7 @@
     <string name="poesia">Poesía</string>
     <string name="ensayo">Ensayo</string>
     <string name="narrativa">Narrativa</string>
-    <string name="library_title">Biblitoeca</string>
+    <string name="library_title">Biblioteca</string>
     <string name="download">Descargar</string>
     <string name="description">Descripción:</string>
     <string name="lorem_ipsum">Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</string>
@@ -85,4 +85,5 @@
     <string name="tests">Curioseando</string>
     <string name="nahuatlismos">Nahuatlismos</string>
     <string name="gacetita">Gacetita</string>
+    <string name="leer_completo">Leer nota completa</string>
 </resources>
