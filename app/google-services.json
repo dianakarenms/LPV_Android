@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "376766675769",
+    "firebase_url": "https://letrasparavolar-1496795824768.firebaseio.com",
+    "project_id": "letrasparavolar-1496795824768",
+    "storage_bucket": "letrasparavolar-1496795824768.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:376766675769:android:49bf27dca649d871",
+        "android_client_info": {
+          "package_name": "com.clickaboom.letrasparavolar"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "376766675769-v0n56pc1dtd8fk45semncc9klqj7nimo.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.clickaboom.letrasparavolar",
+            "certificate_hash": "ac3c6cf65288cc7d22d014dff5aaa8e2f673fd0b"
+          }
+        },
+        {
+          "client_id": "376766675769-1hg034snlhgpkggermiledu11pnnj7pv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD4QQZ2EzaL7FObALswyJSI3NKf2syG7VA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "376766675769-1hg034snlhgpkggermiledu11pnnj7pv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

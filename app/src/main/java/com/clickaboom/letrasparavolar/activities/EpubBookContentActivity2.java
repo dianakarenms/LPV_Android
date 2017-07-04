@@ -104,7 +104,6 @@ public class EpubBookContentActivity2 extends Activity implements DownloadFile.O
     @Override
     public void onPause() {
         super.onPause();
-        mWebView.loadUrl("file:///android_asset/nonexistent.html");
         mWebView.onPause();
     }
 
