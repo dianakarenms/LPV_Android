@@ -121,13 +121,13 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
 
         // Set toolbar_asistant title
         ((TextView)v.findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.collections_title));
-        v.findViewById(R.id.left_btn).setVisibility(View.VISIBLE);
+        /*v.findViewById(R.id.left_btn).setVisibility(View.VISIBLE);
         v.findViewById(R.id.left_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(MapsActivity.newInstance(getContext(), BookDetailsActivity.COLECCIONES));
             }
-        });
+        });*/
         v.findViewById(R.id.right_btn).setVisibility(View.VISIBLE);
         v.findViewById(R.id.right_btn).setOnClickListener(new View.OnClickListener() {
             @Override

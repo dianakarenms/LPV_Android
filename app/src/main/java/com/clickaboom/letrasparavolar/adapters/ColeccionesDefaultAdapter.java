@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.clickaboom.letrasparavolar.R;
@@ -34,16 +35,16 @@ public class ColeccionesDefaultAdapter extends RecyclerView.Adapter<ColeccionesD
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+        public RelativeLayout mContainer;
         public TextView mTitle, mSubtitle;
-        //public NetworkImageView mImage;
         public ImageButton mImage;
         public ViewHolder(View v) {
             super(v);
             v.setOnClickListener(this);
+            mContainer = (RelativeLayout) v.findViewById(R.id.container_rl);
             mTitle = (TextView) v.findViewById(R.id.title_txt);
             mSubtitle = (TextView) v.findViewById(R.id.subtitle_id);
             mImage = (ImageButton)v.findViewById(R.id.book_img);
-            //mImage = (NetworkImageView)v.findViewById(R.id.book_img);
         }
 
         @Override
@@ -64,6 +65,11 @@ public class ColeccionesDefaultAdapter extends RecyclerView.Adapter<ColeccionesD
 
     @Override
     public void onBindViewHolder(ColeccionesDefaultAdapter.ViewHolder holder, int position) {
+        // Container
+        float widthPixels = mContext.getResources().getDisplayMetrics().widthPixels;
+        int width = (int) (widthPixels/3) + 15;
+        holder.mContainer.setLayoutParams(new RelativeLayout.LayoutParams(width, RelativeLayout.LayoutParams.MATCH_PARENT));
+
         // Title
         holder.mTitle.setText(mBookList.get(position).titulo);
 
