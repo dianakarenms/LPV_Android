@@ -51,5 +51,4 @@ public class ApiConfig {
     public static final String gacetitaImg = baseUrl + "/uploads/images/pdfportadas/";
     public static final String gacetitaPdf = baseUrl + "/uploads/pdfs/";
 
-
 }

@@ -274,8 +274,6 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
-
-
     public void restoreBottonNavColors() {
         legendsBtn.setBackgroundColor(Color.TRANSPARENT);
         collectionsBtn.setBackgroundColor(Color.TRANSPARENT);
