@@ -5,14 +5,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -25,17 +28,24 @@ import com.clickaboom.letrasparavolar.adapters.InGameAdapter;
 import com.clickaboom.letrasparavolar.models.game.Game;
 import com.clickaboom.letrasparavolar.models.game.Pregunta;
 import com.clickaboom.letrasparavolar.models.game.ResNahuatlismos;
+import com.clickaboom.letrasparavolar.models.game.ResResultadoTest;
 import com.clickaboom.letrasparavolar.models.game.Respuesta;
+import com.clickaboom.letrasparavolar.models.game.Resultado;
+import com.clickaboom.letrasparavolar.models.game.ResultadoTest;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
 import com.clickaboom.letrasparavolar.network.ApiSingleton;
 import com.clickaboom.letrasparavolar.network.GsonRequest;
+import com.squareup.picasso.Picasso;
 
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static android.media.CamcorderProfile.get;
+import static com.clickaboom.letrasparavolar.R.id.map;
 
 public class JuegosInternoActivity extends AppCompatActivity
         implements View.OnClickListener, InGameAdapter.OnClickListener {
@@ -54,6 +64,7 @@ public class JuegosInternoActivity extends AppCompatActivity
     private Button mNextBtn;
     private Game mGame;
     private Button mRepeatBtn, mFinishBtn, mShareBtn;
+    private HashMap<Integer, Integer> mCurioAnswers;
 
     public static Intent newIntent(Context packageContext, Game game) {
         Intent i = new Intent(packageContext, JuegosInternoActivity.class);
@@ -69,6 +80,7 @@ public class JuegosInternoActivity extends AppCompatActivity
         mListener = this;
 
         mGame = (Game) getIntent().getSerializableExtra(EXTRA_GAME);
+        mCurioAnswers = new HashMap<Integer, Integer>();
 
         // Menu drawer onclicklistener
         findViewById(R.id.drawer_button).setVisibility(View.INVISIBLE);
@@ -97,13 +109,16 @@ public class JuegosInternoActivity extends AppCompatActivity
         mAdapter.setGameType(mGame.gameType);
         mRecyclerView.setAdapter(mAdapter);
 
-       /* // Modal buttons controller
+        // Modal buttons controller
         mRepeatBtn = (Button) findViewById(R.id.repeat_btn);
         mFinishBtn = (Button) findViewById(R.id.repeat_btn);
         mShareBtn = (Button) findViewById(R.id.share_btn);
-        mRepeatBtn.setOnClickListener(this);
-        mFinishBtn.setOnClickListener(this);
-        mShareBtn.setOnClickListener(this);*/
+        if(mGame.gameType.equals(JuegosActivity.JUEGO_B)) {
+            mRepeatBtn.setText("Hacer otro test");
+            mShareBtn.setText("Compartir resultado");
+            findViewById(R.id.nahuatlismos_result).setVisibility(View.GONE);
+            findViewById(R.id.curioseando_result).setVisibility(View.VISIBLE);
+        }
 
         // Setup nextbtn
         mNextBtn = (Button) findViewById(R.id.next_btn);
@@ -137,16 +152,24 @@ public class JuegosInternoActivity extends AppCompatActivity
                 } else {
                     RelativeLayout modalView = (RelativeLayout) findViewById(R.id.modal_game_over);
                     modalView.setVisibility(View.VISIBLE);
-                    TextView tv = (TextView) modalView.findViewById(R.id.puntua_txt);
-                    if(tv != null)
-                        tv.setText(String.valueOf(mCorrectCounter));
+                    if(mGame.gameType.equals(JuegosActivity.JUEGO_A)) {
+                        TextView tv = (TextView) modalView.findViewById(R.id.puntua_txt);
+                        if (tv != null)
+                            tv.setText(String.valueOf(mCorrectCounter));
+                    } else {
+                        loadCurioseandoResult(getResultId());
+                    }
                 }
                 break;
             case R.id.repeat_btn:
-                mCorrectCounter = 0;
-                mQuestionIndex = 0;
-                findViewById(R.id.modal_game_over).setVisibility(View.GONE);
-                setQuestion(mPregList.get(mQuestionIndex));
+                if(mGame.gameType.equals(JuegosActivity.JUEGO_A)) {
+                    mCorrectCounter = 0;
+                    mQuestionIndex = 0;
+                    findViewById(R.id.modal_game_over).setVisibility(View.GONE);
+                    setQuestion(mPregList.get(mQuestionIndex));
+                } else {
+                    finish();
+                }
                 break;
             case R.id.finish_btn:
                 finish();
@@ -155,6 +178,16 @@ public class JuegosInternoActivity extends AppCompatActivity
                 shareImage();
                 break;
         }
+    }
+
+    private int getResultId() {
+        Map.Entry<Integer, Integer> maxEntry = null;
+        for (Map.Entry<Integer, Integer> entry : mCurioAnswers.entrySet()) {
+            if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0) {
+                maxEntry = entry;
+            }
+        }
+        return  maxEntry.getKey();
     }
 
     private void loadNahuatlismosQuestions() {
@@ -202,6 +235,43 @@ public class JuegosInternoActivity extends AppCompatActivity
                 }));
     }
 
+    private void loadCurioseandoResult(int resId) {
+        // Access the RequestQueue through your singleton class.
+        ApiSingleton.getInstance(mContext)
+                .addToRequestQueue(new GsonRequest(ApiConfig.curioseandoTestResult + "?resultado=" + resId,
+                        ResResultadoTest.class,
+                        Request.Method.GET,
+                        null, null,
+                        new Response.Listener() {
+                            @Override
+                            public void onResponse(Object response) {
+                                Log.d(TAG, response.toString());
+                                List<ResultadoTest> res = ((ResResultadoTest) response).data;
+                                ResultadoTest resultado = res.get(0);
+
+                                RelativeLayout modalView = (RelativeLayout) findViewById(R.id.modal_game_over);
+                                ((TextView) modalView.findViewById(R.id.res_title)).setText("Resultado: " + resultado.resultado);
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                    ((TextView) modalView.findViewById(R.id.description_txt)).setText(Html.fromHtml(resultado.descripcion,  Html.FROM_HTML_MODE_COMPACT));
+                                } else {
+                                    ((TextView) modalView.findViewById(R.id.description_txt)).setText(Html.fromHtml(resultado.descripcion));
+                                }
+
+                                String imgUrl = ApiConfig.juegosImg + resultado.imagen;
+                                Picasso.with(mContext)
+                                        .load(imgUrl)
+                                        .resize(200,200)
+                                        .centerInside()
+                                        .into((ImageView) modalView.findViewById(R.id.res_img));
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d(TAG, error.toString());
+                    }
+                }));
+    }
+
     private void setQuestion(Pregunta pregunta){
         ((TextView)findViewById(R.id.question_title)).setText(pregunta.pregunta);
         mRespList.clear();
@@ -222,12 +292,23 @@ public class JuegosInternoActivity extends AppCompatActivity
                 holder.mCheckImg.setImageResource(R.drawable.checked);
             }
         } else if(mGame.gameType.equals(JuegosActivity.JUEGO_B)) {
-            mCorrectCounter += res.resultados.get(0).valor;
+            //mCorrectCounter += res.resultados.get(0).valor;
+            for(Resultado answer: res.resultados) {
+                int newValue = 0;
+                if(mCurioAnswers.get(answer.resultadosCurioseandoId) != null)
+                    newValue = mCurioAnswers.get(answer.resultadosCurioseandoId) + answer.valor; // Sum previous value with new retrieved value
+
+                mCurioAnswers.put(answer.resultadosCurioseandoId, newValue);
+            }
         }
     }
 
     private void shareImage(){
-        View view = findViewById(R.id.nahuatlismos_result);
+        View view;
+        if(mGame.gameType.equals(JuegosActivity.JUEGO_A))
+            view = findViewById(R.id.nahuatlismos_result);
+        else
+            view = findViewById(R.id.curioseando_result);
 
         view.setDrawingCacheEnabled(true);
         Bitmap icon = Bitmap.createBitmap(view.getDrawingCache());

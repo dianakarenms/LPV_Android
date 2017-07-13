@@ -58,7 +58,7 @@ public class InternationalizationAdapter extends RecyclerView.Adapter<Internatio
         holder.mDescription.setText(android.text.Html.fromHtml(mBookList.get(position).contenido).toString());
 
         // Image
-        String imgUrl = ApiConfig.interImg + mBookList.get(position).imagen;
+        String imgUrl = ApiConfig.juegosImg + mBookList.get(position).imagen;
         Picasso.with(mContext)
                 .load(imgUrl)
                 .resize(800,800)

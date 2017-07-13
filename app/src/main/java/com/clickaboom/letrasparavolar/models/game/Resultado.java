@@ -12,13 +12,13 @@ import java.io.Serializable;
 public class Resultado implements Serializable {
     @SerializedName("id")
     @Expose
-    public String id;
+    public Integer id;
     @SerializedName("respuestas_curioseando_id")
     @Expose
-    public String respuestasCurioseandoId;
+    public Integer respuestasCurioseandoId;
     @SerializedName("resultados_curioseando_id")
     @Expose
-    public String resultadosCurioseandoId;
+    public Integer resultadosCurioseandoId;
     @SerializedName("valor")
     @Expose
     public Integer valor;
