@@ -117,6 +117,9 @@
 
         <activity android:name=".activities.GacetitaActivity"
                   android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity android:name=".activities.NoticiasActivity"
+                  android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>

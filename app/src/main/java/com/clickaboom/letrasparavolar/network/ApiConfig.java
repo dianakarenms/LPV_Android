@@ -47,10 +47,14 @@ public class ApiConfig {
     // Participa
     public static final String participa = baseUrl + "/api/participa/save/";
 
+    // Noticias
+    public static final String noticias = baseUrl + "/api/noticias/";
+
     // Gacetita
     public static final String gacetitas = baseUrl + "/api/gacetita/";
     public static final String gacetitaImg = baseUrl + "/uploads/images/pdfportadas/";
     public static final String gacetitaPdf = baseUrl + "/uploads/pdfs/";
 
-
+    // Notificaciones
+    public static final String registrarToken = baseUrl + "/api/Registrartoken/"; //token, device_id
 }

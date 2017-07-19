@@ -4,8 +4,14 @@ import android.content.Context;
 import android.provider.Settings;
 import android.util.Log;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.clickaboom.letrasparavolar.R;
+import com.clickaboom.letrasparavolar.models.tokenRegister.ResTokenRegister;
+import com.clickaboom.letrasparavolar.network.ApiConfig;
+import com.clickaboom.letrasparavolar.network.ApiSingleton;
+import com.clickaboom.letrasparavolar.network.GsonRequest;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
 import com.google.gson.Gson;
@@ -38,7 +44,7 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
         // If you want to send messages to this application instance or
         // manage this apps subscriptions on the server side, send the
         // Instance ID token to your app server.
-        //sendRegistrationToServer(refreshedToken, deviceId, getApplicationContext());
+        sendRegistrationToServer(refreshedToken, deviceId, getApplicationContext());
     }
     // [END refresh_token]
 
@@ -51,41 +57,36 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
      * @param token The new token.
      */
     public static void sendRegistrationToServer(final String token, final String deviceId, final Context context) {
-        // Get token
-        /*final String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+        /*// Get token
+        final String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
 
         // Log and toast
         String msg = getString(R.string.msg_token_fmt, token);
         Log.d(TAG, msg);*/
 
-        /*if (authToken != null) {
-            if (authToken.getAccessToken() != null) {
-                APIConnection apiConnection = APIConnection.getInstance();
-                // Headers
-                Map<String, String> headers = new HashMap<>();
-                headers.put("Accept", "Accept");
-                headers.put("Authorization", "Bearer " + authToken.getAccessToken());
+        String params = "?token=" + token + "&device_id=" + deviceId;
 
-                // Params
-                Map<String, String> params = new HashMap<>();
-                params.put("os", "android");
-                params.put("token", token);
-                params.put("device_id", deviceId);
+        // Access the RequestQueue through your singleton class.
+        ApiSingleton.getInstance(context)
+                .addToRequestQueue(new GsonRequest(ApiConfig.registrarToken + params,
+                        ResTokenRegister.class,
+                        Request.Method.GET,
+                        null, null,
+                        new Response.Listener() {
+                            @Override
+                            public void onResponse(Object response) {
+                                Log.d(TAG, response.toString());
+                                String res = ((ResTokenRegister) response).data;
+                                Log.d("tokenRegister", "success");
 
-                apiConnection.volleyPostRequest(context, context.getResources().getString(R.string.api_register_device), headers, params, new APICallback() {
+                            }
+                        }, new Response.ErrorListener() {
                     @Override
-                    public void onSuccess(JSONObject response) {
-                        Gson gson = new Gson();
-                        ApiResponse res = gson.fromJson(response.toString(), ApiResponse.class);
-                        Log.d(TAG, res.message);
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d(TAG, error.toString());
+                        Log.d("tokenRegister", "error");
                     }
+                }));
 
-                    @Override
-                    public void onError(VolleyError error) {
-                        //Log.d(TAG, error.getMessage());
-                    }
-                }, false);
-            }
-        }*/
     }
 }

@@ -43,11 +43,13 @@ import com.clickaboom.letrasparavolar.models.banners.Banner;
 import com.clickaboom.letrasparavolar.models.banners.ResBanners;
 import com.clickaboom.letrasparavolar.models.collections.Colecciones;
 import com.clickaboom.letrasparavolar.models.defaults.ResDefaults;
+import com.clickaboom.letrasparavolar.models.tokenRegister.ResTokenRegister;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
 import com.clickaboom.letrasparavolar.network.ApiSingleton;
 import com.clickaboom.letrasparavolar.network.DownloadFile;
 import com.clickaboom.letrasparavolar.network.GsonRequest;
 import com.clickaboom.letrasparavolar.network.SQLiteDBHelper;
+import com.clickaboom.letrasparavolar.services.MyFirebaseInstanceIDService;
 import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.io.File;
@@ -205,9 +207,10 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStart() {
         super.onStart();
+        // Get token
         String token = FirebaseInstanceId.getInstance().getToken();
         String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-        Log.d("Firebase", "token: " + token + ", deviceId: " + deviceId);
+        MyFirebaseInstanceIDService.sendRegistrationToServer(token, deviceId, mContext);
     }
 
     @Override
@@ -319,7 +322,7 @@ public class MainActivity extends AppCompatActivity
                 replaceFragment(programInfoFragmentFrag);
                 break;
             case R.id.news_btn:
-                Toast.makeText(getApplicationContext(), "news_btn", Toast.LENGTH_SHORT).show();
+                startActivity(NoticiasActivity.newIntent(mContext));
                 break;
             case R.id.games_btn:
                 startActivity(JuegosActivity.newIntent(mContext));
