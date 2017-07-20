@@ -1,11 +1,13 @@
 package com.clickaboom.letrasparavolar.adapters;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -16,6 +18,8 @@ import com.clickaboom.letrasparavolar.network.ApiConfig;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
+
+import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
 
 /**
  * Created by Karencita on 13/05/2017.
@@ -93,18 +97,24 @@ public class InGameAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         public TextView mTitle;
         public Respuesta mItem;
         public RelativeLayout mItemView;
+        private LinearLayout mBackground;
 
         public CurioseandoHolder(View v) {
             super(v);
             v.setOnClickListener(this);
             mTitle = (TextView) v.findViewById(R.id.res_title);
             mItemView = (RelativeLayout) v.findViewById(R.id.parent);
+            mBackground = (LinearLayout) v.findViewById(R.id.background);
         }
 
         @Override
         public void onClick(View v) {
-            sListener.OnItemClicked(mItem, getAdapterPosition());
-
+            // If there hasn't been chosen an answer before, show the value
+            if(!mAnswerClicked) {
+                mAnswerClicked = true;
+                mBackground.setBackgroundColor(mContext.getResources().getColor(R.color.light_gray));
+                sListener.OnItemClicked(mItem, getAdapterPosition());
+            }
         }
 
         public void setItem(Respuesta item) {
@@ -165,7 +175,7 @@ public class InGameAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
                 // Image
                 nahuaHolder.mImage.setImageResource(R.drawable.book_placeholder); // Initial empty value
-                String imgUrl = ApiConfig.interImg + "thumb_" + respuesta.imagen;
+                String imgUrl = ApiConfig.juegosImg + "thumb_" + respuesta.imagen;
                 //        imageLoader = ApiSingleton.getInstance(mContext).getImageLoader();
                 //        imageLoader.get(imgUrl, ImageLoader.getImageListener(holder.mImage, R.drawable.book_placeholder, android.R.drawable.ic_dialog_alert));
                 //        holder.mImage.setImageUrl(imgUrl, imageLoader);
@@ -194,12 +204,15 @@ public class InGameAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 //params.p(10, 10, 10, 10);
 
                 // set height of RecyclerView
-                curioHolder.itemView.setLayoutParams(params2);
-                curioHolder.itemView.setPadding(15, 15, 15, 15);
+                curioHolder.mItemView.setLayoutParams(params2);
+                curioHolder.mItemView.setPadding(15, 15, 15, 15);
                 //holder.itemView.setBackgroundResource(R.drawable.square_border);
 
                 // Title
                 curioHolder.mTitle.setText(respuesta.respuesta);
+
+                // Reset bacground color
+                curioHolder.mBackground.setBackground(mContext.getResources().getDrawable(R.drawable.square_border));
                 break;
         }
     }

@@ -100,36 +100,12 @@ public class GacetitaActivity extends AppCompatActivity implements View.OnClickL
                                     //db.addAllBooks(item, BookDetailsActivity.COLECCIONES);
                                 }
                                 mColeccionesAdapter.notifyDataSetChanged();
-                                /*List<List<Colecciones>> res = ((ResCollections) response).data;
-
-                                mCollectionsList.clear();
-                                for(List<Colecciones> item : res) {
-                                    mCollectionsList.addAll(item); // Add main book to list
-                                    //db.addAllBooks(item, BookDetailsActivity.COLECCIONES);
-                                }
-
-                                mColeccionesAdapter.notifyDataSetChanged();
-                                mNestedScroll.scrollTo(0, 0);
-                                if(mNestedScroll.getHeight() < mCoordinatorLayout.getHeight()) {
-                                    mNestedScroll.setMinimumHeight(mCoordinatorLayout.getHeight());
-                                }*/
                             }
                         }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.d(TAG, error.toString());
-                        /*ArrayList<Colecciones> allBooks = db.getAllBooks();
-                        if(allBooks.isEmpty())
-                            Toast.makeText(mContext, "Error de conexión", Toast.LENGTH_SHORT).show();
-                        else {
-                            for(Colecciones book: allBooks) {
-                                if(book.mBookType.equals(BookDetailsActivity.COLECCIONES))
-                                    mCollectionsList.add(book);
-                            }
-                            Toast.makeText(mContext, "Sin conexión", Toast.LENGTH_SHORT).show();
-                        }
-                        mColeccionesAdapter.notifyDataSetChanged();*/
-                        }
+                    }
                 }));
 
     }

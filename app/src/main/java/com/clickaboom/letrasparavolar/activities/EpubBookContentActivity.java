@@ -30,6 +30,7 @@ import java.util.zip.ZipFile;
 import nl.siegmann.epublib.domain.Book;
 
 import static com.clickaboom.letrasparavolar.R.id.webView;
+import static com.clickaboom.letrasparavolar.activities.MainActivity.db;
 
 /**
  * Created by clickaboom on 6/10/17.
@@ -104,7 +105,6 @@ public class EpubBookContentActivity extends Activity implements DownloadFile.On
     @Override
     public void onPause() {
         super.onPause();
-        mWebView.loadUrl("file:///android_asset/nonexistent.html");
         mWebView.onPause();
     }
 
@@ -116,6 +116,16 @@ public class EpubBookContentActivity extends Activity implements DownloadFile.On
 
     public void loadEpubFromStorage() {
         try {
+            // if localStored
+            if(db.getBookByePub(mEpub.epub).isEmpty()) {
+                // Epub was already downloaded but not yet added to database
+                mEpub.descargado = true;
+                mEpub.favorito = false;
+                if (db.insertBook(mEpub)) {
+                    Log.d("ebookContent", "stored in db");
+                }
+            }
+
             decom(mEpub.epub, basePath + "/");
 
             mEpubBaseURL = "file://" + Environment.getExternalStorageDirectory() + "/LPV_eBooks/epub_reader/index.html?book=" + mEpub.epub;

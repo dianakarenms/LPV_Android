@@ -27,7 +27,7 @@ public class ApiConfig {
 
     // Images URL
     public static final String collectionsImg = baseUrl + "/uploads/images/libros/thumb_";
-    public static final String interImg = baseUrl + "/uploads/images/juegos/";
+    public static final String juegosImg = baseUrl + "/uploads/images/juegos/";
 
     // Epubs URL
     public static final String epubs = baseUrl + "/uploads/epubs/";
@@ -42,13 +42,22 @@ public class ApiConfig {
     public static final String nahuatlismosGame = baseUrl + "/api/nahuatlismos/";
     public static final String curioseandoTests = baseUrl + "/api/curioseando/tests/";
     public static final String curioseandoTestQuestions = baseUrl + "/api/curioseando/preguntas/";
+    public static final String curioseandoTestResult = baseUrl + "/api/curioseando/resultado/";
 
     // Participa
     public static final String participa = baseUrl + "/api/participa/save/";
+
+    // Noticias
+    public static final String noticias = baseUrl + "/api/noticias/";
 
     // Gacetita
     public static final String gacetitas = baseUrl + "/api/gacetita/";
     public static final String gacetitaImg = baseUrl + "/uploads/images/pdfportadas/";
     public static final String gacetitaPdf = baseUrl + "/uploads/pdfs/";
 
+<<<<<<< HEAD
+=======
+    // Notificaciones
+    public static final String registrarToken = baseUrl + "/api/Registrartoken/"; //token, device_id
+>>>>>>> 04442ba9c50fd5c30797cd3910f859e8311555c8
 }

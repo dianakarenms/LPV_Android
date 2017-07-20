@@ -5,6 +5,7 @@ import android.content.res.AssetManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.Settings;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -42,11 +43,14 @@ import com.clickaboom.letrasparavolar.models.banners.Banner;
 import com.clickaboom.letrasparavolar.models.banners.ResBanners;
 import com.clickaboom.letrasparavolar.models.collections.Colecciones;
 import com.clickaboom.letrasparavolar.models.defaults.ResDefaults;
+import com.clickaboom.letrasparavolar.models.tokenRegister.ResTokenRegister;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
 import com.clickaboom.letrasparavolar.network.ApiSingleton;
 import com.clickaboom.letrasparavolar.network.DownloadFile;
 import com.clickaboom.letrasparavolar.network.GsonRequest;
 import com.clickaboom.letrasparavolar.network.SQLiteDBHelper;
+import com.clickaboom.letrasparavolar.services.MyFirebaseInstanceIDService;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -163,6 +167,9 @@ public class MainActivity extends AppCompatActivity
 
         copyFileOrDir("epub_reader");
 
+        loadLegends();
+        loadCollections();
+
         view1 = (ViewPager)findViewById(R.id.banner);
         view1.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -200,6 +207,10 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStart() {
         super.onStart();
+        // Get token
+        String token = FirebaseInstanceId.getInstance().getToken();
+        String deviceId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+        MyFirebaseInstanceIDService.sendRegistrationToServer(token, deviceId, mContext);
     }
 
     @Override
@@ -309,7 +320,7 @@ public class MainActivity extends AppCompatActivity
                 replaceFragment(programInfoFragmentFrag);
                 break;
             case R.id.news_btn:
-                Toast.makeText(getApplicationContext(), "news_btn", Toast.LENGTH_SHORT).show();
+                startActivity(NoticiasActivity.newIntent(mContext));
                 break;
             case R.id.games_btn:
                 startActivity(JuegosActivity.newIntent(mContext));
@@ -639,8 +650,23 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void descargar(String url, String fileName, Colecciones ePub){
-        DownloadFile downloadFile = new DownloadFile(mDownloadsListener, mContext, MainActivity.this, false, ePub);
-        downloadFile.execute(url, fileName, fileName);
+        String basePath = Environment.getExternalStorageDirectory() + "/LPV_eBooks/epub_reader/epubs/" + ePub.epub;
+        File file = new File(basePath);
+        if(!file.exists()) {
+            DownloadFile downloadFile = new DownloadFile(mDownloadsListener, mContext, MainActivity.this, false, ePub);
+            downloadFile.execute(url, fileName, fileName);
+        } else {
+            // if localStored
+            if(db.getBookByePub(ePub.epub).isEmpty()) {
+                // Epub was already downloaded but not yet added to database
+                ePub.descargado = true;
+                ePub.favorito = false;
+                if (db.insertBook(ePub)) {
+                    Log.d("ebookContent", "stored in db");
+                }
+            }
+        }
+
     }
 
     final static String TARGET_BASE_PATH = "/sdcard/LPV_eBooks/";
@@ -674,9 +700,6 @@ public class MainActivity extends AppCompatActivity
                     if (!path.startsWith("images") && !path.startsWith("sounds") && !path.startsWith("webkit"))
                         copyFileOrDir( p + assets[i]);
                 }
-
-                loadLegends();
-                loadCollections();
 
             }
         } catch (IOException ex) {
