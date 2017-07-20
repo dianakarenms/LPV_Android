@@ -55,9 +55,7 @@ public class ApiConfig {
     public static final String gacetitaImg = baseUrl + "/uploads/images/pdfportadas/";
     public static final String gacetitaPdf = baseUrl + "/uploads/pdfs/";
 
-<<<<<<< HEAD
-=======
     // Notificaciones
     public static final String registrarToken = baseUrl + "/api/Registrartoken/"; //token, device_id
->>>>>>> 04442ba9c50fd5c30797cd3910f859e8311555c8
+
 }

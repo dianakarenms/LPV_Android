@@ -72,6 +72,15 @@ public class NotificationPublisher {
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
         Map<String, String> data = remoteMessage.getData();
+
+
+        String title = remoteMessage.getData().get("title");
+        String message = remoteMessage.getData().get("message");
+        if(title == null) {
+            title = "Letras para volar";
+            message = remoteMessage.getNotification().getBody();
+        }
+
         //Bitmap bitmap = getBitmapFromURL(remoteMessage.getData().get("image"));
         Bitmap bitmap = getBitmapFromURL("http://www.startupremarkable.com/wp-content/uploads/2015/02/a-book-a-week-image.jpg");
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
@@ -80,8 +89,8 @@ public class NotificationPublisher {
                 .setColor(ContextCompat.getColor(context, R.color.colorAccent))
                 //.setContentTitle("Letras para volar")
                 //.setContentText("¡Visualiza el nuevo contenido!")
-                .setContentTitle(remoteMessage.getData().get("title"))
-                .setContentText(remoteMessage.getData().get("message"))
+                .setContentTitle(title)
+                .setContentText(message)
                 .setAutoCancel(true)
                 .setSound(defaultSoundUri)
                 .setDefaults(Notification.DEFAULT_VIBRATE)

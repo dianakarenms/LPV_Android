@@ -33,6 +33,6 @@ public class Noticia implements Serializable {
     public String date;
     @SerializedName("image")
     @Expose
-    public Object image;
+    public String image;
 
 }

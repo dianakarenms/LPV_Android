@@ -4,12 +4,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -38,7 +39,6 @@ public class NoticiasActivity extends AppCompatActivity implements View.OnClickL
     private RecyclerView mCollectionsRV;
     private NoticiaAdapter mNoticiasAdapter;
     private List<Noticia> mNoticiasList = new ArrayList<>();
-    private GridLayoutManager mGridLayoutManager;
     private Context mContext;
 
     public static Intent newIntent(Context packageContext) {
@@ -49,7 +49,7 @@ public class NoticiasActivity extends AppCompatActivity implements View.OnClickL
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_gacetita);
+        setContentView(R.layout.activity_gace_noti);
         mContext = this;
 
         // Menu drawer onclicklistener
@@ -73,8 +73,7 @@ public class NoticiasActivity extends AppCompatActivity implements View.OnClickL
         // Collections RecyclerView
         mNoticiasAdapter = new NoticiaAdapter(mNoticiasList, mContext);
         mCollectionsRV = (RecyclerView) findViewById(R.id.collections_recycler);
-        mGridLayoutManager = new GridLayoutManager(mContext, 3);
-        mCollectionsRV.setLayoutManager(mGridLayoutManager);
+        mCollectionsRV.setLayoutManager(new LinearLayoutManager(mContext));
         mCollectionsRV.setHasFixedSize(true);
         mNoticiasAdapter.mColType = BookDetailsActivity.COLECCIONES;
         mCollectionsRV.setAdapter(mNoticiasAdapter);
@@ -86,6 +85,8 @@ public class NoticiasActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void loadNoticias() {
+        ApiSingleton.showProgressFlower(NoticiasActivity.this);
+
         ApiSingleton.getInstance(mContext)
                 .addToRequestQueue(new JsonArrayRequest(ApiConfig.noticias + "?page=1",
                 new Response.Listener<JSONArray>() {
@@ -98,15 +99,19 @@ public class NoticiasActivity extends AppCompatActivity implements View.OnClickL
                         mNoticiasList.clear();
                         mNoticiasList.addAll((List<Noticia>) gson.fromJson(response.toString(), noticiasType));
                         mNoticiasAdapter.notifyDataSetChanged();
+                        ApiSingleton.hideProgressFlower();
                     }
                 },
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
+                        ApiSingleton.hideProgressFlower();
+                        Toast.makeText(mContext, "Sin conexión", Toast.LENGTH_SHORT).show();
                         Log.d("getNoticias", "error");
                     }
                 }
         ));
+
     }
 
     @Override

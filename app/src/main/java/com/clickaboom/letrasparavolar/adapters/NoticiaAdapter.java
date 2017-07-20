@@ -1,8 +1,6 @@
 package com.clickaboom.letrasparavolar.adapters;
 
 import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,8 +9,8 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.clickaboom.letrasparavolar.R;
+import com.clickaboom.letrasparavolar.activities.NoticiasDetailActivity;
 import com.clickaboom.letrasparavolar.models.noticias.Noticia;
-import com.clickaboom.letrasparavolar.network.ApiConfig;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -42,7 +40,7 @@ public class NoticiaAdapter extends RecyclerView.Adapter<NoticiaAdapter.ViewHold
             mTitle = (TextView) v.findViewById(R.id.titleTxt);
             mDate = (TextView) v.findViewById(R.id.dateTxt);
             mDescription = (TextView) v.findViewById(R.id.descriptionTxt);
-            //mImage = (ImageButton)v.findViewById(R.id.book_img);
+            mImage = (ImageButton)v.findViewById(R.id.coverImg);
         }
 
         @Override
@@ -51,6 +49,9 @@ public class NoticiaAdapter extends RecyclerView.Adapter<NoticiaAdapter.ViewHold
             Intent i = new Intent(Intent.ACTION_VIEW);
             i.setData(Uri.parse(url));
             mContext.startActivity(i);*/
+            mContext.startActivity(NoticiasDetailActivity.newIntent(
+                    mContext,
+                    mItem));
         }
 
         public void setItem(Noticia item) {
@@ -61,7 +62,7 @@ public class NoticiaAdapter extends RecyclerView.Adapter<NoticiaAdapter.ViewHold
     @Override
     public NoticiaAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_book, parent, false);
+                .inflate(R.layout.item_noticias, parent, false);
         ViewHolder viewHolder = new ViewHolder(v);
         return viewHolder;
     }
@@ -71,21 +72,25 @@ public class NoticiaAdapter extends RecyclerView.Adapter<NoticiaAdapter.ViewHold
         Noticia item = mItems.get(position);
         holder.setItem(item);
         // Title
-        holder.mTitle.setText(item.title);
+        NoticiasDetailActivity.setHtmlText(item.title, holder.mTitle);
 
         // Date
         holder.mDate.setText(item.date);
 
-        // Subtitle
-        holder.mDescription.setText(item.description);
+        // Description
+        NoticiasDetailActivity.setHtmlText(item.description, holder.mDescription);
 
         // Image
-        /*String imgUrl = ApiConfig.gacetitaImg + item.image;
-        Picasso.with(mContext)
-                .load(imgUrl)
-                .resize(200,200)
-                .centerInside()
-                .into(holder.mImage);*/
+        if(item.image == null) {
+            holder.mImage.setVisibility(View.GONE);
+        } else {
+            String imgUrl = item.image;
+            Picasso.with(mContext)
+                    .load(imgUrl)
+                    .resize(200,200)
+                    .centerInside()
+                    .into(holder.mImage);
+        }
     }
 
     @Override

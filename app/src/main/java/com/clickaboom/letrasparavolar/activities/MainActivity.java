@@ -5,6 +5,7 @@ import android.content.res.AssetManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.Settings;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -43,7 +44,6 @@ import com.clickaboom.letrasparavolar.models.banners.Banner;
 import com.clickaboom.letrasparavolar.models.banners.ResBanners;
 import com.clickaboom.letrasparavolar.models.collections.Colecciones;
 import com.clickaboom.letrasparavolar.models.defaults.ResDefaults;
-import com.clickaboom.letrasparavolar.models.tokenRegister.ResTokenRegister;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
 import com.clickaboom.letrasparavolar.network.ApiSingleton;
 import com.clickaboom.letrasparavolar.network.DownloadFile;
@@ -94,6 +94,11 @@ public class MainActivity extends AppCompatActivity
     private DownloadFile.OnTaskCompleted mDownloadsListener;
     private ArrayList<String> mDefaultList = new ArrayList<>();
     public static DrawerLayout drawer;
+    private LibraryFragment mLibraryFragment;
+    private ColeccionesFragment mColeccionesFragment;
+    private LegendsFragment mLeyendasFragment;
+    private boolean doubleBackToExitPressedOnce = false;
+    private boolean isHomeVisible = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -214,27 +219,47 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        doubleBackToExitPressedOnce = false;
+    }
+
+    @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.END)) {
             drawer.closeDrawer(GravityCompat.END);
         } else {
-            /*// If there're available fragments pop them from backstack
-            // by overriding the backbutton
-            FragmentManager fm = getSupportFragmentManager();
-            if(fm.getBackStackEntryCount() > 0) {
+            if (doubleBackToExitPressedOnce) {
                 super.onBackPressed();
+                return;
+            } else {
+                if(!isHomeVisible) {
+                    // Pop all fragments from backstack
+                    FragmentManager fm = getSupportFragmentManager();
+                    fm.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+                    restoreBottonNavColors();
+
+                    isHomeVisible = true;
+                } else {
+                    if (doubleBackToExitPressedOnce) {
+                        super.onBackPressed();
+                        return;
+                    }
+
+                    this.doubleBackToExitPressedOnce = true;
+                    Toast.makeText(this, "Presiona de nuevo para salir", Toast.LENGTH_SHORT).show();
+
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            doubleBackToExitPressedOnce = false;
+                        }
+                    }, 5000);
+                }
             }
 
-            // If there aren't any fragments in backstack then
-            // unselect all bottomNavView buttons
-            if(fm.getBackStackEntryCount() == 0) {
-                restoreBottonNavColors();
-            }*/
-            // Pop all fragments from backstack
-            FragmentManager fm = getSupportFragmentManager();
-            fm.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-            restoreBottonNavColors();
+
         }
     }
 
@@ -295,18 +320,24 @@ public class MainActivity extends AppCompatActivity
     public void onClick(View v) {
         // Set selected button
         restoreBottonNavColors();
-        //v.setBackgroundColor(getResources().getColor(R.color.bottom_nav_pressed));
+        doubleBackToExitPressedOnce = false;
+        isHomeVisible = false;
 
         switch (v.getId()) {
             case R.id.legends_btn:
-                presentFragment(LegendsFragment.newInstance());
+                if(mLeyendasFragment == null)
+                    mLeyendasFragment = LegendsFragment.newInstance();
+                presentFragment(mLeyendasFragment);
                 break;
             case R.id.collections_btn:
-                presentFragment(ColeccionesFragment.newInstance());
+                if(mColeccionesFragment == null)
+                    mColeccionesFragment = ColeccionesFragment.newInstance();
+                presentFragment(mColeccionesFragment);
                 break;
             case R.id.library_btn:
-                Fragment libFrag = new LibraryFragment();
-                presentFragment(libFrag);
+                if(mLibraryFragment == null)
+                    mLibraryFragment = new LibraryFragment();
+                presentFragment(mLibraryFragment);
                 break;
         }
     }
@@ -369,7 +400,22 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public void presentFragment(Fragment fragment) {
+    public void presentFragment (Fragment fragment){
+        String backStateName = fragment.getClass().getName();
+
+        FragmentManager manager = getSupportFragmentManager();
+        boolean fragmentPopped = manager.popBackStackImmediate (backStateName, 0);
+
+        if (!fragmentPopped){ //mMainPagerFrag not in back stack, create it.
+            FragmentTransaction ft = manager.beginTransaction();
+            ft.add(R.id.fragment_container, fragment);
+            ft.addToBackStack(backStateName);
+            ft.commit();
+        }
+    }
+
+
+    /*public void presentFragment(Fragment fragment) {
         String backStateName = fragment.getClass().getName();
 
         FragmentManager manager = getSupportFragmentManager();
@@ -385,7 +431,7 @@ public class MainActivity extends AppCompatActivity
             manager.popBackStack(backStateName, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         }
         ft.commit();
-    }
+    }*/
 
     public static void addFragment(Fragment fragment, FragmentActivity activity){
         String backStateName = fragment.getClass().getName();

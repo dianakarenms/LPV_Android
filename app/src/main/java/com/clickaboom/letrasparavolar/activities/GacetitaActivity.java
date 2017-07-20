@@ -46,7 +46,7 @@ public class GacetitaActivity extends AppCompatActivity implements View.OnClickL
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.fragment_gacetita);
+        setContentView(R.layout.activity_gace_noti);
         mContext = this;
 
         // Menu drawer onclicklistener

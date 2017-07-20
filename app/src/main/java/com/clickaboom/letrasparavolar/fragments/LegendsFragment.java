@@ -90,7 +90,7 @@ public class LegendsFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRetainInstance(true);
+//        setRetainInstance(true);
         mLegendsAdapter = new LegendsAdapter(mLegendsList, getContext());
         mLegendsCategoriesAdapter = new LegendsCategoriesAdapter(mCategoriesList, mImgPath, R.color.legends_nav_pressed, getContext(), new LegendsCategoriesAdapter.RecyclerViewClickListener() {
             @Override

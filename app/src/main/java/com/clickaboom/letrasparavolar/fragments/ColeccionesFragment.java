@@ -25,11 +25,10 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.activities.BookDetailsActivity;
-import com.clickaboom.letrasparavolar.activities.MainActivity;
-import com.clickaboom.letrasparavolar.activities.MapsActivity;
 import com.clickaboom.letrasparavolar.activities.BuscarActivity;
-import com.clickaboom.letrasparavolar.adapters.ColeccionesCategoriesAdapter;
+import com.clickaboom.letrasparavolar.activities.MainActivity;
 import com.clickaboom.letrasparavolar.adapters.ColeccionesAdapter;
+import com.clickaboom.letrasparavolar.adapters.ColeccionesCategoriesAdapter;
 import com.clickaboom.letrasparavolar.models.collections.Categoria;
 import com.clickaboom.letrasparavolar.models.collections.Colecciones;
 import com.clickaboom.letrasparavolar.models.collections.ResCollections;
@@ -92,7 +91,7 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRetainInstance(true);
+//        setRetainInstance(true);
         mColeccionesAdapter = new ColeccionesAdapter(mCollectionsList, getContext());
         mColeccionesCategoriesAdapter = new ColeccionesCategoriesAdapter(mCategoriesList, mImgPath, R.color.collections_nav_pressed, getContext(), new ColeccionesCategoriesAdapter.RecyclerViewClickListener() {
             @Override
@@ -110,6 +109,7 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
         v = inflater.inflate(R.layout.fragment_collections, container, false);
 
         mContext = getContext();
+
         // Set its bottomNavButton clicked
         ((MainActivity)getActivity()).restoreBottonNavColors();
         ((MainActivity)getActivity()).collectionsBtn.

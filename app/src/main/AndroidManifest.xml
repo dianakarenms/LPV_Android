@@ -120,6 +120,9 @@
 
         <activity android:name=".activities.NoticiasActivity"
                   android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity android:name=".activities.NoticiasDetailActivity"
+                  android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>
