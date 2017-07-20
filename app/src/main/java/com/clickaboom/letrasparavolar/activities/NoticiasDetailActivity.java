@@ -89,10 +89,15 @@ public class NoticiasDetailActivity extends AppCompatActivity implements View.On
     }
 
     public static void setHtmlText(String text, TextView textView) {
+//        text = text.replaceAll("&"+"nbsp;", " ");
+//        text = text.replaceAll(String.valueOf((char) 160), " ");
+        //text = text.replaceAll("\u00a0","");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            textView.setText(Html.fromHtml(text,  Html.FROM_HTML_MODE_COMPACT));
+            text = Html.fromHtml(text,  Html.FROM_HTML_MODE_COMPACT).toString().replaceAll("&nbsp;"," ");
+            textView.setText(text);
         } else {
-            textView.setText(Html.fromHtml(text));
+            text = Html.fromHtml(text).toString().replaceAll("&nbsp;"," ");
+            textView.setText(text);
         }
     }
 }

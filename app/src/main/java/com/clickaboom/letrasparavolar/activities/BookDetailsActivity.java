@@ -1,8 +1,13 @@
 package com.clickaboom.letrasparavolar.activities;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.v4.content.IntentCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -31,6 +36,7 @@ import java.util.List;
 
 import static com.clickaboom.letrasparavolar.activities.MainActivity.db;
 import static com.clickaboom.letrasparavolar.activities.MainActivity.getStringFromListByCommas;
+import static com.clickaboom.letrasparavolar.network.DownloadFile.isStoragePermissionGranted;
 
 /**
  * Created by Karencita on 15/05/2017.
@@ -264,7 +270,10 @@ public class BookDetailsActivity extends AppCompatActivity {
         findViewById(R.id.downloadBtn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivityForResult(EpubBookContentActivity.newIntent(mContext, mItem), REQUEST_DOWNLOAD);
+                if(isStoragePermissionGranted(BookDetailsActivity.this)) {
+                    startActivityForResult(EpubBookContentActivity.newIntent(mContext, mItem), REQUEST_DOWNLOAD);
+                }
+
                                         /*// read epub
                                         try {
                                             EpubReader epubReader = new EpubReader();
@@ -294,6 +303,39 @@ public class BookDetailsActivity extends AppCompatActivity {
                     updateUI();
                 }
                 break;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(grantResults[0]== PackageManager.PERMISSION_GRANTED){
+            Log.v(TAG,"Permission: "+permissions[0]+ "was "+grantResults[0]);
+
+            Toast.makeText(mContext, "Habilitando permisos...", Toast.LENGTH_SHORT).show();
+
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    // Restart the app since in order to change the ID the process
+                    // has to be restarted. Next time you open the app,
+                    // the new groupID is set and the permission is granted.
+                    PackageManager packageManager = getPackageManager();
+                    Intent intent = packageManager.getLaunchIntentForPackage(getPackageName());
+                    ComponentName componentName = intent.getComponent();
+                    Intent mainIntent = IntentCompat.makeRestartActivityTask(componentName);
+                    // TODO: redirect app to open the corresponding item in bookDetails and open the epub viewer
+                    mainIntent.putExtra(MainActivity.EXTRA_BOOK_ITEM, mItem);
+                    startActivity(mainIntent);
+                    System.exit(0);
+                }
+            }, 2000);
+
+        } else {
+            Toast.makeText(mContext,
+                    "Habilite permiso de \"almacenamiento local\" para visualizar los epubs",
+                    Toast.LENGTH_SHORT)
+                    .show();
         }
     }
 }

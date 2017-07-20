@@ -83,8 +83,7 @@
                 android:layout_weight="2.5"
                 android:maxHeight="100dp"
                 android:adjustViewBounds="true"
-                android:scaleType="centerInside"
-                android:src="@drawable/modal_juego2"/>
+                android:scaleType="fitCenter"/>
             <TextView
                 android:id="@+id/res_title"
                 android:layout_width="0dp"

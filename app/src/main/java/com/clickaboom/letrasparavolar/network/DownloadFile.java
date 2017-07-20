@@ -85,7 +85,7 @@ public class DownloadFile extends AsyncTask<String, Void, Void> {
         //folder = new File(extStorageDirectory, "LPV_eBooks");
         folder = new File(extStorageDirectory, "LPV_eBooks/epub_reader/epubs/" + fileFolder);
 
-        if(isStoragePermissionGranted()) {
+        if(isStoragePermissionGranted(activity)) {
             if (folder.exists()) {
                 pdfFile = new File(folder, fileName);
                 if (pdfFile.exists()) {
@@ -202,15 +202,15 @@ public class DownloadFile extends AsyncTask<String, Void, Void> {
         return true;
     }
 
-    public Boolean isStoragePermissionGranted() {
+    public static Boolean isStoragePermissionGranted(Activity activity) {
         if (Build.VERSION.SDK_INT >= 23) {
             if (Build.VERSION.SDK_INT >= 23)
             {
-                if (checkPermission())
+                if (checkPermission(activity))
                 {
                     return true;
                 } else {
-                    requestPermission(); // Code for permission
+                    requestPermission(activity); // Code for permission
                     return false;
                 }
             }
@@ -222,7 +222,7 @@ public class DownloadFile extends AsyncTask<String, Void, Void> {
         return false;
     }
 
-    private boolean checkPermission() {
+    public static boolean checkPermission(Activity activity) {
         int result = ContextCompat.checkSelfPermission(activity, android.Manifest.permission.WRITE_EXTERNAL_STORAGE);
         if (result == PackageManager.PERMISSION_GRANTED) {
             return true;
@@ -231,12 +231,30 @@ public class DownloadFile extends AsyncTask<String, Void, Void> {
         }
     }
 
-    private void requestPermission() {
+    public static void requestPermission(Activity activity) {
         if (ActivityCompat.shouldShowRequestPermissionRationale(activity, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
             //Toast.makeText(context, "Habilita el permiso para guardar los archivos en tu dispositivo.", Toast.LENGTH_LONG).show();
+            showExplanation("Permiso requerido", "Habilita el permiso para abrir los epubs en tu dispositivo.", android.Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQUEST_CODE, activity);
         } else {
             ActivityCompat.requestPermissions(activity, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
         }
     }
+
+    public static void showExplanation(String title,
+                                 String message,
+                                 final String permission,
+                                 final int permissionRequestCode, final Activity activity) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+        builder.setTitle(title)
+                .setMessage(message)
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        ActivityCompat.requestPermissions(activity,
+                                new String[]{permission}, permissionRequestCode);
+                    }
+                });
+        builder.create().show();
+    }
+
 
 }

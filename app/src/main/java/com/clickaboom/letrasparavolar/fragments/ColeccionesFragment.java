@@ -41,7 +41,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
+import static com.clickaboom.letrasparavolar.activities.MainActivity.EXTRA_BOOK_ITEM;
 import static com.clickaboom.letrasparavolar.activities.MainActivity.db;
+import static com.clickaboom.letrasparavolar.activities.MainActivity.mIntentBook;
 
 /**
  * Created by Karencita on 15/05/2017.
@@ -66,8 +68,11 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
     private CoordinatorLayout mCoordinatorLayout;
     private Context mContext;
 
-    public static ColeccionesFragment newInstance() {
+    public static ColeccionesFragment newInstance(Colecciones book) {
         ColeccionesFragment fragment = new ColeccionesFragment();
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(EXTRA_BOOK_ITEM, book);
+        fragment.setArguments(bundle);
         return fragment;
     }
 
@@ -277,6 +282,11 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
                             Toast.makeText(mContext, "Sin conexión", Toast.LENGTH_SHORT).show();
                         }
                         mColeccionesAdapter.notifyDataSetChanged();
+
+                        Colecciones book = (Colecciones) getArguments().getSerializable(EXTRA_BOOK_ITEM);
+                        if(book != null) {
+                            startActivity(BookDetailsActivity.newIntent(mContext, book.id, book.mBookType));
+                        }
                         }
                 }));
 

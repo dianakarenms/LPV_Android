@@ -250,17 +250,13 @@ public class JuegosInternoActivity extends AppCompatActivity
                                 ResultadoTest resultado = res.get(0);
 
                                 RelativeLayout modalView = (RelativeLayout) findViewById(R.id.modal_game_over);
-                                ((TextView) modalView.findViewById(R.id.res_title)).setText("Resultado: " + resultado.resultado);
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                                    ((TextView) modalView.findViewById(R.id.description_txt)).setText(Html.fromHtml(resultado.descripcion,  Html.FROM_HTML_MODE_COMPACT));
-                                } else {
-                                    ((TextView) modalView.findViewById(R.id.description_txt)).setText(Html.fromHtml(resultado.descripcion));
-                                }
+                                NoticiasDetailActivity.setHtmlText(resultado.resultado, ((TextView) modalView.findViewById(R.id.res_title)));
+                                NoticiasDetailActivity.setHtmlText(resultado.descripcion, ((TextView) modalView.findViewById(R.id.description_txt)));
 
                                 String imgUrl = ApiConfig.juegosImg + resultado.imagen;
                                 Picasso.with(mContext)
                                         .load(imgUrl)
-                                        .resize(200,200)
+                                        .resize(400,400)
                                         .centerInside()
                                         .into((ImageView) modalView.findViewById(R.id.res_img));
                             }

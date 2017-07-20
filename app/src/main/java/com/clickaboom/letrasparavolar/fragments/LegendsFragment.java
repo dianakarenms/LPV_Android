@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
+import static com.clickaboom.letrasparavolar.activities.MainActivity.EXTRA_BOOK_ITEM;
 import static com.clickaboom.letrasparavolar.activities.MainActivity.db;
 
 /**
@@ -65,8 +66,11 @@ public class LegendsFragment extends Fragment implements View.OnClickListener {
     private CoordinatorLayout mCoordinatorLayout;
     private Context mContext;
 
-    public static LegendsFragment newInstance() {
+    public static LegendsFragment newInstance(Colecciones book) {
         LegendsFragment fragment = new LegendsFragment();
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(EXTRA_BOOK_ITEM, book);
+        fragment.setArguments(bundle);
         return fragment;
     }
 
@@ -276,6 +280,11 @@ public class LegendsFragment extends Fragment implements View.OnClickListener {
                             Toast.makeText(mContext, "Sin conexión", Toast.LENGTH_SHORT).show();
                         }
                         mLegendsAdapter.notifyDataSetChanged();
+
+                        Colecciones book = (Colecciones) getArguments().getSerializable(EXTRA_BOOK_ITEM);
+                        if(book != null) {
+                            startActivity(BookDetailsActivity.newIntent(mContext, book.id, book.mBookType));
+                        }
                     }
                 }));
 

@@ -1,17 +1,22 @@
 package com.clickaboom.letrasparavolar.activities;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.IntentCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -71,10 +76,16 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
+import nl.siegmann.epublib.epub.Main;
+
+import static com.clickaboom.letrasparavolar.network.ApiConfig.epubs;
+import static com.clickaboom.letrasparavolar.network.DownloadFile.isStoragePermissionGranted;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         View.OnClickListener, DownloadFile.OnTaskCompleted {
 
+    public static final String EXTRA_BOOK_ITEM = "com.lpv.bookItem";
     public RelativeLayout legendsBtn, collectionsBtn, libraryBtn;
     public static List<String> mLocalEpubsList = new ArrayList<>();
 
@@ -99,6 +110,8 @@ public class MainActivity extends AppCompatActivity
     private LegendsFragment mLeyendasFragment;
     private boolean doubleBackToExitPressedOnce = false;
     private boolean isHomeVisible = true;
+    private int mBooksLoaded = 0;
+    public static Colecciones mIntentBook;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -207,6 +220,14 @@ public class MainActivity extends AppCompatActivity
 
         mLocalEpubsList = getDownloadedEpubs();
         Log.d("MainActivity", mLocalEpubsList.toString());
+
+        mIntentBook = (Colecciones) getIntent().getSerializableExtra(EXTRA_BOOK_ITEM);
+        if(mIntentBook != null) {
+            if(mIntentBook.mBookType.equals(BookDetailsActivity.LEGENDS))
+                legendsBtn.performClick();
+            else if(mIntentBook.mBookType.equals(BookDetailsActivity.COLECCIONES))
+                collectionsBtn.performClick();
+        }
     }
     
     @Override
@@ -326,12 +347,12 @@ public class MainActivity extends AppCompatActivity
         switch (v.getId()) {
             case R.id.legends_btn:
                 if(mLeyendasFragment == null)
-                    mLeyendasFragment = LegendsFragment.newInstance();
+                    mLeyendasFragment = LegendsFragment.newInstance(mIntentBook);
                 presentFragment(mLeyendasFragment);
                 break;
             case R.id.collections_btn:
                 if(mColeccionesFragment == null)
-                    mColeccionesFragment = ColeccionesFragment.newInstance();
+                    mColeccionesFragment = ColeccionesFragment.newInstance(mIntentBook);
                 presentFragment(mColeccionesFragment);
                 break;
             case R.id.library_btn:
@@ -501,11 +522,7 @@ public class MainActivity extends AppCompatActivity
                                 mLegendsList.addAll(res);
 
                                 mLegendsAdapter.notifyDataSetChanged();
-                                for(Colecciones item: mLegendsList) {
-                                    item.favorito = false;
-                                    item.mBookType = BookDetailsActivity.LEGENDS;
-                                    descargar(ApiConfig.epubs + item.epub, item.epub, item);
-                                }
+                                downloadDefaultBooks();
                             }
                         }, new Response.ErrorListener() {
                     @Override
@@ -546,11 +563,7 @@ public class MainActivity extends AppCompatActivity
                                 mCollectionsList.addAll(res);
 
                                 mCollectionsAdapter.notifyDataSetChanged();
-                                for(Colecciones item: mCollectionsList) {
-                                    item.favorito = false;
-                                    item.mBookType = BookDetailsActivity.COLECCIONES;
-                                    descargar(ApiConfig.epubs + item.epub, item.epub, item);
-                                }
+                                downloadDefaultBooks();
                             }
                         }, new Response.ErrorListener() {
                     @Override
@@ -570,6 +583,60 @@ public class MainActivity extends AppCompatActivity
                     }
                 }));
 
+    }
+
+    private void downloadDefaultBooks() {
+        mBooksLoaded++;
+        if(mBooksLoaded == 2) {
+            if(isStoragePermissionGranted(MainActivity.this)) {
+                recursiveDownload();
+            }
+        }
+    }
+
+    private void recursiveDownload() {
+        for (Colecciones item : mLegendsList) {
+            item.favorito = false;
+            item.mBookType = BookDetailsActivity.LEGENDS;
+            descargar(epubs + item.epub, item.epub, item);
+        }
+
+        for (Colecciones item : mCollectionsList) {
+            item.favorito = false;
+            item.mBookType = BookDetailsActivity.COLECCIONES;
+            descargar(epubs + item.epub, item.epub, item);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(grantResults[0]== PackageManager.PERMISSION_GRANTED){
+            Log.v(TAG,"Permission: "+permissions[0]+ "was "+grantResults[0]);
+
+            Toast.makeText(mContext, "Habilitando permisos...", Toast.LENGTH_SHORT).show();
+
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    // Restart the app since in order to change the ID the process
+                    // has to be restarted. Next time you open the app,
+                    // the new groupID is set and the permission is granted.
+                    PackageManager packageManager = getPackageManager();
+                    Intent intent = packageManager.getLaunchIntentForPackage(getPackageName());
+                    ComponentName componentName = intent.getComponent();
+                    Intent mainIntent = IntentCompat.makeRestartActivityTask(componentName);
+                    startActivity(mainIntent);
+                    System.exit(0);
+                }
+            }, 2000);
+
+        } else {
+            Toast.makeText(mContext,
+                    "Habilite permiso de \"almacenamiento local\" para visualizar los epubs",
+                    Toast.LENGTH_SHORT)
+                    .show();
+        }
     }
 
     private void loadBanners() {
