@@ -38,16 +38,23 @@
             android:resource="@color/colorAccent" />
         <!-- [END fcm_default_icon] -->
 
+        <!-- Splash Activity -->
         <activity
-            android:name=".activities.MainActivity"
+            android:name=".activities.SplashActivity"
             android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:screenOrientation="portrait"
+            android:noHistory="true"
+            android:theme="@style/SplashTheme">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".activities.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar"/>
         <activity
             android:name=".activities.BuscarActivity"
             android:theme="@style/Theme.Transparent"
@@ -55,43 +62,44 @@
         <activity
             android:name=".activities.WebviewActivity"
             android:theme="@style/AppTheme.NoActionBar"/>
-
         <activity
             android:name=".activities.BookDetailsActivity"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
+            android:name=".activities.MapsActivity"
+            android:label="@string/title_activity_maps"/>
 
-        </activity>
+        <activity
+            android:name=".activities.EpubBookContentActivity"
+            android:theme="@style/AppTheme.NoActionBar"/>
+
+        <activity
+            android:name=".activities.JuegosMenuActivity"
+            android:theme="@style/AppTheme.NoActionBar"/>
+
+        <activity
+            android:name=".activities.JuegosInGameActivity"
+            android:theme="@style/AppTheme.NoActionBar"/>
+
+        <activity
+            android:name=".activities.ParticipaActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity
+            android:name=".activities.CurioseandoTestsListActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
              Note that the API key is linked to the encryption key used to sign the APK.
              You need a different API key for each encryption key, including the release key that is used to
              sign the APK for publishing.
-             You can define the keys for the debug and release targets in src/debug/ and src/release/. 
+             You can define the keys for the debug and release targets in src/debug/ and src/release/.
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key"/>
-
-        <activity
-            android:name=".activities.MapsActivity"
-            android:label="@string/title_activity_maps">
-        </activity>
-
-        <activity android:name=".activities.EpubBookContentActivity"
-                  android:theme="@style/AppTheme.NoActionBar"/>
-
-        <activity android:name=".activities.JuegosActivity"
-                  android:theme="@style/AppTheme.NoActionBar"/>
-
-        <activity android:name=".activities.JuegosInternoActivity"
-                  android:theme="@style/AppTheme.NoActionBar"/>
-
-        <activity android:name=".activities.ParticipaActivity"
-                  android:theme="@style/AppTheme.NoActionBar" />
-
-        <activity android:name=".activities.CurioseandoTestsListActivity"
-                  android:theme="@style/AppTheme.NoActionBar" />
 
         <!-- [START firebase_service] -->
         <service android:name=".services.MyFirebaseMessagingService">

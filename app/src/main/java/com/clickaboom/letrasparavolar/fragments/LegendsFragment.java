@@ -263,6 +263,11 @@ public class LegendsFragment extends Fragment implements View.OnClickListener {
                                 if(mNestedScroll.getHeight() < mCoordinatorLayout.getHeight()) {
                                     mNestedScroll.setMinimumHeight(mCoordinatorLayout.getHeight());
                                 }
+
+                                Colecciones book = (Colecciones) getArguments().getSerializable(EXTRA_BOOK_ITEM);
+                                if(book != null) {
+                                    startActivity(BookDetailsActivity.newIntent(mContext, book.id, book.mBookType));
+                                }
                             }
                         }, new Response.ErrorListener() {
                     @Override
@@ -280,11 +285,6 @@ public class LegendsFragment extends Fragment implements View.OnClickListener {
                             Toast.makeText(mContext, "Sin conexión", Toast.LENGTH_SHORT).show();
                         }
                         mLegendsAdapter.notifyDataSetChanged();
-
-                        Colecciones book = (Colecciones) getArguments().getSerializable(EXTRA_BOOK_ITEM);
-                        if(book != null) {
-                            startActivity(BookDetailsActivity.newIntent(mContext, book.id, book.mBookType));
-                        }
                     }
                 }));
 

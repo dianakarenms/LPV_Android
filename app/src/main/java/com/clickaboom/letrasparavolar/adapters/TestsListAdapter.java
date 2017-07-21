@@ -9,7 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.clickaboom.letrasparavolar.R;
-import com.clickaboom.letrasparavolar.activities.JuegosInternoActivity;
+import com.clickaboom.letrasparavolar.activities.JuegosInGameActivity;
 import com.clickaboom.letrasparavolar.models.game.Game;
 import com.clickaboom.letrasparavolar.models.game.TestCurioseando;
 
@@ -62,7 +62,7 @@ public class TestsListAdapter extends RecyclerView.Adapter<TestsListAdapter.View
             public void onClick(View v) {
                 //Toast.makeText(mContext, game.gameType, Toast.LENGTH_SHORT).show();
                 sGame.id = test.id;
-                mContext.startActivity(JuegosInternoActivity.newIntent(mContext, sGame));
+                mContext.startActivity(JuegosInGameActivity.newIntent(mContext, sGame));
             }
         });
     }

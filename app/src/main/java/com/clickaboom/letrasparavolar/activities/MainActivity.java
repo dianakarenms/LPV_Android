@@ -76,8 +76,6 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import nl.siegmann.epublib.epub.Main;
-
 import static com.clickaboom.letrasparavolar.network.ApiConfig.epubs;
 import static com.clickaboom.letrasparavolar.network.DownloadFile.isStoragePermissionGranted;
 
@@ -86,6 +84,7 @@ public class MainActivity extends AppCompatActivity
         View.OnClickListener, DownloadFile.OnTaskCompleted {
 
     public static final String EXTRA_BOOK_ITEM = "com.lpv.bookItem";
+    public static final String EXTRA_OPEN_GAMES = "com.lpv.isGameAction";
     public RelativeLayout legendsBtn, collectionsBtn, libraryBtn;
     public static List<String> mLocalEpubsList = new ArrayList<>();
 
@@ -123,6 +122,8 @@ public class MainActivity extends AppCompatActivity
 
         mContext = this;
         mDownloadsListener = this;
+
+        mIntentBook = (Colecciones) getIntent().getSerializableExtra(EXTRA_BOOK_ITEM);
 
         db = SQLiteDBHelper.getInstance(this);
 
@@ -221,15 +222,8 @@ public class MainActivity extends AppCompatActivity
         mLocalEpubsList = getDownloadedEpubs();
         Log.d("MainActivity", mLocalEpubsList.toString());
 
-        mIntentBook = (Colecciones) getIntent().getSerializableExtra(EXTRA_BOOK_ITEM);
-        if(mIntentBook != null) {
-            if(mIntentBook.mBookType.equals(BookDetailsActivity.LEGENDS))
-                legendsBtn.performClick();
-            else if(mIntentBook.mBookType.equals(BookDetailsActivity.COLECCIONES))
-                collectionsBtn.performClick();
-        }
     }
-    
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -375,7 +369,7 @@ public class MainActivity extends AppCompatActivity
                 startActivity(NoticiasActivity.newIntent(mContext));
                 break;
             case R.id.games_btn:
-                startActivity(JuegosActivity.newIntent(mContext));
+                startActivity(JuegosMenuActivity.newIntent(mContext));
                 break;
             case R.id.participate_btn:
                 startActivity(ParticipaActivity.newIntent(mContext));
@@ -606,6 +600,22 @@ public class MainActivity extends AppCompatActivity
             item.mBookType = BookDetailsActivity.COLECCIONES;
             descargar(epubs + item.epub, item.epub, item);
         }
+
+        checkIntentData();
+    }
+
+    private void checkIntentData() {
+        // Checks if a downloadBook or opening GamesActivity was requested.
+        if(mIntentBook != null) {
+            if(mIntentBook.mBookType.equals(BookDetailsActivity.LEGENDS)) {
+                legendsBtn.performClick();
+            } else if(mIntentBook.mBookType.equals(BookDetailsActivity.COLECCIONES)) {
+                collectionsBtn.performClick();
+            }
+        } else if(getIntent().getBooleanExtra(EXTRA_OPEN_GAMES, false)) {
+            getIntent().putExtra(MainActivity.EXTRA_OPEN_GAMES, false);
+            findViewById(R.id.games_btn).performClick();
+        }
     }
 
     @Override
@@ -634,7 +644,7 @@ public class MainActivity extends AppCompatActivity
         } else {
             Toast.makeText(mContext,
                     "Habilite permiso de \"almacenamiento local\" para visualizar los epubs",
-                    Toast.LENGTH_SHORT)
+                    Toast.LENGTH_LONG)
                     .show();
         }
     }

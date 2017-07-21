@@ -132,6 +132,9 @@ public class EpubBookContentActivity extends Activity implements DownloadFile.On
             mWebView.loadUrl(mEpubBaseURL);
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (NullPointerException ex) {
+            ex.printStackTrace();
+            finish();
         }
     }
 

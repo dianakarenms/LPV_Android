@@ -13,14 +13,12 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.adapters.GamesListAdapter;
-import com.clickaboom.letrasparavolar.models.collections.Colecciones;
 import com.clickaboom.letrasparavolar.models.defaults.ResDefaults;
 import com.clickaboom.letrasparavolar.models.game.Game;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
@@ -28,12 +26,6 @@ import com.clickaboom.letrasparavolar.network.ApiSingleton;
 import com.clickaboom.letrasparavolar.network.GsonRequest;
 
 import java.util.ArrayList;
-import java.util.List;
-
-import static android.R.attr.id;
-import static android.R.id.edit;
-import static android.os.Build.VERSION_CODES.M;
-import static com.clickaboom.letrasparavolar.activities.MainActivity.db;
 
 public class ParticipaActivity extends AppCompatActivity
         implements View.OnClickListener {

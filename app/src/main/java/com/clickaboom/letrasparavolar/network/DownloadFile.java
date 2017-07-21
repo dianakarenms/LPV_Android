@@ -14,6 +14,8 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 
+import com.clickaboom.letrasparavolar.activities.JuegosInGameActivity;
+import com.clickaboom.letrasparavolar.activities.JuegosMenuActivity;
 import com.clickaboom.letrasparavolar.models.collections.Colecciones;
 
 import java.io.File;
@@ -234,7 +236,20 @@ public class DownloadFile extends AsyncTask<String, Void, Void> {
     public static void requestPermission(Activity activity) {
         if (ActivityCompat.shouldShowRequestPermissionRationale(activity, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
             //Toast.makeText(context, "Habilita el permiso para guardar los archivos en tu dispositivo.", Toast.LENGTH_LONG).show();
-            showExplanation("Permiso requerido", "Habilita el permiso para abrir los epubs en tu dispositivo.", android.Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQUEST_CODE, activity);
+            String permissionTitle, permissionText;
+
+            if(activity instanceof JuegosMenuActivity) {
+                permissionTitle = "Habilitar permiso para compartir resultados";
+                permissionText = "Sino lo habilitas ahora, deberás repetir el test para compartir tus resultados la próxima vez.";
+            } else if(activity instanceof JuegosInGameActivity) {
+                permissionTitle = "Habilitar permiso para compartir resultados";
+                permissionText = "Deberás repetir el test para compartir tus resultados la próxima vez.";
+            } else {
+                permissionTitle = "Permiso de almacenamiento requerido";
+                permissionText = "Habilita el permiso para poder visualizar los epubs en tu dispositivo.";
+            }
+
+            showExplanation(permissionTitle, permissionText, android.Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQUEST_CODE, activity);
         } else {
             ActivityCompat.requestPermissions(activity, new String[]{android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
         }

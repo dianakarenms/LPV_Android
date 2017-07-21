@@ -76,7 +76,7 @@ public class LegendsAdapter extends RecyclerView.Adapter<LegendsAdapter.ViewHold
         String imgUrl = ApiConfig.collectionsImg + mBookList.get(position).imagen;
         Picasso.with(mContext)
                 .load(imgUrl)
-                .resize(200,200)
+                .resize(400,400)
                 .centerInside()
                 .into(holder.mImage);
     }
