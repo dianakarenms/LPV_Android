@@ -40,7 +40,7 @@ public class Gacetita implements Serializable {
     @SerializedName("4")
     @Expose
     public String _4;
-    @SerializedName("epub")
+    @SerializedName("pdf")
     @Expose
     public String epub;
     @SerializedName("5")
