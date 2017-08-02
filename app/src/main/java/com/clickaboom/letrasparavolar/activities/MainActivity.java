@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -93,7 +94,7 @@ public class MainActivity extends AppCompatActivity
     private LinearLayoutManager mLayoutManager;
     private ColeccionesDefaultAdapter mCollectionsAdapter;
     private LegendsDefaultAdapter mLegendsAdapter;
-    private ViewPager view1;
+    private ViewPager mBannerPager;
     private BannerPagerAdapter mBannerAdapter;
     private ImageView image;
     private LinearLayoutManager mLayoutManager2;
@@ -111,6 +112,7 @@ public class MainActivity extends AppCompatActivity
     private boolean isHomeVisible = true;
     private int mBooksLoaded = 0;
     public static Colecciones mIntentBook;
+    private TabLayout mTabLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -145,8 +147,8 @@ public class MainActivity extends AppCompatActivity
 
         // Set toolbar_asistant title
         ((TextView)findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.news_title));
-        findViewById(R.id.left_btn).setVisibility(View.GONE);
-        findViewById(R.id.right_btn).setVisibility(View.GONE);
+        findViewById(R.id.leyendas_prev_btn).setVisibility(View.GONE);
+        findViewById(R.id.leyendas_next_btn).setVisibility(View.GONE);
 
         legendsBtn = (RelativeLayout)findViewById(R.id.legends_btn);
         legendsBtn.setOnClickListener(this);
@@ -165,8 +167,8 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        mRecyclerView = (RecyclerView)findViewById(R.id.home_recycler);
-        mRecyclerView2 = (RecyclerView)findViewById(R.id.home_recycler2);
+        mRecyclerView = (RecyclerView)findViewById(R.id.leyendas_rv);
+        mRecyclerView2 = (RecyclerView)findViewById(R.id.colecciones_rv);
 
         // use a linear layout manager
         mLayoutManager = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
@@ -189,8 +191,8 @@ public class MainActivity extends AppCompatActivity
         loadLegends();
         loadCollections();
 
-        view1 = (ViewPager)findViewById(R.id.banner);
-        view1.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+        mBannerPager = (ViewPager)findViewById(R.id.banner);
+        mBannerPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageSelected(int index) {
                 Log.v( "onPageSelected", String.valueOf( index ) );
@@ -205,18 +207,20 @@ public class MainActivity extends AppCompatActivity
             public void onPageScrollStateChanged(int state) {
                 Log.v("onPageScrollStateCh", String.valueOf(state));
 
+                /*// Infinite loop
                 if (state ==ViewPager.SCROLL_STATE_IDLE) {
-                    int index = view1.getCurrentItem();
+                    int index = mBannerPager.getCurrentItem();
                     if ( index == 0 ) {
-                        view1.setCurrentItem(mBannerAdapter.getCount() - 2, false);
+                        mBannerPager.setCurrentItem(mBannerAdapter.getCount() - 2, false);
                     } else if ( index == mBannerAdapter.getCount() - 1 )
-                        view1.setCurrentItem( 1 , false);
-                }
+                        mBannerPager.setCurrentItem( 1 , false);
+                }*/
             }
         });
-
+        mTabLayout = (TabLayout) findViewById(R.id.tabDots);
+        mTabLayout.setupWithViewPager(mBannerPager, true);
         mBannerAdapter = new BannerPagerAdapter(getApplicationContext(), mBannerItems);
-        view1.setAdapter(mBannerAdapter);
+        mBannerPager.setAdapter(mBannerAdapter);
         loadBanners();
 
         mLocalEpubsList = getDownloadedEpubs();
@@ -273,8 +277,6 @@ public class MainActivity extends AppCompatActivity
                     }, 5000);
                 }
             }
-
-
         }
     }
 
@@ -664,11 +666,14 @@ public class MainActivity extends AppCompatActivity
                                 mBannerItems.clear();
 
                                 // Repeat last and first values to make an infinite ViewPager
-                                mBannerItems.add(res.get(res.size()-1));
+//                                mBannerItems.add(res.get(res.size()-1));
                                 mBannerItems.addAll(res); // Add main book to list
-                                mBannerItems.add(res.get(0));
+//                                mBannerItems.add(res.get(0));
 
                                 mBannerAdapter.notifyDataSetChanged();
+
+//                                mTabLayout.removeTabAt(0);
+//                                mTabLayout.removeTabAt(res.size()-1);
                             }
                         }, new Response.ErrorListener() {
                     @Override

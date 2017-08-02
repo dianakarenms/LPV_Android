@@ -97,8 +97,8 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
 
         // Set toolbar_asistant title
         ((TextView)v.findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.library_title));
-        v.findViewById(R.id.left_btn).setVisibility(View.GONE);
-        v.findViewById(R.id.right_btn).setVisibility(View.GONE);
+        v.findViewById(R.id.leyendas_prev_btn).setVisibility(View.GONE);
+        v.findViewById(R.id.leyendas_next_btn).setVisibility(View.GONE);
 
         // ScrollView setup
         mNestedScroll = (NestedScrollView) v.findViewById(R.id.nested_scroll);
