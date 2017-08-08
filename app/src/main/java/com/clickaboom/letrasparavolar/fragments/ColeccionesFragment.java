@@ -115,9 +115,9 @@ public class ColeccionesFragment extends Fragment implements View.OnClickListene
         mContext = getContext();
 
         // Set its bottomNavButton clicked
-        ((MainActivity)getActivity()).restoreBottonNavColors();
-        ((MainActivity)getActivity()).collectionsBtn.
-                setBackgroundColor(getResources().getColor(R.color.bottom_nav_pressed));
+//        ((MainActivity)getActivity()).restoreBottonNavColors();
+//        ((MainActivity)getActivity()).collectionsBtn.
+//                setBackgroundColor(getResources().getColor(R.color.bottom_nav_pressed));
 
         // ScrollView setup
         mNestedScroll = (NestedScrollView) v.findViewById(R.id.nested_scroll);

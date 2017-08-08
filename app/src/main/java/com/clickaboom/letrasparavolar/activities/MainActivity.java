@@ -345,16 +345,19 @@ public class MainActivity extends AppCompatActivity
                 if(mLeyendasFragment == null)
                     mLeyendasFragment = LegendsFragment.newInstance(mIntentBook);
                 presentFragment(mLeyendasFragment);
+                legendsBtn.setBackgroundColor(getResources().getColor(R.color.bottom_nav_pressed));
                 break;
             case R.id.collections_btn:
                 if(mColeccionesFragment == null)
                     mColeccionesFragment = ColeccionesFragment.newInstance(mIntentBook);
+                collectionsBtn.setBackgroundColor(getResources().getColor(R.color.bottom_nav_pressed));
                 presentFragment(mColeccionesFragment);
                 break;
             case R.id.library_btn:
                 if(mLibraryFragment == null)
                     mLibraryFragment = new LibraryFragment();
                 presentFragment(mLibraryFragment);
+                libraryBtn.setBackgroundColor(getResources().getColor(R.color.bottom_nav_pressed));
                 break;
         }
     }
@@ -423,7 +426,7 @@ public class MainActivity extends AppCompatActivity
         FragmentManager manager = getSupportFragmentManager();
         boolean fragmentPopped = manager.popBackStackImmediate (backStateName, 0);
 
-        if (!fragmentPopped){ //mMainPagerFrag not in back stack, create it.
+        if (!fragmentPopped && !fragment.isVisible()){ //mMainPagerFrag not in back stack and not visible.
             FragmentTransaction ft = manager.beginTransaction();
             ft.add(R.id.fragment_container, fragment);
             ft.addToBackStack(backStateName);

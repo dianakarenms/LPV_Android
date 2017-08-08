@@ -91,9 +91,9 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
         v = inflater.inflate(R.layout.fragment_library, container, false);
 
         // Set its bottomNavButton clicked
-        ((MainActivity)getActivity()).restoreBottonNavColors();
-        ((MainActivity)getActivity()).libraryBtn.
-                setBackgroundColor(getResources().getColor(R.color.bottom_nav_pressed));
+//        ((MainActivity)getActivity()).restoreBottonNavColors();
+//        ((MainActivity)getActivity()).libraryBtn.
+//                setBackgroundColor(getResources().getColor(R.color.bottom_nav_pressed));
 
         // Set toolbar_asistant title
         ((TextView)v.findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.library_title));

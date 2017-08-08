@@ -145,8 +145,12 @@ public class BookDetailsActivity extends AppCompatActivity {
                                 Log.d(TAG, response.toString());
                                 List<Colecciones> res = ((ResDefaults) response).data;
                                 mItem = res.get(0);
-
-                                updateUI();
+                                if(mItem.epub != null) {
+                                    updateUI();
+                                } else {
+                                    Toast.makeText(mContext, "Este libro no tiene ePub", Toast.LENGTH_SHORT).show();
+                                    finish();
+                                }
                             }
                         }, new Response.ErrorListener() {
                     @Override
@@ -157,7 +161,11 @@ public class BookDetailsActivity extends AppCompatActivity {
                             Toast.makeText(mContext, "Error de conexión", Toast.LENGTH_SHORT).show();
                         else {
                             mItem = book.get(0);
-                            updateUI();
+                            if(mItem.epub != null) {
+                            updateUI();} else {
+                                Toast.makeText(mContext, "Este libro no tiene ePub", Toast.LENGTH_SHORT).show();
+                                finish();
+                            }
                         }
                     }
                 }));
@@ -174,23 +182,29 @@ public class BookDetailsActivity extends AppCompatActivity {
             starBtn = (ImageView) findViewById(R.id.favorite_star);
 
             // If item is stored on db...
-            final ArrayList<Colecciones> localItem = db.getBookByePub(mItem.epub);
-            if (!localItem.isEmpty()) {
-                if (localItem.get(0).descargado) {
-                    ((TextView) findViewById(R.id.downloadBtn)).setText(getResources().getString(R.string.open));
-                }
-                if (localItem.get(0).favorito) {
-                    starBtn.setImageResource(R.drawable.favorite_selected);
-                }
-            } else
-                ((TextView) findViewById(R.id.downloadBtn)).setText(getResources().getString(R.string.download));
+            ArrayList<Colecciones> localItem = new ArrayList<>();
+            if(mItem.epub != null) {
+                localItem = db.getBookByePub(mItem.epub);
+                if (!localItem.isEmpty()) {
+                    if (localItem.get(0).descargado) {
+                        ((TextView) findViewById(R.id.downloadBtn)).setText(getResources().getString(R.string.open));
+                    }
+                    if (localItem.get(0).favorito) {
+                        starBtn.setImageResource(R.drawable.favorite_selected);
+                    }
+                } else
+                    ((TextView) findViewById(R.id.downloadBtn)).setText(getResources().getString(R.string.download));
+
+            }
 
             // Book title info
-            ((TextView) findViewById(R.id.title_txt)).setText(mItem.titulo);
+            if(mItem.titulo != null)
+                ((TextView) findViewById(R.id.title_txt)).setText(mItem.titulo);
 
-            if (!mItem.imagenes.isEmpty()) {
+            // Book cover image
+            if (!mItem.imagenes.isEmpty())
                 mItem.imagen = mItem.imagenes.get(0).imagen;
-            }
+
             String imgUrl = ApiConfig.collectionsImg + mItem.imagen;
             ImageView image = (ImageView) findViewById(R.id.book_img);
             Picasso.with(mContext)
@@ -201,12 +215,20 @@ public class BookDetailsActivity extends AppCompatActivity {
             ((TextView) findViewById(R.id.date_title_txt)).setText(mItem.fecha);
 
             // Subtitle Authors
-            List<String> autoresList = new ArrayList<>();
-            for (int i = 0; i < mItem.autores.size(); i++) {
-                autoresList.add(mItem.autores.get(i).autor);
+            if(mItem.autores != null) {
+                List<String> autoresList = new ArrayList<>();
+                for (int i = 0; i < mItem.autores.size(); i++) {
+                    autoresList.add(mItem.autores.get(i).autor);
+                    ((TextView) findViewById(R.id.subtitle_txt)).setText(getStringFromListByCommas(autoresList));
+                }
             }
-            ((TextView) findViewById(R.id.subtitle_txt)).setText(getStringFromListByCommas(autoresList));
-            ((TextView) findViewById(R.id.date_title_txt)).setText(mItem.fecha);
+
+            // Date label
+            if(mItem.fecha != null) {
+                ((TextView) findViewById(R.id.date_title_txt)).setText(mItem.fecha);
+                // Extra info date label
+                ((TextView) findViewById(R.id.date_txt)).setText(mItem.fecha);
+            }
 
             // Category Image
             if (!mItem.categorias.isEmpty()) {
@@ -223,17 +245,20 @@ public class BookDetailsActivity extends AppCompatActivity {
 
 
             // Book extra info
-            ((TextView) findViewById(R.id.description_txt)).setText(mItem.descripcion);
+            if(mItem.descripcion != null)
+                ((TextView) findViewById(R.id.description_txt)).setText(mItem.descripcion);
             ((TextView) findViewById(R.id.idiom_txt)).setText("Español");
-            ((TextView) findViewById(R.id.publisher_txt)).setText(mItem.editorial);
-            ((TextView) findViewById(R.id.date_txt)).setText(mItem.fecha);
-            ((TextView) findViewById(R.id.size_txt)).setText(mItem.length + " MB");
-            ((TextView) findViewById(R.id.pages_txt)).setText(mItem.length);
+            if(mItem.editorial != null)
+                ((TextView) findViewById(R.id.publisher_txt)).setText(mItem.editorial);
+            if(mItem.length != null)
+                ((TextView) findViewById(R.id.size_txt)).setText(mItem.length + " MB");
+            if(mItem.length != null)
+                ((TextView) findViewById(R.id.pages_txt)).setText(mItem.length);
 
             // Tags
             List<String> tagsList = new ArrayList<>();
             for (int i = 0; i < mItem.etiquetas.size(); i++) {
-                autoresList.add(mItem.etiquetas.get(i).etiqueta);
+                tagsList.add(mItem.etiquetas.get(i).etiqueta);
             }
             ((TextView) findViewById(R.id.tags_txt)).setText(getStringFromListByCommas(tagsList));
 
@@ -244,17 +269,18 @@ public class BookDetailsActivity extends AppCompatActivity {
             }
 
             // add book to favorites
+            final ArrayList<Colecciones> finalLocalItem = localItem;
             findViewById(R.id.add_to_favorites_llay).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (!localItem.isEmpty()) {
-                        if (localItem.get(0).favorito) {
+                    if (!finalLocalItem.isEmpty()) {
+                        if (finalLocalItem.get(0).favorito) {
                             db.updateFavBook(mItem.epub, 0);
-                            localItem.get(0).favorito = false;
+                            finalLocalItem.get(0).favorito = false;
                             starBtn.setImageResource(R.drawable.favorite_unselected);
                         } else {
                             db.updateFavBook(mItem.epub, 1);
-                            localItem.get(0).favorito = true;
+                            finalLocalItem.get(0).favorito = true;
                             starBtn.setImageResource(R.drawable.favorite_selected);
                         }
 

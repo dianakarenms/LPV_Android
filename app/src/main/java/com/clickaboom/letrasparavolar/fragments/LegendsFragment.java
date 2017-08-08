@@ -114,9 +114,9 @@ public class LegendsFragment extends Fragment implements View.OnClickListener {
         mContext = getContext();
 
         // Set its bottomNavButton clicked
-        ((MainActivity)getActivity()).restoreBottonNavColors();
-        ((MainActivity)getActivity()).legendsBtn.
-                setBackgroundColor(getResources().getColor(R.color.bottom_nav_pressed));
+//        ((MainActivity)getActivity()).restoreBottonNavColors();
+//        ((MainActivity)getActivity()).legendsBtn.
+//                setBackgroundColor(getResources().getColor(R.color.bottom_nav_pressed));
 
         // ScrollView setup
         mNestedScroll = (NestedScrollView) v.findViewById(R.id.nested_scroll);
