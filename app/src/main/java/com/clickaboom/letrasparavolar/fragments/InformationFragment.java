@@ -72,8 +72,8 @@ public class InformationFragment extends Fragment implements View.OnClickListene
 
         // Set toolbar_asistant title
         ((TextView)v.findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.information));
-        v.findViewById(R.id.leyendas_prev_btn).setVisibility(View.GONE);
-        v.findViewById(R.id.leyendas_next_btn).setVisibility(View.GONE);
+        v.findViewById(R.id.toolbar_prev_btn).setVisibility(View.GONE);
+        v.findViewById(R.id.toolbar_next_btn).setVisibility(View.GONE);
 
         // BackBtn
         LinearLayout backBtn = (LinearLayout) v.findViewById(R.id.back_btn);

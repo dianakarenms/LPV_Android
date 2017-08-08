@@ -62,7 +62,9 @@
             android:src="@drawable/left_arrow"
             android:tint="@color/gray"
             android:scaleType="fitXY"
-            android:background="@null"/>
+            android:background="@null"
+            android:onClick="recyclerNavOnClick"
+            android:visibility="invisible"/>
         <android.support.v7.widget.RecyclerView
             android:id="@+id/leyendas_rv"
             android:layout_width="match_parent"
@@ -81,7 +83,8 @@
             android:src="@drawable/right_arrow"
             android:tint="@color/gray"
             android:scaleType="fitXY"
-            android:background="@null"/>
+            android:background="@null"
+            android:onClick="recyclerNavOnClick"/>
     </RelativeLayout>
 
     <View
@@ -112,7 +115,9 @@
             android:src="@drawable/left_arrow"
             android:tint="@color/gray"
             android:scaleType="fitXY"
-            android:background="@null"/>
+            android:background="@null"
+            android:onClick="recyclerNavOnClick"
+            android:visibility="invisible"/>
         <android.support.v7.widget.RecyclerView
             android:id="@+id/colecciones_rv"
             android:layout_width="match_parent"
@@ -131,7 +136,8 @@
             android:src="@drawable/right_arrow"
             android:tint="@color/gray"
             android:scaleType="fitXY"
-            android:background="@null"/>
+            android:background="@null"
+            android:onClick="recyclerNavOnClick"/>
     </RelativeLayout>
 
     <RelativeLayout

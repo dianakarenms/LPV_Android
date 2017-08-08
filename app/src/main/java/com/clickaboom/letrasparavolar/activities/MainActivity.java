@@ -30,6 +30,7 @@ import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -90,14 +91,14 @@ public class MainActivity extends AppCompatActivity
     public static List<String> mLocalEpubsList = new ArrayList<>();
 
     private static final String TAG = "com.lpv.MainActivity";
-    private RecyclerView mRecyclerView, mRecyclerView2;
-    private LinearLayoutManager mLayoutManager;
+    private RecyclerView mLegendsRV, mColeccionesRV;
+    private LinearLayoutManager mLegendsManager;
     private ColeccionesDefaultAdapter mCollectionsAdapter;
     private LegendsDefaultAdapter mLegendsAdapter;
     private ViewPager mBannerPager;
     private BannerPagerAdapter mBannerAdapter;
     private ImageView image;
-    private LinearLayoutManager mLayoutManager2;
+    private LinearLayoutManager mColeccionsManager;
     private List<Banner> mBannerItems = new ArrayList<>();
     private Context mContext;
     private List<Colecciones> mLegendsList = new ArrayList<>(), mCollectionsList = new ArrayList<>();;
@@ -113,6 +114,7 @@ public class MainActivity extends AppCompatActivity
     private int mBooksLoaded = 0;
     public static Colecciones mIntentBook;
     private TabLayout mTabLayout;
+    private ImageButton mLegendsPrevBtn, mLegendsNextBtn, mColeccionesNextBtn, mColeccionesPrevBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,8 +149,8 @@ public class MainActivity extends AppCompatActivity
 
         // Set toolbar_asistant title
         ((TextView)findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.news_title));
-        findViewById(R.id.leyendas_prev_btn).setVisibility(View.GONE);
-        findViewById(R.id.leyendas_next_btn).setVisibility(View.GONE);
+        findViewById(R.id.toolbar_prev_btn).setVisibility(View.GONE);
+        findViewById(R.id.toolbar_next_btn).setVisibility(View.GONE);
 
         legendsBtn = (RelativeLayout)findViewById(R.id.legends_btn);
         legendsBtn.setOnClickListener(this);
@@ -159,6 +161,11 @@ public class MainActivity extends AppCompatActivity
         libraryBtn = (RelativeLayout)findViewById(R.id.library_btn);
         libraryBtn.setOnClickListener(this);
 
+        mLegendsNextBtn = (ImageButton) findViewById(R.id.leyendas_next_btn);
+        mLegendsPrevBtn = (ImageButton) findViewById(R.id.leyendas_prev_btn);
+        mColeccionesNextBtn = (ImageButton) findViewById(R.id.colecciones_next_btn);
+        mColeccionesPrevBtn = (ImageButton) findViewById(R.id.colecciones_prev_btn);
+
         image = (ImageView)findViewById(R.id.mi_barquitoo);
         image.post(new Runnable() {
             @Override
@@ -167,29 +174,26 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        mRecyclerView = (RecyclerView)findViewById(R.id.leyendas_rv);
-        mRecyclerView2 = (RecyclerView)findViewById(R.id.colecciones_rv);
+        mLegendsRV = (RecyclerView)findViewById(R.id.leyendas_rv);
+        mColeccionesRV = (RecyclerView)findViewById(R.id.colecciones_rv);
 
         // use a linear layout manager
-        mLayoutManager = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
-        mRecyclerView.setLayoutManager(mLayoutManager);
+        mLegendsManager = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
+        mLegendsRV.setLayoutManager(mLegendsManager);
         // use a linear layout manager
-        mLayoutManager2 = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
-        mRecyclerView2.setLayoutManager(mLayoutManager2);
+        mColeccionsManager = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
+        mColeccionesRV.setLayoutManager(mColeccionsManager);
 
         // specify an adapter (see also next example)
         mLegendsAdapter = new LegendsDefaultAdapter(mLegendsList, mContext);
         mLegendsAdapter.mColType = BookDetailsActivity.LEGENDS;
-        mRecyclerView.setAdapter(mLegendsAdapter);
+        mLegendsRV.setAdapter(mLegendsAdapter);
 
         mCollectionsAdapter = new ColeccionesDefaultAdapter(mCollectionsList, mContext);
         mCollectionsAdapter.mColType = BookDetailsActivity.COLECCIONES;
-        mRecyclerView2.setAdapter(mCollectionsAdapter);
+        mColeccionesRV.setAdapter(mCollectionsAdapter);
 
         copyFileOrDir("epub_reader");
-
-        loadLegends();
-        loadCollections();
 
         mBannerPager = (ViewPager)findViewById(R.id.banner);
         mBannerPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
@@ -223,7 +227,8 @@ public class MainActivity extends AppCompatActivity
         mBannerPager.setAdapter(mBannerAdapter);
         loadBanners();
 
-        mLocalEpubsList = getDownloadedEpubs();
+//        mLocalEpubsList = getDownloadedEpubs();
+        getLocalEpubs();
         Log.d("MainActivity", mLocalEpubsList.toString());
 
     }
@@ -258,6 +263,9 @@ public class MainActivity extends AppCompatActivity
                     FragmentManager fm = getSupportFragmentManager();
                     fm.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                     restoreBottonNavColors();
+
+                    // Check if there were more epubs downloaded and show them in homeFragment
+                    getLocalEpubs();
 
                     isHomeVisible = true;
                 } else {
@@ -386,6 +394,39 @@ public class MainActivity extends AppCompatActivity
                 break;
             case R.id.magazine_btn:
                 startActivity(GacetitaActivity.newIntent(mContext));
+                break;
+        }
+    }
+
+    public void recyclerNavOnClick(View v) {
+        switch (v.getId()) {
+            case R.id.leyendas_next_btn:
+                mLegendsRV.smoothScrollToPosition(mLegendsList.size() - 1);
+                if(mLegendsManager.findLastVisibleItemPosition() == mLegendsList.size()-1) {
+                    mLegendsNextBtn.setVisibility(View.INVISIBLE);
+                    mLegendsPrevBtn.setVisibility(View.VISIBLE);
+                }
+                break;
+            case R.id.leyendas_prev_btn:
+                mLegendsRV.smoothScrollToPosition(0);
+                if(mLegendsManager.findFirstVisibleItemPosition() == 0) {
+                    mLegendsNextBtn.setVisibility(View.VISIBLE);
+                    mLegendsPrevBtn.setVisibility(View.INVISIBLE);
+                }
+                break;
+            case R.id.colecciones_next_btn:
+                mColeccionesRV.smoothScrollToPosition(mCollectionsList.size() - 1);
+                if(mColeccionsManager.findLastVisibleItemPosition() == mCollectionsList.size()-1) {
+                    mColeccionesNextBtn.setVisibility(View.INVISIBLE);
+                    mColeccionesPrevBtn.setVisibility(View.VISIBLE);
+                }
+                break;
+            case R.id.colecciones_prev_btn:
+                mColeccionesRV.smoothScrollToPosition(0);
+                if(mColeccionsManager.findFirstVisibleItemPosition() == 0) {
+                    mColeccionesNextBtn.setVisibility(View.VISIBLE);
+                    mColeccionesPrevBtn.setVisibility(View.INVISIBLE);
+                }
                 break;
         }
     }
@@ -764,9 +805,9 @@ public class MainActivity extends AppCompatActivity
         return answer;
     }
 
-    private static List<String> getDownloadedEpubs() {
+    private List<String> getDownloadedEpubs() {
         List<String> epubsList = new ArrayList<>();
-        String path = Environment.getExternalStorageDirectory() + "/LPV_eBooks/";
+        String path = Environment.getExternalStorageDirectory() + "/LPV_eBooks/epub_reader/epubs/";
         Log.d("Files", "Path: " + path);
         File directory = new File(path);
         File[] files = directory.listFiles();
@@ -777,7 +818,30 @@ public class MainActivity extends AppCompatActivity
                 epubsList.add(files[i].getName());
             }
         }
+
         return epubsList;
+    }
+
+    private void getLocalEpubs() {
+        // Clear previous data
+        mLegendsList.clear();
+        mCollectionsList.clear();
+
+        ArrayList<Colecciones> mArrayList = db.getAllBooks();
+        if (mArrayList != null) { // If there's data available in the db
+            for (Colecciones book : mArrayList) {
+                if (book.mBookType.equals(BookDetailsActivity.LEGENDS) && book.descargado)
+                    mLegendsList.add(book);
+                else if (book.mBookType.equals(BookDetailsActivity.COLECCIONES) && book.descargado)
+                    mCollectionsList.add(book);
+            }
+        }
+
+        mLegendsAdapter.notifyDataSetChanged();
+        mCollectionsAdapter.notifyDataSetChanged();
+
+//        loadLegends();
+//        loadCollections();
     }
 
     public void descargar(String url, String fileName, Colecciones ePub){

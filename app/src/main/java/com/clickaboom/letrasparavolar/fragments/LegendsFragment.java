@@ -129,15 +129,15 @@ public class LegendsFragment extends Fragment implements View.OnClickListener {
         // Set toolbar_asistant title
 
         ((TextView)v.findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.legends_title));
-        v.findViewById(R.id.leyendas_prev_btn).setVisibility(View.VISIBLE);
-        v.findViewById(R.id.leyendas_prev_btn).setOnClickListener(new View.OnClickListener() {
+        v.findViewById(R.id.toolbar_prev_btn).setVisibility(View.VISIBLE);
+        v.findViewById(R.id.toolbar_prev_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(MapsActivity.newInstance(getContext(), BookDetailsActivity.LEGENDS));
             }
         });
-        v.findViewById(R.id.leyendas_next_btn).setVisibility(View.VISIBLE);
-        v.findViewById(R.id.leyendas_next_btn).setOnClickListener(new View.OnClickListener() {
+        v.findViewById(R.id.toolbar_next_btn).setVisibility(View.VISIBLE);
+        v.findViewById(R.id.toolbar_next_btn).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivityForResult(

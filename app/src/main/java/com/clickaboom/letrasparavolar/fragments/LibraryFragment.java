@@ -72,7 +72,7 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
     public void onResume() {
         super.onResume();
 
-        loadCollections();
+        loadLocalBooks();
     }
 
     @Override
@@ -97,8 +97,8 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
 
         // Set toolbar_asistant title
         ((TextView)v.findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.library_title));
-        v.findViewById(R.id.leyendas_prev_btn).setVisibility(View.GONE);
-        v.findViewById(R.id.leyendas_next_btn).setVisibility(View.GONE);
+        v.findViewById(R.id.toolbar_prev_btn).setVisibility(View.GONE);
+        v.findViewById(R.id.toolbar_next_btn).setVisibility(View.GONE);
 
         // ScrollView setup
         mNestedScroll = (NestedScrollView) v.findViewById(R.id.nested_scroll);
@@ -156,7 +156,7 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
         return v;
     }
 
-    private void loadCollections() {
+    private void loadLocalBooks() {
         // Clear previous data
         mLegendsList.clear();
         mCollectionsList.clear();
@@ -226,7 +226,7 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
 
         }
         v.setBackgroundColor(getResources().getColor(R.color.order_back_pressed));
-        loadCollections();
+        loadLocalBooks();
     }
 
     private void restoreOrderColors() {
@@ -240,7 +240,7 @@ public class LibraryFragment extends Fragment implements View.OnClickListener {
         switch (requestCode) {
             case REQUEST_SEARCH:
                 if(resultCode == RESULT_OK) {
-                    loadCollections();
+                    loadLocalBooks();
                 }
                 break;
         }

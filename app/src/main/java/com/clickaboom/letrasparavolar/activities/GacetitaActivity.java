@@ -54,8 +54,8 @@ public class GacetitaActivity extends AppCompatActivity implements View.OnClickL
 
         // Set toolbar_asistant title
         ((TextView)findViewById(R.id.toolbar_title)).setText(getResources().getString(R.string.gacetita));
-        findViewById(R.id.leyendas_prev_btn).setVisibility(View.GONE);
-        findViewById(R.id.leyendas_next_btn).setVisibility(View.GONE);
+        findViewById(R.id.toolbar_prev_btn).setVisibility(View.GONE);
+        findViewById(R.id.toolbar_next_btn).setVisibility(View.GONE);
 
         // BackBtn
         LinearLayout backBtn = (LinearLayout) findViewById(R.id.back_btn);

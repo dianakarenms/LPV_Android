@@ -13,7 +13,7 @@
         android:src="@drawable/pattern_subheader"/>
 
     <LinearLayout
-        android:id="@+id/leyendas_prev_btn"
+        android:id="@+id/toolbar_prev_btn"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:paddingRight="@dimen/large_padding"
@@ -57,7 +57,7 @@
         android:background="@color/white_trans"/>
 
     <LinearLayout
-        android:id="@+id/leyendas_next_btn"
+        android:id="@+id/toolbar_next_btn"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:paddingLeft="@dimen/large_padding"
