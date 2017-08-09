@@ -116,6 +116,9 @@
             </intent-filter>
         </service>
 
+        <activity android:name=".activities.InformationActivity"
+                  android:theme="@style/AppTheme.NoActionBar" />
+
         <activity android:name=".activities.GacetitaActivity"
                   android:theme="@style/AppTheme.NoActionBar" />
 

@@ -70,7 +70,7 @@ public class LegendsDefaultAdapter extends RecyclerView.Adapter<LegendsDefaultAd
     public void onBindViewHolder(LegendsDefaultAdapter.ViewHolder holder, int position) {
         // Container
         float widthPixels = mContext.getResources().getDisplayMetrics().widthPixels;
-        int width = (int) (widthPixels/3) + 15;
+        int width = (int) (widthPixels-50)/3;
         holder.mContainer.setLayoutParams(new RelativeLayout.LayoutParams(width, RelativeLayout.LayoutParams.MATCH_PARENT));
 
         // Title

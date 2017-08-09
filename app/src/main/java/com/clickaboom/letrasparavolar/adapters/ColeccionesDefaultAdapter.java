@@ -67,7 +67,7 @@ public class ColeccionesDefaultAdapter extends RecyclerView.Adapter<ColeccionesD
     public void onBindViewHolder(ColeccionesDefaultAdapter.ViewHolder holder, int position) {
         // Container
         float widthPixels = mContext.getResources().getDisplayMetrics().widthPixels;
-        int width = (int) (widthPixels/3) + 15;
+        int width = (int) (widthPixels-50)/3; // 50 is the combined width of both scroll arrows
         holder.mContainer.setLayoutParams(new RelativeLayout.LayoutParams(width, RelativeLayout.LayoutParams.MATCH_PARENT));
 
         // Title

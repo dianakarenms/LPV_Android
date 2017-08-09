@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -44,7 +45,6 @@ import com.clickaboom.letrasparavolar.adapters.BannerPagerAdapter;
 import com.clickaboom.letrasparavolar.adapters.ColeccionesDefaultAdapter;
 import com.clickaboom.letrasparavolar.adapters.LegendsDefaultAdapter;
 import com.clickaboom.letrasparavolar.fragments.ColeccionesFragment;
-import com.clickaboom.letrasparavolar.fragments.InformationFragment;
 import com.clickaboom.letrasparavolar.fragments.LegendsFragment;
 import com.clickaboom.letrasparavolar.fragments.LibraryFragment;
 import com.clickaboom.letrasparavolar.models.banners.Banner;
@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity
     private LinearLayoutManager mColeccionsManager;
     private List<Banner> mBannerItems = new ArrayList<>();
     private Context mContext;
-    private List<Colecciones> mLegendsList = new ArrayList<>(), mCollectionsList = new ArrayList<>();;
+    private List<Colecciones> mLegendsList = new ArrayList<>(), mColectionesList = new ArrayList<>();;
     public static SQLiteDBHelper db;
     private DownloadFile.OnTaskCompleted mDownloadsListener;
     private ArrayList<String> mDefaultList = new ArrayList<>();
@@ -175,7 +175,37 @@ public class MainActivity extends AppCompatActivity
         });
 
         mLegendsRV = (RecyclerView)findViewById(R.id.leyendas_rv);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            mLegendsRV.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+                @Override
+                public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                    setScrollArrowsState(mLegendsManager, mLegendsList, mLegendsNextBtn, mLegendsPrevBtn);
+                }
+            });
+        } else {
+            mLegendsRV.setOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                    setScrollArrowsState(mLegendsManager, mLegendsList, mLegendsNextBtn, mLegendsPrevBtn);
+                }
+            });
+        }
         mColeccionesRV = (RecyclerView)findViewById(R.id.colecciones_rv);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            mColeccionesRV.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+                @Override
+                public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                    setScrollArrowsState(mColeccionsManager, mColectionesList, mColeccionesNextBtn, mColeccionesPrevBtn);
+                }
+            });
+        } else {
+            mColeccionesRV.setOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                    setScrollArrowsState(mColeccionsManager, mColectionesList, mColeccionesNextBtn, mColeccionesPrevBtn);
+                }
+            });
+        }
 
         // use a linear layout manager
         mLegendsManager = new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.HORIZONTAL, false);
@@ -189,7 +219,7 @@ public class MainActivity extends AppCompatActivity
         mLegendsAdapter.mColType = BookDetailsActivity.LEGENDS;
         mLegendsRV.setAdapter(mLegendsAdapter);
 
-        mCollectionsAdapter = new ColeccionesDefaultAdapter(mCollectionsList, mContext);
+        mCollectionsAdapter = new ColeccionesDefaultAdapter(mColectionesList, mContext);
         mCollectionsAdapter.mColType = BookDetailsActivity.COLECCIONES;
         mColeccionesRV.setAdapter(mCollectionsAdapter);
 
@@ -223,14 +253,33 @@ public class MainActivity extends AppCompatActivity
         });
         mTabLayout = (TabLayout) findViewById(R.id.tabDots);
         mTabLayout.setupWithViewPager(mBannerPager, true);
-        mBannerAdapter = new BannerPagerAdapter(getApplicationContext(), mBannerItems);
+        mBannerAdapter = new BannerPagerAdapter(mContext, mBannerItems);
         mBannerPager.setAdapter(mBannerAdapter);
         loadBanners();
 
 //        mLocalEpubsList = getDownloadedEpubs();
-        getLocalEpubs();
+        getLocalEpubs(false);
         Log.d("MainActivity", mLocalEpubsList.toString());
 
+    }
+
+    private static void setScrollArrowsState(LinearLayoutManager manager, List<Colecciones> list, ImageButton nextBtn, ImageButton prevBtn) {
+        int firstPos = manager.findFirstCompletelyVisibleItemPosition();
+        int lastPos = manager.findLastCompletelyVisibleItemPosition();
+        int size = list.size();
+
+        if(firstPos > 0 && lastPos < size-1) {
+            nextBtn.setVisibility(View.VISIBLE);
+            prevBtn.setVisibility(View.VISIBLE);
+        } else if(lastPos == size-1) {
+            // NextPressed
+            nextBtn.setVisibility(View.INVISIBLE);
+            prevBtn.setVisibility(View.VISIBLE);
+        } else if(firstPos == 0) {
+            // PrevPressed
+            nextBtn.setVisibility(View.VISIBLE);
+            prevBtn.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override
@@ -265,7 +314,7 @@ public class MainActivity extends AppCompatActivity
                     restoreBottonNavColors();
 
                     // Check if there were more epubs downloaded and show them in homeFragment
-                    getLocalEpubs();
+                    getLocalEpubs(true);
 
                     isHomeVisible = true;
                 } else {
@@ -375,8 +424,7 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.END);
         switch (v.getId()) {
             case R.id.info_btn:
-                Fragment programInfoFragmentFrag = new InformationFragment();
-                replaceFragment(programInfoFragmentFrag);
+                startActivity(InformationActivity.newIntent(mContext));
                 break;
             case R.id.news_btn:
                 startActivity(NoticiasActivity.newIntent(mContext));
@@ -399,34 +447,31 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void recyclerNavOnClick(View v) {
+        int scrollPos = 0;
         switch (v.getId()) {
             case R.id.leyendas_next_btn:
-                mLegendsRV.smoothScrollToPosition(mLegendsList.size() - 1);
-                if(mLegendsManager.findLastVisibleItemPosition() == mLegendsList.size()-1) {
-                    mLegendsNextBtn.setVisibility(View.INVISIBLE);
-                    mLegendsPrevBtn.setVisibility(View.VISIBLE);
-                }
+                scrollPos = mLegendsManager.findLastCompletelyVisibleItemPosition() + 3;
+                if(scrollPos >= mLegendsList.size())
+                    scrollPos = mLegendsList.size() - 1;
+                mLegendsRV.smoothScrollToPosition(scrollPos);
                 break;
             case R.id.leyendas_prev_btn:
-                mLegendsRV.smoothScrollToPosition(0);
-                if(mLegendsManager.findFirstVisibleItemPosition() == 0) {
-                    mLegendsNextBtn.setVisibility(View.VISIBLE);
-                    mLegendsPrevBtn.setVisibility(View.INVISIBLE);
-                }
+                scrollPos = mLegendsManager.findLastCompletelyVisibleItemPosition() - 3;
+                if(scrollPos < 0)
+                    scrollPos = 0;
+                mLegendsRV.smoothScrollToPosition(scrollPos);
                 break;
             case R.id.colecciones_next_btn:
-                mColeccionesRV.smoothScrollToPosition(mCollectionsList.size() - 1);
-                if(mColeccionsManager.findLastVisibleItemPosition() == mCollectionsList.size()-1) {
-                    mColeccionesNextBtn.setVisibility(View.INVISIBLE);
-                    mColeccionesPrevBtn.setVisibility(View.VISIBLE);
-                }
+                scrollPos = mColeccionsManager.findLastCompletelyVisibleItemPosition() + 3;
+                if(scrollPos >= mColectionesList.size())
+                    scrollPos = mColectionesList.size() - 1;
+                mColeccionesRV.smoothScrollToPosition(scrollPos);
                 break;
             case R.id.colecciones_prev_btn:
-                mColeccionesRV.smoothScrollToPosition(0);
-                if(mColeccionsManager.findFirstVisibleItemPosition() == 0) {
-                    mColeccionesNextBtn.setVisibility(View.VISIBLE);
-                    mColeccionesPrevBtn.setVisibility(View.INVISIBLE);
-                }
+                scrollPos = mColeccionsManager.findLastCompletelyVisibleItemPosition() - 3;
+                if(scrollPos < 0)
+                    scrollPos = 0;
+                mColeccionesRV.smoothScrollToPosition(scrollPos);
                 break;
         }
     }
@@ -558,8 +603,13 @@ public class MainActivity extends AppCompatActivity
                                 Log.d(TAG, response.toString());
                                 List<Colecciones> res = ((ResDefaults) response).data;
 
-                                mLegendsList.clear();
-                                mLegendsList.addAll(res);
+                                for(Colecciones book: res) {
+                                    if(!mLegendsList.contains(book)) {
+                                        mLegendsList.add(0, book);
+                                    }
+                                }
+                                //mLegendsList.clear();
+//                                mLegendsList.addAll(res);
 
                                 mLegendsAdapter.notifyDataSetChanged();
                                 downloadDefaultBooks();
@@ -568,17 +618,17 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.d(TAG, error.toString());
-                        ArrayList<Colecciones> allBooks = db.getAllBooks();
+                        /*ArrayList<Colecciones> allBooks = db.getAllBooks();
                         if(allBooks.isEmpty())
                             Toast.makeText(mContext, "Error de conexión", Toast.LENGTH_SHORT).show();
                         else {
                             for(Colecciones book: allBooks) {
                                 if(book.mBookType.equals(BookDetailsActivity.LEGENDS))
                                     mLegendsList.add(book);
-                            }
+                            }*/
 
-                            Toast.makeText(mContext, "Sin conexión", Toast.LENGTH_SHORT).show();
-                        }
+                            Toast.makeText(mContext, "Sin conexión a internet", Toast.LENGTH_SHORT).show();
+                        //}
                         mLegendsAdapter.notifyDataSetChanged();
                     }
                 }));
@@ -599,8 +649,13 @@ public class MainActivity extends AppCompatActivity
                                 Log.d(TAG, response.toString());
                                 List<Colecciones> res = ((ResDefaults) response).data;
 
-                                mCollectionsList.clear();
-                                mCollectionsList.addAll(res);
+                                for(Colecciones book: res) {
+                                    if(!mColectionesList.contains(book)) {
+                                        mColectionesList.add(0, book);
+                                    }
+                                }
+//                                mColectionesList.clear();
+//                                mColectionesList.addAll(res);
 
                                 mCollectionsAdapter.notifyDataSetChanged();
                                 downloadDefaultBooks();
@@ -609,16 +664,16 @@ public class MainActivity extends AppCompatActivity
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.d(TAG, error.toString());
-                        ArrayList<Colecciones> allBooks = db.getAllBooks();
+                        /*ArrayList<Colecciones> allBooks = db.getAllBooks();
                         if(allBooks.isEmpty())
                             Toast.makeText(mContext, "Error de conexión", Toast.LENGTH_SHORT).show();
                         else {
                             for(Colecciones book: allBooks) {
                                 if(book.mBookType.equals(BookDetailsActivity.COLECCIONES))
-                                    mCollectionsList.add(book);
-                            }
-                            Toast.makeText(mContext, "Sin conexión", Toast.LENGTH_SHORT).show();
-                        }
+                                    mColectionesList.add(book);
+                            }*/
+                            Toast.makeText(mContext, "Sin conexión a internet", Toast.LENGTH_SHORT).show();
+//                        }
                         mCollectionsAdapter.notifyDataSetChanged();
                     }
                 }));
@@ -641,7 +696,7 @@ public class MainActivity extends AppCompatActivity
             descargar(epubs + item.epub, item.epub, item);
         }
 
-        for (Colecciones item : mCollectionsList) {
+        for (Colecciones item : mColectionesList) {
             item.favorito = false;
             item.mBookType = BookDetailsActivity.COLECCIONES;
             descargar(epubs + item.epub, item.epub, item);
@@ -822,10 +877,10 @@ public class MainActivity extends AppCompatActivity
         return epubsList;
     }
 
-    private void getLocalEpubs() {
+    private void getLocalEpubs(boolean showLastAddedBooks) {
         // Clear previous data
         mLegendsList.clear();
-        mCollectionsList.clear();
+        mColectionesList.clear();
 
         ArrayList<Colecciones> mArrayList = db.getAllBooks();
         if (mArrayList != null) { // If there's data available in the db
@@ -833,15 +888,20 @@ public class MainActivity extends AppCompatActivity
                 if (book.mBookType.equals(BookDetailsActivity.LEGENDS) && book.descargado)
                     mLegendsList.add(book);
                 else if (book.mBookType.equals(BookDetailsActivity.COLECCIONES) && book.descargado)
-                    mCollectionsList.add(book);
+                    mColectionesList.add(book);
             }
         }
 
         mLegendsAdapter.notifyDataSetChanged();
         mCollectionsAdapter.notifyDataSetChanged();
 
-//        loadLegends();
-//        loadCollections();
+        if(showLastAddedBooks) {
+            mLegendsRV.scrollToPosition(mLegendsList.size() - 1);
+            mColeccionesRV.scrollToPosition(mColectionesList.size() - 1);
+        }
+
+        loadLegends();
+        loadCollections();
     }
 
     public void descargar(String url, String fileName, Colecciones ePub){

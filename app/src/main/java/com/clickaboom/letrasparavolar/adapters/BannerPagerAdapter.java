@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.clickaboom.letrasparavolar.R;
+import com.clickaboom.letrasparavolar.activities.WebviewActivity;
 import com.clickaboom.letrasparavolar.models.banners.Banner;
 import com.clickaboom.letrasparavolar.network.ApiConfig;
 import com.squareup.picasso.Picasso;
@@ -64,7 +65,11 @@ public class BannerPagerAdapter extends PagerAdapter
             @Override
             public void onClick(View v) {
                 if(banner.target.equals(TARGET_URL)) {
-                    Toast.makeText(mContext, banner.url, Toast.LENGTH_SHORT).show();
+                    if(!banner.url.isEmpty()) {
+                        mContext.startActivity(WebviewActivity.newIntent(
+                                mContext,
+                                banner.url));
+                    }
                 } else if(banner.target.equals(TARGET_COLECCION)) {
 
                 }

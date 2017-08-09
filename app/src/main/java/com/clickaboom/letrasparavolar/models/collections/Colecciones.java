@@ -89,6 +89,16 @@ public class Colecciones implements Serializable {
         mBookType = bookType;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Colecciones) {
+            Colecciones c = (Colecciones) obj;
+            if ( this.epub.equals(c.epub) )
+                return true;
+        }
+        return false;
+    }
+
     @SerializedName("0")
     @Expose
     public String _0;
