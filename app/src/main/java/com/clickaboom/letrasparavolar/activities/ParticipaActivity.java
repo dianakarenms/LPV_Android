@@ -133,7 +133,7 @@ public class ParticipaActivity extends AppCompatActivity
     private void sendParticipaRequest(String nombre, String correo, String procedencia, String mensaje) {
         ApiSingleton.showProgressFlower(ParticipaActivity.this);
 
-        String params = "?nombre=" + nombre + "&email=" + correo + "&escuela=" + procedencia + "&=" + mensaje.replace("\n", " ");
+        String params = "?nombre=" + nombre + "&email=" + correo + "&escuela=" + procedencia + "&mensaje=" + mensaje.replace("\n", " ");
         // Access the RequestQueue through your singleton class.
         ApiSingleton.getInstance(mContext)
                 .addToRequestQueue(new GsonRequest(ApiConfig.participa + params,
