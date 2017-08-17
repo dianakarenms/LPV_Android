@@ -65,28 +65,29 @@ public class MyFirebaseInstanceIDService extends FirebaseInstanceIdService {
         Log.d(TAG, msg);*/
 
         String params = "?token=" + token + "&device_id=" + deviceId;
+        if(token != null) {
+            // Access the RequestQueue through your singleton class.
+            ApiSingleton.getInstance(context)
+                    .addToRequestQueue(new GsonRequest(ApiConfig.registrarToken + params,
+                            ResTokenRegister.class,
+                            Request.Method.GET,
+                            null, null,
+                            new Response.Listener() {
+                                @Override
+                                public void onResponse(Object response) {
+                                    Log.d(TAG, response.toString());
+                                    String res = ((ResTokenRegister) response).data;
+                                    Log.d("tokenRegister", "success");
 
-        // Access the RequestQueue through your singleton class.
-        ApiSingleton.getInstance(context)
-                .addToRequestQueue(new GsonRequest(ApiConfig.registrarToken + params,
-                        ResTokenRegister.class,
-                        Request.Method.GET,
-                        null, null,
-                        new Response.Listener() {
-                            @Override
-                            public void onResponse(Object response) {
-                                Log.d(TAG, response.toString());
-                                String res = ((ResTokenRegister) response).data;
-                                Log.d("tokenRegister", "success");
-
-                            }
-                        }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.d(TAG, error.toString());
-                        Log.d("tokenRegister", "error");
-                    }
-                }));
+                                }
+                            }, new Response.ErrorListener() {
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Log.d(TAG, error.toString());
+                            Log.d("tokenRegister", "error");
+                        }
+                    }));
+        }
 
     }
 }

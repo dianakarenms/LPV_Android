@@ -895,10 +895,10 @@ public class MainActivity extends AppCompatActivity
         mLegendsAdapter.notifyDataSetChanged();
         mCollectionsAdapter.notifyDataSetChanged();
 
-        if(showLastAddedBooks) {
+        /*if(showLastAddedBooks) {
             mLegendsRV.scrollToPosition(mLegendsList.size() - 1);
             mColeccionesRV.scrollToPosition(mColectionesList.size() - 1);
-        }
+        }*/
 
         loadLegends();
         loadCollections();
