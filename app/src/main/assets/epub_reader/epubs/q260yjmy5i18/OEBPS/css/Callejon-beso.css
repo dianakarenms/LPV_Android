@@ -1,0 +1,103 @@
+@font-face {
+	font-family:Arial;
+	font-style:normal;
+	font-weight:bold;
+	src : url("../font/Arial-BoldMT.ttf");
+}
+@font-face {
+	font-family:Arial;
+	font-style:italic;
+	font-weight:normal;
+	src : url("../font/Arial-ItalicMT.ttf");
+}
+@font-face {
+	font-family:Arial;
+	font-style:oblique;
+	font-weight:normal;
+	src : url("../font/Arial-ItalicMT.ttf");
+}
+@font-face {
+	font-family:Arial;
+	font-style:normal;
+	font-weight:normal;
+	src : url("../font/ArialMT.ttf");
+}
+body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, p, pre, code, blockquote {
+	margin:0;
+	padding:0;
+	border-width:0;
+}
+td, th {
+	border-style:solid;
+	border-width:1px;
+}
+table {
+	border-collapse:collapse;
+}
+li {
+	display:block;
+}
+body {
+	-epub-hyphens:auto;
+	-webkit-hyphens:auto;
+}
+@page {
+	margin : 24px 24px 24px 24px;
+}
+p.P-rrafo-b-sico {
+	-epub-ruby-position:over;
+	color:#000000;
+	font-family:"Minion Pro", serif;
+	font-size:1em;
+	font-style:normal;
+	font-variant:normal;
+	font-weight:normal;
+	line-height:1.2;
+	margin-bottom:0px;
+	margin-left:0px;
+	margin-right:0px;
+	text-align:left;
+	text-decoration:none;
+	text-indent:0px;
+}
+span.t-tulos {
+	font-family:Arial, sans-serif;
+	font-size:1.333em;
+	font-style:normal;
+	font-weight:bold;
+}
+span.autors {
+	font-family:Arial, sans-serif;
+	font-size:0.833em;
+	font-style:italic;
+	font-weight:normal;
+}
+p.para-style-override-1 {
+	font-family:Arial, sans-serif;
+	font-size:0.667em;
+	font-style:italic;
+	font-weight:normal;
+}
+span.char-style-override-1 {
+	font-family:Arial;
+	font-size:1.083em;
+	font-style:normal;
+	font-weight:normal;
+}
+span.char-style-override-2 {
+	font-family:Arial, sans-serif;
+	font-size:13px;
+	font-style:normal;
+	font-weight:normal;
+}
+audio.frame-1 {
+	height:50px;
+	width:584px;
+}
+div.frame-2 {
+	margin:0px auto 0px auto;
+	text-align:center;
+}
+img.frame-3 {
+	width:76%;
+}

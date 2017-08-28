@@ -10,9 +10,6 @@ public class ApiConfig {
     // Banners
     public static final String banners = baseUrl + "/api/banners/";
 
-    // Images Path Categorias
-    public static final String catImgPath = baseUrl + "/uploads/images/categorias/";
-
     // Libros / Leyendas
     public static final String legends = baseUrl + "/api/libros/";
     public static final String legendsCategories = baseUrl + "/api/categorias/";
@@ -26,6 +23,7 @@ public class ApiConfig {
     public static final String searchCollections = baseUrl + "/api/search/colecciones/";
 
     // Images URL
+    public static final String catImgPath = baseUrl + "/uploads/images/categorias/";
     public static final String collectionsImg = baseUrl + "/uploads/images/libros/thumb_";
     public static final String juegosImg = baseUrl + "/uploads/images/juegos/";
 

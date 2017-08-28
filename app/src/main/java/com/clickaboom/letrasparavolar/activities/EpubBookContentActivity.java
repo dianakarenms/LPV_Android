@@ -36,6 +36,8 @@ import static com.clickaboom.letrasparavolar.activities.MainActivity.db;
  * Created by clickaboom on 6/10/17.
  */
 
+//<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
 public class EpubBookContentActivity extends Activity implements DownloadFile.OnTaskCompleted {
 
     private static final String TAG = "EpubBookContentActivity";
@@ -55,6 +57,7 @@ public class EpubBookContentActivity extends Activity implements DownloadFile.On
     private String linez;
     private String basePath;
     private ProgressBar progressBar;
+    private String mEpubFolder;
     private String mEpubBaseURL;
 
     public static Intent newIntent(Context packageContext, Colecciones epub) {
@@ -72,7 +75,8 @@ public class EpubBookContentActivity extends Activity implements DownloadFile.On
         mDownloadsListener = this;
 
         mEpub = (Colecciones) getIntent().getSerializableExtra(EXTRA_EPUB);
-        basePath = Environment.getExternalStorageDirectory() + "/LPV_eBooks/epub_reader/epubs/" + mEpub.epub;
+        mEpubFolder = mEpub.epub.replace(".epub", "");
+        basePath = Environment.getExternalStorageDirectory() + "/LPV_eBooks/epub_reader/epubs/" + mEpubFolder;
 
         mWebView = (WebView) findViewById(webView);
         mWebView.getSettings().setJavaScriptEnabled(true);
@@ -91,7 +95,7 @@ public class EpubBookContentActivity extends Activity implements DownloadFile.On
 
         File file = new File(basePath);
         if(!file.exists())
-            descargar(ApiConfig.epubs + mEpub.epub, mEpub.epub);
+            descargar(ApiConfig.epubs + mEpub.epub, mEpubFolder, mEpub.epub);
         else
             loadEpubFromStorage();
     }
@@ -128,7 +132,7 @@ public class EpubBookContentActivity extends Activity implements DownloadFile.On
 
             decom(mEpub.epub, basePath + "/");
 
-            mEpubBaseURL = "file://" + Environment.getExternalStorageDirectory() + "/LPV_eBooks/epub_reader/index.html?book=" + mEpub.epub;
+            mEpubBaseURL = "file://" + Environment.getExternalStorageDirectory() + "/LPV_eBooks/epub_reader/index.html?book=" + mEpubFolder;
             mWebView.loadUrl(mEpubBaseURL);
         } catch (IOException e) {
             e.printStackTrace();
@@ -195,9 +199,9 @@ public class EpubBookContentActivity extends Activity implements DownloadFile.On
         }
     }
 
-    public void descargar(String url, String fileName){
+    public void descargar(String url, String fileFolder, String fileName){
         DownloadFile downloadFile = new DownloadFile(mDownloadsListener, mContext, EpubBookContentActivity.this, true, mEpub);
-        downloadFile.execute(url, fileName, fileName);
+        downloadFile.execute(url, fileFolder, fileName);
     }
 
     @Override

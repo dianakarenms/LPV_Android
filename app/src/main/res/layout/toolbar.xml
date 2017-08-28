@@ -30,14 +30,14 @@
                 android:src="@drawable/back_arrow"
                 android:adjustViewBounds="true"
                 android:scaleType="centerInside"
-                android:tint="@color/legends_nav_pressed"
+                android:tint="@color/black"
                 android:layout_gravity="center_vertical"
                 android:background="@null"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:text="@string/atras"
-                android:textColor="@color/dark_gray"
+                android:textColor="@color/legends_nav_pressed"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
                 android:gravity="center"/>
         </LinearLayout>

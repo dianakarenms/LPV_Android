@@ -1,4795 +1,232 @@
-/*!
- * @overview RSVP - a tiny implementation of Promises/A+.
- * @copyright Copyright (c) 2016 Yehuda Katz, Tom Dale, Stefan Penner and contributors
- * @license   Licensed under MIT license
- *            See https://raw.githubusercontent.com/tildeio/rsvp.js/master/LICENSE
- * @version   3.5.0
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory((function webpackLoadOptionalExternalModule() { try { return require("JSZip"); } catch(e) {} }()), require("xmldom"));
+	else if(typeof define === 'function' && define.amd)
+		define(["JSZip", "xmldom"], factory);
+	else if(typeof exports === 'object')
+		exports["ePub"] = factory((function webpackLoadOptionalExternalModule() { try { return require("JSZip"); } catch(e) {} }()), require("xmldom"));
+	else
+		root["ePub"] = factory(root["JSZip"], root["xmldom"]);
+})(this, function(__WEBPACK_EXTERNAL_MODULE_45__, __WEBPACK_EXTERNAL_MODULE_14__) {
+return /******/ (function(modules) { // webpackBootstrap
+/******/ 	// The module cache
+/******/ 	var installedModules = {};
+/******/
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/
+/******/ 		// Check if module is in cache
+/******/ 		if(installedModules[moduleId])
+/******/ 			return installedModules[moduleId].exports;
+/******/
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = installedModules[moduleId] = {
+/******/ 			i: moduleId,
+/******/ 			l: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/
+/******/ 		// Execute the module function
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/
+/******/ 		// Flag the module as loaded
+/******/ 		module.l = true;
+/******/
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/
+/******/
+/******/ 	// expose the modules object (__webpack_modules__)
+/******/ 	__webpack_require__.m = modules;
+/******/
+/******/ 	// expose the module cache
+/******/ 	__webpack_require__.c = installedModules;
+/******/
+/******/ 	// identity function for calling harmory imports with the correct context
+/******/ 	__webpack_require__.i = function(value) { return value; };
+/******/
+/******/ 	// define getter function for harmory exports
+/******/ 	__webpack_require__.d = function(exports, name, getter) {
+/******/ 		Object.defineProperty(exports, name, {
+/******/ 			configurable: false,
+/******/ 			enumerable: true,
+/******/ 			get: getter
+/******/ 		});
+/******/ 	};
+/******/
+/******/ 	// getDefaultExport function for compatibility with non-harmony modules
+/******/ 	__webpack_require__.n = function(module) {
+/******/ 		var getter = module && module.__esModule ?
+/******/ 			function getDefault() { return module['default']; } :
+/******/ 			function getModuleExports() { return module; };
+/******/ 		__webpack_require__.d(getter, 'a', getter);
+/******/ 		return getter;
+/******/ 	};
+/******/
+/******/ 	// Object.prototype.hasOwnProperty.call
+/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
+/******/
+/******/ 	// __webpack_public_path__
+/******/ 	__webpack_require__.p = "/dist/";
+/******/
+/******/ 	// Load entry module and return exports
+/******/ 	return __webpack_require__(__webpack_require__.s = 47);
+/******/ })
+/************************************************************************/
+/******/ ([
+/* 0 */
+/***/ function(module, exports, __webpack_require__) {
+
+var base64 = __webpack_require__(21);
+var path = __webpack_require__(3);
+
+var requestAnimationFrame = (typeof window != 'undefined') ? (window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame) : false;
+
+/**
+ * creates a uri object
+ * @param	{string} urlString	a url string (relative or absolute)
+ * @param	{[string]} baseString optional base for the url,
+ * default to window.location.href
+ * @return {object} url
  */
-
-(function (global, factory) {
-	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-	typeof define === 'function' && define.amd ? define(['exports'], factory) :
-	(factory((global.RSVP = global.RSVP || {})));
-}(this, (function (exports) { 'use strict';
-
-function indexOf(callbacks, callback) {
-  for (var i = 0, l = callbacks.length; i < l; i++) {
-    if (callbacks[i] === callback) {
-      return i;
-    }
-  }
-
-  return -1;
-}
-
-function callbacksFor(object) {
-  var callbacks = object._promiseCallbacks;
-
-  if (!callbacks) {
-    callbacks = object._promiseCallbacks = {};
-  }
-
-  return callbacks;
-}
-
-/**
-  @class RSVP.EventTarget
-*/
-var EventTarget = {
-
-  /**
-    `RSVP.EventTarget.mixin` extends an object with EventTarget methods. For
-    Example:
-     ```javascript
-    let object = {};
-     RSVP.EventTarget.mixin(object);
-     object.on('finished', function(event) {
-      // handle event
-    });
-     object.trigger('finished', { detail: value });
-    ```
-     `EventTarget.mixin` also works with prototypes:
-     ```javascript
-    let Person = function() {};
-    RSVP.EventTarget.mixin(Person.prototype);
-     let yehuda = new Person();
-    let tom = new Person();
-     yehuda.on('poke', function(event) {
-      console.log('Yehuda says OW');
-    });
-     tom.on('poke', function(event) {
-      console.log('Tom says OW');
-    });
-     yehuda.trigger('poke');
-    tom.trigger('poke');
-    ```
-     @method mixin
-    @for RSVP.EventTarget
-    @private
-    @param {Object} object object to extend with EventTarget methods
-  */
-  mixin: function mixin(object) {
-    object['on'] = this['on'];
-    object['off'] = this['off'];
-    object['trigger'] = this['trigger'];
-    object._promiseCallbacks = undefined;
-    return object;
-  },
-
-  /**
-    Registers a callback to be executed when `eventName` is triggered
-     ```javascript
-    object.on('event', function(eventInfo){
-      // handle the event
-    });
-     object.trigger('event');
-    ```
-     @method on
-    @for RSVP.EventTarget
-    @private
-    @param {String} eventName name of the event to listen for
-    @param {Function} callback function to be called when the event is triggered.
-  */
-  on: function on(eventName, callback) {
-    if (typeof callback !== 'function') {
-      throw new TypeError('Callback must be a function');
-    }
-
-    var allCallbacks = callbacksFor(this),
-        callbacks = undefined;
-
-    callbacks = allCallbacks[eventName];
-
-    if (!callbacks) {
-      callbacks = allCallbacks[eventName] = [];
-    }
-
-    if (indexOf(callbacks, callback) === -1) {
-      callbacks.push(callback);
-    }
-  },
-
-  /**
-    You can use `off` to stop firing a particular callback for an event:
-     ```javascript
-    function doStuff() { // do stuff! }
-    object.on('stuff', doStuff);
-     object.trigger('stuff'); // doStuff will be called
-     // Unregister ONLY the doStuff callback
-    object.off('stuff', doStuff);
-    object.trigger('stuff'); // doStuff will NOT be called
-    ```
-     If you don't pass a `callback` argument to `off`, ALL callbacks for the
-    event will not be executed when the event fires. For example:
-     ```javascript
-    let callback1 = function(){};
-    let callback2 = function(){};
-     object.on('stuff', callback1);
-    object.on('stuff', callback2);
-     object.trigger('stuff'); // callback1 and callback2 will be executed.
-     object.off('stuff');
-    object.trigger('stuff'); // callback1 and callback2 will not be executed!
-    ```
-     @method off
-    @for RSVP.EventTarget
-    @private
-    @param {String} eventName event to stop listening to
-    @param {Function} callback optional argument. If given, only the function
-    given will be removed from the event's callback queue. If no `callback`
-    argument is given, all callbacks will be removed from the event's callback
-    queue.
-  */
-  off: function off(eventName, callback) {
-    var allCallbacks = callbacksFor(this),
-        callbacks = undefined,
-        index = undefined;
-
-    if (!callback) {
-      allCallbacks[eventName] = [];
-      return;
-    }
-
-    callbacks = allCallbacks[eventName];
-
-    index = indexOf(callbacks, callback);
-
-    if (index !== -1) {
-      callbacks.splice(index, 1);
-    }
-  },
-
-  /**
-    Use `trigger` to fire custom events. For example:
-     ```javascript
-    object.on('foo', function(){
-      console.log('foo event happened!');
-    });
-    object.trigger('foo');
-    // 'foo event happened!' logged to the console
-    ```
-     You can also pass a value as a second argument to `trigger` that will be
-    passed as an argument to all event listeners for the event:
-     ```javascript
-    object.on('foo', function(value){
-      console.log(value.name);
-    });
-     object.trigger('foo', { name: 'bar' });
-    // 'bar' logged to the console
-    ```
-     @method trigger
-    @for RSVP.EventTarget
-    @private
-    @param {String} eventName name of the event to be triggered
-    @param {*} options optional value to be passed to any event handlers for
-    the given `eventName`
-  */
-  trigger: function trigger(eventName, options, label) {
-    var allCallbacks = callbacksFor(this),
-        callbacks = undefined,
-        callback = undefined;
-
-    if (callbacks = allCallbacks[eventName]) {
-      // Don't cache the callbacks.length since it may grow
-      for (var i = 0; i < callbacks.length; i++) {
-        callback = callbacks[i];
-
-        callback(options, label);
-      }
-    }
-  }
-};
-
-var config = {
-  instrument: false
-};
-
-EventTarget['mixin'](config);
-
-function configure(name, value) {
-  if (name === 'onerror') {
-    // handle for legacy users that expect the actual
-    // error to be passed to their function added via
-    // `RSVP.configure('onerror', someFunctionHere);`
-    config['on']('error', value);
-    return;
-  }
-
-  if (arguments.length === 2) {
-    config[name] = value;
-  } else {
-    return config[name];
-  }
-}
-
-function objectOrFunction(x) {
-  return typeof x === 'function' || typeof x === 'object' && x !== null;
-}
-
-function isFunction(x) {
-  return typeof x === 'function';
-}
-
-function isMaybeThenable(x) {
-  return typeof x === 'object' && x !== null;
-}
-
-var _isArray = undefined;
-if (!Array.isArray) {
-  _isArray = function (x) {
-    return Object.prototype.toString.call(x) === '[object Array]';
-  };
-} else {
-  _isArray = Array.isArray;
-}
-
-var isArray = _isArray;
-
-// Date.now is not available in browsers < IE9
-// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/now#Compatibility
-var now = Date.now || function () {
-  return new Date().getTime();
-};
-
-function F() {}
-
-var o_create = Object.create || function (o) {
-  if (arguments.length > 1) {
-    throw new Error('Second argument not supported');
-  }
-  if (typeof o !== 'object') {
-    throw new TypeError('Argument must be an object');
-  }
-  F.prototype = o;
-  return new F();
-};
-
-var queue = [];
-
-function scheduleFlush() {
-  setTimeout(function () {
-    for (var i = 0; i < queue.length; i++) {
-      var entry = queue[i];
-
-      var payload = entry.payload;
-
-      payload.guid = payload.key + payload.id;
-      payload.childGuid = payload.key + payload.childId;
-      if (payload.error) {
-        payload.stack = payload.error.stack;
-      }
-
-      config['trigger'](entry.name, entry.payload);
-    }
-    queue.length = 0;
-  }, 50);
-}
-function instrument$1(eventName, promise, child) {
-  if (1 === queue.push({
-    name: eventName,
-    payload: {
-      key: promise._guidKey,
-      id: promise._id,
-      eventName: eventName,
-      detail: promise._result,
-      childId: child && child._id,
-      label: promise._label,
-      timeStamp: now(),
-      error: config["instrument-with-stack"] ? new Error(promise._label) : null
-    } })) {
-    scheduleFlush();
-  }
-}
-
-/**
-  `RSVP.Promise.resolve` returns a promise that will become resolved with the
-  passed `value`. It is shorthand for the following:
-
-  ```javascript
-  let promise = new RSVP.Promise(function(resolve, reject){
-    resolve(1);
-  });
-
-  promise.then(function(value){
-    // value === 1
-  });
-  ```
-
-  Instead of writing the above, your code now simply becomes the following:
-
-  ```javascript
-  let promise = RSVP.Promise.resolve(1);
-
-  promise.then(function(value){
-    // value === 1
-  });
-  ```
-
-  @method resolve
-  @static
-  @param {*} object value that the returned promise will be resolved with
-  @param {String} label optional string for identifying the returned promise.
-  Useful for tooling.
-  @return {Promise} a promise that will become fulfilled with the given
-  `value`
-*/
-function resolve$1(object, label) {
-  /*jshint validthis:true */
-  var Constructor = this;
-
-  if (object && typeof object === 'object' && object.constructor === Constructor) {
-    return object;
-  }
-
-  var promise = new Constructor(noop, label);
-  resolve(promise, object);
-  return promise;
-}
-
-function withOwnPromise() {
-  return new TypeError('A promises callback cannot return that same promise.');
-}
-
-function noop() {}
-
-var PENDING = void 0;
-var FULFILLED = 1;
-var REJECTED = 2;
-
-var GET_THEN_ERROR = new ErrorObject();
-
-function getThen(promise) {
-  try {
-    return promise.then;
-  } catch (error) {
-    GET_THEN_ERROR.error = error;
-    return GET_THEN_ERROR;
-  }
-}
-
-function tryThen(then$$1, value, fulfillmentHandler, rejectionHandler) {
-  try {
-    then$$1.call(value, fulfillmentHandler, rejectionHandler);
-  } catch (e) {
-    return e;
-  }
-}
-
-function handleForeignThenable(promise, thenable, then$$1) {
-  config.async(function (promise) {
-    var sealed = false;
-    var error = tryThen(then$$1, thenable, function (value) {
-      if (sealed) {
-        return;
-      }
-      sealed = true;
-      if (thenable !== value) {
-        resolve(promise, value, undefined);
-      } else {
-        fulfill(promise, value);
-      }
-    }, function (reason) {
-      if (sealed) {
-        return;
-      }
-      sealed = true;
-
-      reject(promise, reason);
-    }, 'Settle: ' + (promise._label || ' unknown promise'));
-
-    if (!sealed && error) {
-      sealed = true;
-      reject(promise, error);
-    }
-  }, promise);
-}
-
-function handleOwnThenable(promise, thenable) {
-  if (thenable._state === FULFILLED) {
-    fulfill(promise, thenable._result);
-  } else if (thenable._state === REJECTED) {
-    thenable._onError = null;
-    reject(promise, thenable._result);
-  } else {
-    subscribe(thenable, undefined, function (value) {
-      if (thenable !== value) {
-        resolve(promise, value, undefined);
-      } else {
-        fulfill(promise, value);
-      }
-    }, function (reason) {
-      return reject(promise, reason);
-    });
-  }
-}
-
-function handleMaybeThenable(promise, maybeThenable, then$$1) {
-  if (maybeThenable.constructor === promise.constructor && then$$1 === then && promise.constructor.resolve === resolve$1) {
-    handleOwnThenable(promise, maybeThenable);
-  } else {
-    if (then$$1 === GET_THEN_ERROR) {
-      reject(promise, GET_THEN_ERROR.error);
-      GET_THEN_ERROR.error = null;
-    } else if (then$$1 === undefined) {
-      fulfill(promise, maybeThenable);
-    } else if (isFunction(then$$1)) {
-      handleForeignThenable(promise, maybeThenable, then$$1);
-    } else {
-      fulfill(promise, maybeThenable);
-    }
-  }
-}
-
-function resolve(promise, value) {
-  if (promise === value) {
-    fulfill(promise, value);
-  } else if (objectOrFunction(value)) {
-    handleMaybeThenable(promise, value, getThen(value));
-  } else {
-    fulfill(promise, value);
-  }
-}
-
-function publishRejection(promise) {
-  if (promise._onError) {
-    promise._onError(promise._result);
-  }
-
-  publish(promise);
-}
-
-function fulfill(promise, value) {
-  if (promise._state !== PENDING) {
-    return;
-  }
-
-  promise._result = value;
-  promise._state = FULFILLED;
-
-  if (promise._subscribers.length === 0) {
-    if (config.instrument) {
-      instrument$1('fulfilled', promise);
-    }
-  } else {
-    config.async(publish, promise);
-  }
-}
-
-function reject(promise, reason) {
-  if (promise._state !== PENDING) {
-    return;
-  }
-  promise._state = REJECTED;
-  promise._result = reason;
-  config.async(publishRejection, promise);
-}
-
-function subscribe(parent, child, onFulfillment, onRejection) {
-  var subscribers = parent._subscribers;
-  var length = subscribers.length;
-
-  parent._onError = null;
-
-  subscribers[length] = child;
-  subscribers[length + FULFILLED] = onFulfillment;
-  subscribers[length + REJECTED] = onRejection;
-
-  if (length === 0 && parent._state) {
-    config.async(publish, parent);
-  }
-}
-
-function publish(promise) {
-  var subscribers = promise._subscribers;
-  var settled = promise._state;
-
-  if (config.instrument) {
-    instrument$1(settled === FULFILLED ? 'fulfilled' : 'rejected', promise);
-  }
-
-  if (subscribers.length === 0) {
-    return;
-  }
-
-  var child = undefined,
-      callback = undefined,
-      detail = promise._result;
-
-  for (var i = 0; i < subscribers.length; i += 3) {
-    child = subscribers[i];
-    callback = subscribers[i + settled];
-
-    if (child) {
-      invokeCallback(settled, child, callback, detail);
-    } else {
-      callback(detail);
-    }
-  }
-
-  promise._subscribers.length = 0;
-}
-
-function ErrorObject() {
-  this.error = null;
-}
-
-var TRY_CATCH_ERROR = new ErrorObject();
-
-function tryCatch(callback, detail) {
-  try {
-    return callback(detail);
-  } catch (e) {
-    TRY_CATCH_ERROR.error = e;
-    return TRY_CATCH_ERROR;
-  }
-}
-
-function invokeCallback(settled, promise, callback, detail) {
-  var hasCallback = isFunction(callback),
-      value = undefined,
-      error = undefined,
-      succeeded = undefined,
-      failed = undefined;
-
-  if (hasCallback) {
-    value = tryCatch(callback, detail);
-
-    if (value === TRY_CATCH_ERROR) {
-      failed = true;
-      error = value.error;
-      value.error = null; // release
-    } else {
-        succeeded = true;
-      }
-
-    if (promise === value) {
-      reject(promise, withOwnPromise());
-      return;
-    }
-  } else {
-    value = detail;
-    succeeded = true;
-  }
-
-  if (promise._state !== PENDING) {
-    // noop
-  } else if (hasCallback && succeeded) {
-      resolve(promise, value);
-    } else if (failed) {
-      reject(promise, error);
-    } else if (settled === FULFILLED) {
-      fulfill(promise, value);
-    } else if (settled === REJECTED) {
-      reject(promise, value);
-    }
-}
-
-function initializePromise(promise, resolver) {
-  var resolved = false;
-  try {
-    resolver(function (value) {
-      if (resolved) {
-        return;
-      }
-      resolved = true;
-      resolve(promise, value);
-    }, function (reason) {
-      if (resolved) {
-        return;
-      }
-      resolved = true;
-      reject(promise, reason);
-    });
-  } catch (e) {
-    reject(promise, e);
-  }
-}
-
-function then(onFulfillment, onRejection, label) {
-  var _arguments = arguments;
-
-  var parent = this;
-  var state = parent._state;
-
-  if (state === FULFILLED && !onFulfillment || state === REJECTED && !onRejection) {
-    config.instrument && instrument$1('chained', parent, parent);
-    return parent;
-  }
-
-  parent._onError = null;
-
-  var child = new parent.constructor(noop, label);
-  var result = parent._result;
-
-  config.instrument && instrument$1('chained', parent, child);
-
-  if (state) {
-    (function () {
-      var callback = _arguments[state - 1];
-      config.async(function () {
-        return invokeCallback(state, child, callback, result);
-      });
-    })();
-  } else {
-    subscribe(parent, child, onFulfillment, onRejection);
-  }
-
-  return child;
-}
-
-function makeSettledResult(state, position, value) {
-  if (state === FULFILLED) {
-    return {
-      state: 'fulfilled',
-      value: value
-    };
-  } else {
-    return {
-      state: 'rejected',
-      reason: value
-    };
-  }
-}
-
-function Enumerator(Constructor, input, abortOnReject, label) {
-  this._instanceConstructor = Constructor;
-  this.promise = new Constructor(noop, label);
-  this._abortOnReject = abortOnReject;
-
-  if (this._validateInput(input)) {
-    this._input = input;
-    this.length = input.length;
-    this._remaining = input.length;
-
-    this._init();
-
-    if (this.length === 0) {
-      fulfill(this.promise, this._result);
-    } else {
-      this.length = this.length || 0;
-      this._enumerate();
-      if (this._remaining === 0) {
-        fulfill(this.promise, this._result);
-      }
-    }
-  } else {
-    reject(this.promise, this._validationError());
-  }
-}
-
-Enumerator.prototype._validateInput = function (input) {
-  return isArray(input);
-};
-
-Enumerator.prototype._validationError = function () {
-  return new Error('Array Methods must be provided an Array');
-};
-
-Enumerator.prototype._init = function () {
-  this._result = new Array(this.length);
-};
-
-Enumerator.prototype._enumerate = function () {
-  var length = this.length;
-  var promise = this.promise;
-  var input = this._input;
-
-  for (var i = 0; promise._state === PENDING && i < length; i++) {
-    this._eachEntry(input[i], i);
-  }
-};
-
-Enumerator.prototype._settleMaybeThenable = function (entry, i) {
-  var c = this._instanceConstructor;
-  var resolve$$1 = c.resolve;
-
-  if (resolve$$1 === resolve$1) {
-    var then$$1 = getThen(entry);
-
-    if (then$$1 === then && entry._state !== PENDING) {
-      entry._onError = null;
-      this._settledAt(entry._state, i, entry._result);
-    } else if (typeof then$$1 !== 'function') {
-      this._remaining--;
-      this._result[i] = this._makeResult(FULFILLED, i, entry);
-    } else if (c === Promise$1) {
-      var promise = new c(noop);
-      handleMaybeThenable(promise, entry, then$$1);
-      this._willSettleAt(promise, i);
-    } else {
-      this._willSettleAt(new c(function (resolve$$1) {
-        return resolve$$1(entry);
-      }), i);
-    }
-  } else {
-    this._willSettleAt(resolve$$1(entry), i);
-  }
-};
-
-Enumerator.prototype._eachEntry = function (entry, i) {
-  if (isMaybeThenable(entry)) {
-    this._settleMaybeThenable(entry, i);
-  } else {
-    this._remaining--;
-    this._result[i] = this._makeResult(FULFILLED, i, entry);
-  }
-};
-
-Enumerator.prototype._settledAt = function (state, i, value) {
-  var promise = this.promise;
-
-  if (promise._state === PENDING) {
-    this._remaining--;
-
-    if (this._abortOnReject && state === REJECTED) {
-      reject(promise, value);
-    } else {
-      this._result[i] = this._makeResult(state, i, value);
-    }
-  }
-
-  if (this._remaining === 0) {
-    fulfill(promise, this._result);
-  }
-};
-
-Enumerator.prototype._makeResult = function (state, i, value) {
-  return value;
-};
-
-Enumerator.prototype._willSettleAt = function (promise, i) {
-  var enumerator = this;
-
-  subscribe(promise, undefined, function (value) {
-    return enumerator._settledAt(FULFILLED, i, value);
-  }, function (reason) {
-    return enumerator._settledAt(REJECTED, i, reason);
-  });
-};
-
-/**
-  `RSVP.Promise.all` accepts an array of promises, and returns a new promise which
-  is fulfilled with an array of fulfillment values for the passed promises, or
-  rejected with the reason of the first passed promise to be rejected. It casts all
-  elements of the passed iterable to promises as it runs this algorithm.
-
-  Example:
-
-  ```javascript
-  let promise1 = RSVP.resolve(1);
-  let promise2 = RSVP.resolve(2);
-  let promise3 = RSVP.resolve(3);
-  let promises = [ promise1, promise2, promise3 ];
-
-  RSVP.Promise.all(promises).then(function(array){
-    // The array here would be [ 1, 2, 3 ];
-  });
-  ```
-
-  If any of the `promises` given to `RSVP.all` are rejected, the first promise
-  that is rejected will be given as an argument to the returned promises's
-  rejection handler. For example:
-
-  Example:
-
-  ```javascript
-  let promise1 = RSVP.resolve(1);
-  let promise2 = RSVP.reject(new Error("2"));
-  let promise3 = RSVP.reject(new Error("3"));
-  let promises = [ promise1, promise2, promise3 ];
-
-  RSVP.Promise.all(promises).then(function(array){
-    // Code here never runs because there are rejected promises!
-  }, function(error) {
-    // error.message === "2"
-  });
-  ```
-
-  @method all
-  @static
-  @param {Array} entries array of promises
-  @param {String} label optional string for labeling the promise.
-  Useful for tooling.
-  @return {Promise} promise that is fulfilled when all `promises` have been
-  fulfilled, or rejected if any of them become rejected.
-  @static
-*/
-function all$1(entries, label) {
-  return new Enumerator(this, entries, true, /* abort on reject */label).promise;
-}
-
-/**
-  `RSVP.Promise.race` returns a new promise which is settled in the same way as the
-  first passed promise to settle.
-
-  Example:
-
-  ```javascript
-  let promise1 = new RSVP.Promise(function(resolve, reject){
-    setTimeout(function(){
-      resolve('promise 1');
-    }, 200);
-  });
-
-  let promise2 = new RSVP.Promise(function(resolve, reject){
-    setTimeout(function(){
-      resolve('promise 2');
-    }, 100);
-  });
-
-  RSVP.Promise.race([promise1, promise2]).then(function(result){
-    // result === 'promise 2' because it was resolved before promise1
-    // was resolved.
-  });
-  ```
-
-  `RSVP.Promise.race` is deterministic in that only the state of the first
-  settled promise matters. For example, even if other promises given to the
-  `promises` array argument are resolved, but the first settled promise has
-  become rejected before the other promises became fulfilled, the returned
-  promise will become rejected:
-
-  ```javascript
-  let promise1 = new RSVP.Promise(function(resolve, reject){
-    setTimeout(function(){
-      resolve('promise 1');
-    }, 200);
-  });
-
-  let promise2 = new RSVP.Promise(function(resolve, reject){
-    setTimeout(function(){
-      reject(new Error('promise 2'));
-    }, 100);
-  });
-
-  RSVP.Promise.race([promise1, promise2]).then(function(result){
-    // Code here never runs
-  }, function(reason){
-    // reason.message === 'promise 2' because promise 2 became rejected before
-    // promise 1 became fulfilled
-  });
-  ```
-
-  An example real-world use case is implementing timeouts:
-
-  ```javascript
-  RSVP.Promise.race([ajax('foo.json'), timeout(5000)])
-  ```
-
-  @method race
-  @static
-  @param {Array} entries array of promises to observe
-  @param {String} label optional string for describing the promise returned.
-  Useful for tooling.
-  @return {Promise} a promise which settles in the same way as the first passed
-  promise to settle.
-*/
-function race$1(entries, label) {
-  /*jshint validthis:true */
-  var Constructor = this;
-
-  var promise = new Constructor(noop, label);
-
-  if (!isArray(entries)) {
-    reject(promise, new TypeError('You must pass an array to race.'));
-    return promise;
-  }
-
-  for (var i = 0; promise._state === PENDING && i < entries.length; i++) {
-    subscribe(Constructor.resolve(entries[i]), undefined, function (value) {
-      return resolve(promise, value);
-    }, function (reason) {
-      return reject(promise, reason);
-    });
-  }
-
-  return promise;
-}
-
-/**
-  `RSVP.Promise.reject` returns a promise rejected with the passed `reason`.
-  It is shorthand for the following:
-
-  ```javascript
-  let promise = new RSVP.Promise(function(resolve, reject){
-    reject(new Error('WHOOPS'));
-  });
-
-  promise.then(function(value){
-    // Code here doesn't run because the promise is rejected!
-  }, function(reason){
-    // reason.message === 'WHOOPS'
-  });
-  ```
-
-  Instead of writing the above, your code now simply becomes the following:
-
-  ```javascript
-  let promise = RSVP.Promise.reject(new Error('WHOOPS'));
-
-  promise.then(function(value){
-    // Code here doesn't run because the promise is rejected!
-  }, function(reason){
-    // reason.message === 'WHOOPS'
-  });
-  ```
-
-  @method reject
-  @static
-  @param {*} reason value that the returned promise will be rejected with.
-  @param {String} label optional string for identifying the returned promise.
-  Useful for tooling.
-  @return {Promise} a promise rejected with the given `reason`.
-*/
-function reject$1(reason, label) {
-  /*jshint validthis:true */
-  var Constructor = this;
-  var promise = new Constructor(noop, label);
-  reject(promise, reason);
-  return promise;
-}
-
-var guidKey = 'rsvp_' + now() + '-';
-var counter = 0;
-
-function needsResolver() {
-  throw new TypeError('You must pass a resolver function as the first argument to the promise constructor');
-}
-
-function needsNew() {
-  throw new TypeError("Failed to construct 'Promise': Please use the 'new' operator, this object constructor cannot be called as a function.");
-}
-
-/**
-  Promise objects represent the eventual result of an asynchronous operation. The
-  primary way of interacting with a promise is through its `then` method, which
-  registers callbacks to receive either a promise’s eventual value or the reason
-  why the promise cannot be fulfilled.
-
-  Terminology
-  -----------
-
-  - `promise` is an object or function with a `then` method whose behavior conforms to this specification.
-  - `thenable` is an object or function that defines a `then` method.
-  - `value` is any legal JavaScript value (including undefined, a thenable, or a promise).
-  - `exception` is a value that is thrown using the throw statement.
-  - `reason` is a value that indicates why a promise was rejected.
-  - `settled` the final resting state of a promise, fulfilled or rejected.
-
-  A promise can be in one of three states: pending, fulfilled, or rejected.
-
-  Promises that are fulfilled have a fulfillment value and are in the fulfilled
-  state.  Promises that are rejected have a rejection reason and are in the
-  rejected state.  A fulfillment value is never a thenable.
-
-  Promises can also be said to *resolve* a value.  If this value is also a
-  promise, then the original promise's settled state will match the value's
-  settled state.  So a promise that *resolves* a promise that rejects will
-  itself reject, and a promise that *resolves* a promise that fulfills will
-  itself fulfill.
-
-
-  Basic Usage:
-  ------------
-
-  ```js
-  let promise = new Promise(function(resolve, reject) {
-    // on success
-    resolve(value);
-
-    // on failure
-    reject(reason);
-  });
-
-  promise.then(function(value) {
-    // on fulfillment
-  }, function(reason) {
-    // on rejection
-  });
-  ```
-
-  Advanced Usage:
-  ---------------
-
-  Promises shine when abstracting away asynchronous interactions such as
-  `XMLHttpRequest`s.
-
-  ```js
-  function getJSON(url) {
-    return new Promise(function(resolve, reject){
-      let xhr = new XMLHttpRequest();
-
-      xhr.open('GET', url);
-      xhr.onreadystatechange = handler;
-      xhr.responseType = 'json';
-      xhr.setRequestHeader('Accept', 'application/json');
-      xhr.send();
-
-      function handler() {
-        if (this.readyState === this.DONE) {
-          if (this.status === 200) {
-            resolve(this.response);
-          } else {
-            reject(new Error('getJSON: `' + url + '` failed with status: [' + this.status + ']'));
-          }
-        }
-      };
-    });
-  }
-
-  getJSON('/posts.json').then(function(json) {
-    // on fulfillment
-  }, function(reason) {
-    // on rejection
-  });
-  ```
-
-  Unlike callbacks, promises are great composable primitives.
-
-  ```js
-  Promise.all([
-    getJSON('/posts'),
-    getJSON('/comments')
-  ]).then(function(values){
-    values[0] // => postsJSON
-    values[1] // => commentsJSON
-
-    return values;
-  });
-  ```
-
-  @class RSVP.Promise
-  @param {function} resolver
-  @param {String} label optional string for labeling the promise.
-  Useful for tooling.
-  @constructor
-*/
-function Promise$1(resolver, label) {
-  this._id = counter++;
-  this._label = label;
-  this._state = undefined;
-  this._result = undefined;
-  this._subscribers = [];
-
-  config.instrument && instrument$1('created', this);
-
-  if (noop !== resolver) {
-    typeof resolver !== 'function' && needsResolver();
-    this instanceof Promise$1 ? initializePromise(this, resolver) : needsNew();
-  }
-}
-
-Promise$1.cast = resolve$1; // deprecated
-Promise$1.all = all$1;
-Promise$1.race = race$1;
-Promise$1.resolve = resolve$1;
-Promise$1.reject = reject$1;
-
-Promise$1.prototype = {
-  constructor: Promise$1,
-
-  _guidKey: guidKey,
-
-  _onError: function _onError(reason) {
-    var promise = this;
-    config.after(function () {
-      if (promise._onError) {
-        config['trigger']('error', reason, promise._label);
-      }
-    });
-  },
-
-  /**
-    The primary way of interacting with a promise is through its `then` method,
-    which registers callbacks to receive either a promise's eventual value or the
-    reason why the promise cannot be fulfilled.
-  
-    ```js
-    findUser().then(function(user){
-      // user is available
-    }, function(reason){
-      // user is unavailable, and you are given the reason why
-    });
-    ```
-  
-    Chaining
-    --------
-  
-    The return value of `then` is itself a promise.  This second, 'downstream'
-    promise is resolved with the return value of the first promise's fulfillment
-    or rejection handler, or rejected if the handler throws an exception.
-  
-    ```js
-    findUser().then(function (user) {
-      return user.name;
-    }, function (reason) {
-      return 'default name';
-    }).then(function (userName) {
-      // If `findUser` fulfilled, `userName` will be the user's name, otherwise it
-      // will be `'default name'`
-    });
-  
-    findUser().then(function (user) {
-      throw new Error('Found user, but still unhappy');
-    }, function (reason) {
-      throw new Error('`findUser` rejected and we\'re unhappy');
-    }).then(function (value) {
-      // never reached
-    }, function (reason) {
-      // if `findUser` fulfilled, `reason` will be 'Found user, but still unhappy'.
-      // If `findUser` rejected, `reason` will be '`findUser` rejected and we\'re unhappy'.
-    });
-    ```
-    If the downstream promise does not specify a rejection handler, rejection reasons will be propagated further downstream.
-  
-    ```js
-    findUser().then(function (user) {
-      throw new PedagogicalException('Upstream error');
-    }).then(function (value) {
-      // never reached
-    }).then(function (value) {
-      // never reached
-    }, function (reason) {
-      // The `PedgagocialException` is propagated all the way down to here
-    });
-    ```
-  
-    Assimilation
-    ------------
-  
-    Sometimes the value you want to propagate to a downstream promise can only be
-    retrieved asynchronously. This can be achieved by returning a promise in the
-    fulfillment or rejection handler. The downstream promise will then be pending
-    until the returned promise is settled. This is called *assimilation*.
-  
-    ```js
-    findUser().then(function (user) {
-      return findCommentsByAuthor(user);
-    }).then(function (comments) {
-      // The user's comments are now available
-    });
-    ```
-  
-    If the assimliated promise rejects, then the downstream promise will also reject.
-  
-    ```js
-    findUser().then(function (user) {
-      return findCommentsByAuthor(user);
-    }).then(function (comments) {
-      // If `findCommentsByAuthor` fulfills, we'll have the value here
-    }, function (reason) {
-      // If `findCommentsByAuthor` rejects, we'll have the reason here
-    });
-    ```
-  
-    Simple Example
-    --------------
-  
-    Synchronous Example
-  
-    ```javascript
-    let result;
-  
-    try {
-      result = findResult();
-      // success
-    } catch(reason) {
-      // failure
-    }
-    ```
-  
-    Errback Example
-  
-    ```js
-    findResult(function(result, err){
-      if (err) {
-        // failure
-      } else {
-        // success
-      }
-    });
-    ```
-  
-    Promise Example;
-  
-    ```javascript
-    findResult().then(function(result){
-      // success
-    }, function(reason){
-      // failure
-    });
-    ```
-  
-    Advanced Example
-    --------------
-  
-    Synchronous Example
-  
-    ```javascript
-    let author, books;
-  
-    try {
-      author = findAuthor();
-      books  = findBooksByAuthor(author);
-      // success
-    } catch(reason) {
-      // failure
-    }
-    ```
-  
-    Errback Example
-  
-    ```js
-  
-    function foundBooks(books) {
-  
-    }
-  
-    function failure(reason) {
-  
-    }
-  
-    findAuthor(function(author, err){
-      if (err) {
-        failure(err);
-        // failure
-      } else {
-        try {
-          findBoooksByAuthor(author, function(books, err) {
-            if (err) {
-              failure(err);
-            } else {
-              try {
-                foundBooks(books);
-              } catch(reason) {
-                failure(reason);
-              }
-            }
-          });
-        } catch(error) {
-          failure(err);
-        }
-        // success
-      }
-    });
-    ```
-  
-    Promise Example;
-  
-    ```javascript
-    findAuthor().
-      then(findBooksByAuthor).
-      then(function(books){
-        // found books
-    }).catch(function(reason){
-      // something went wrong
-    });
-    ```
-  
-    @method then
-    @param {Function} onFulfillment
-    @param {Function} onRejection
-    @param {String} label optional string for labeling the promise.
-    Useful for tooling.
-    @return {Promise}
-  */
-  then: then,
-
-  /**
-    `catch` is simply sugar for `then(undefined, onRejection)` which makes it the same
-    as the catch block of a try/catch statement.
-  
-    ```js
-    function findAuthor(){
-      throw new Error('couldn\'t find that author');
-    }
-  
-    // synchronous
-    try {
-      findAuthor();
-    } catch(reason) {
-      // something went wrong
-    }
-  
-    // async with promises
-    findAuthor().catch(function(reason){
-      // something went wrong
-    });
-    ```
-  
-    @method catch
-    @param {Function} onRejection
-    @param {String} label optional string for labeling the promise.
-    Useful for tooling.
-    @return {Promise}
-  */
-  'catch': function _catch(onRejection, label) {
-    return this.then(undefined, onRejection, label);
-  },
-
-  /**
-    `finally` will be invoked regardless of the promise's fate just as native
-    try/catch/finally behaves
-  
-    Synchronous example:
-  
-    ```js
-    findAuthor() {
-      if (Math.random() > 0.5) {
-        throw new Error();
-      }
-      return new Author();
-    }
-  
-    try {
-      return findAuthor(); // succeed or fail
-    } catch(error) {
-      return findOtherAuthor();
-    } finally {
-      // always runs
-      // doesn't affect the return value
-    }
-    ```
-  
-    Asynchronous example:
-  
-    ```js
-    findAuthor().catch(function(reason){
-      return findOtherAuthor();
-    }).finally(function(){
-      // author was either found, or not
-    });
-    ```
-  
-    @method finally
-    @param {Function} callback
-    @param {String} label optional string for labeling the promise.
-    Useful for tooling.
-    @return {Promise}
-  */
-  'finally': function _finally(callback, label) {
-    var promise = this;
-    var constructor = promise.constructor;
-
-    return promise.then(function (value) {
-      return constructor.resolve(callback()).then(function () {
-        return value;
-      });
-    }, function (reason) {
-      return constructor.resolve(callback()).then(function () {
-        throw reason;
-      });
-    }, label);
-  }
-};
-
-function Result() {
-  this.value = undefined;
-}
-
-var ERROR = new Result();
-var GET_THEN_ERROR$1 = new Result();
-
-function getThen$1(obj) {
-  try {
-    return obj.then;
-  } catch (error) {
-    ERROR.value = error;
-    return ERROR;
-  }
-}
-
-function tryApply(f, s, a) {
-  try {
-    f.apply(s, a);
-  } catch (error) {
-    ERROR.value = error;
-    return ERROR;
-  }
-}
-
-function makeObject(_, argumentNames) {
-  var obj = {};
-  var length = _.length;
-  var args = new Array(length);
-
-  for (var x = 0; x < length; x++) {
-    args[x] = _[x];
-  }
-
-  for (var i = 0; i < argumentNames.length; i++) {
-    var _name = argumentNames[i];
-    obj[_name] = args[i + 1];
-  }
-
-  return obj;
-}
-
-function arrayResult(_) {
-  var length = _.length;
-  var args = new Array(length - 1);
-
-  for (var i = 1; i < length; i++) {
-    args[i - 1] = _[i];
-  }
-
-  return args;
-}
-
-function wrapThenable(_then, promise) {
-  return {
-    then: function then(onFulFillment, onRejection) {
-      return _then.call(promise, onFulFillment, onRejection);
-    }
-  };
-}
-
-/**
-  `RSVP.denodeify` takes a 'node-style' function and returns a function that
-  will return an `RSVP.Promise`. You can use `denodeify` in Node.js or the
-  browser when you'd prefer to use promises over using callbacks. For example,
-  `denodeify` transforms the following:
-
-  ```javascript
-  let fs = require('fs');
-
-  fs.readFile('myfile.txt', function(err, data){
-    if (err) return handleError(err);
-    handleData(data);
-  });
-  ```
-
-  into:
-
-  ```javascript
-  let fs = require('fs');
-  let readFile = RSVP.denodeify(fs.readFile);
-
-  readFile('myfile.txt').then(handleData, handleError);
-  ```
-
-  If the node function has multiple success parameters, then `denodeify`
-  just returns the first one:
-
-  ```javascript
-  let request = RSVP.denodeify(require('request'));
-
-  request('http://example.com').then(function(res) {
-    // ...
-  });
-  ```
-
-  However, if you need all success parameters, setting `denodeify`'s
-  second parameter to `true` causes it to return all success parameters
-  as an array:
-
-  ```javascript
-  let request = RSVP.denodeify(require('request'), true);
-
-  request('http://example.com').then(function(result) {
-    // result[0] -> res
-    // result[1] -> body
-  });
-  ```
-
-  Or if you pass it an array with names it returns the parameters as a hash:
-
-  ```javascript
-  let request = RSVP.denodeify(require('request'), ['res', 'body']);
-
-  request('http://example.com').then(function(result) {
-    // result.res
-    // result.body
-  });
-  ```
-
-  Sometimes you need to retain the `this`:
-
-  ```javascript
-  let app = require('express')();
-  let render = RSVP.denodeify(app.render.bind(app));
-  ```
-
-  The denodified function inherits from the original function. It works in all
-  environments, except IE 10 and below. Consequently all properties of the original
-  function are available to you. However, any properties you change on the
-  denodeified function won't be changed on the original function. Example:
-
-  ```javascript
-  let request = RSVP.denodeify(require('request')),
-      cookieJar = request.jar(); // <- Inheritance is used here
-
-  request('http://example.com', {jar: cookieJar}).then(function(res) {
-    // cookieJar.cookies holds now the cookies returned by example.com
-  });
-  ```
-
-  Using `denodeify` makes it easier to compose asynchronous operations instead
-  of using callbacks. For example, instead of:
-
-  ```javascript
-  let fs = require('fs');
-
-  fs.readFile('myfile.txt', function(err, data){
-    if (err) { ... } // Handle error
-    fs.writeFile('myfile2.txt', data, function(err){
-      if (err) { ... } // Handle error
-      console.log('done')
-    });
-  });
-  ```
-
-  you can chain the operations together using `then` from the returned promise:
-
-  ```javascript
-  let fs = require('fs');
-  let readFile = RSVP.denodeify(fs.readFile);
-  let writeFile = RSVP.denodeify(fs.writeFile);
-
-  readFile('myfile.txt').then(function(data){
-    return writeFile('myfile2.txt', data);
-  }).then(function(){
-    console.log('done')
-  }).catch(function(error){
-    // Handle error
-  });
-  ```
-
-  @method denodeify
-  @static
-  @for RSVP
-  @param {Function} nodeFunc a 'node-style' function that takes a callback as
-  its last argument. The callback expects an error to be passed as its first
-  argument (if an error occurred, otherwise null), and the value from the
-  operation as its second argument ('function(err, value){ }').
-  @param {Boolean|Array} [options] An optional paramter that if set
-  to `true` causes the promise to fulfill with the callback's success arguments
-  as an array. This is useful if the node function has multiple success
-  paramters. If you set this paramter to an array with names, the promise will
-  fulfill with a hash with these names as keys and the success parameters as
-  values.
-  @return {Function} a function that wraps `nodeFunc` to return an
-  `RSVP.Promise`
-  @static
-*/
-function denodeify$1(nodeFunc, options) {
-  var fn = function fn() {
-    var self = this;
-    var l = arguments.length;
-    var args = new Array(l + 1);
-    var promiseInput = false;
-
-    for (var i = 0; i < l; ++i) {
-      var arg = arguments[i];
-
-      if (!promiseInput) {
-        // TODO: clean this up
-        promiseInput = needsPromiseInput(arg);
-        if (promiseInput === GET_THEN_ERROR$1) {
-          var p = new Promise$1(noop);
-          reject(p, GET_THEN_ERROR$1.value);
-          return p;
-        } else if (promiseInput && promiseInput !== true) {
-          arg = wrapThenable(promiseInput, arg);
-        }
-      }
-      args[i] = arg;
-    }
-
-    var promise = new Promise$1(noop);
-
-    args[l] = function (err, val) {
-      if (err) reject(promise, err);else if (options === undefined) resolve(promise, val);else if (options === true) resolve(promise, arrayResult(arguments));else if (isArray(options)) resolve(promise, makeObject(arguments, options));else resolve(promise, val);
-    };
-
-    if (promiseInput) {
-      return handlePromiseInput(promise, args, nodeFunc, self);
-    } else {
-      return handleValueInput(promise, args, nodeFunc, self);
-    }
-  };
-
-  fn.__proto__ = nodeFunc;
-
-  return fn;
-}
-
-function handleValueInput(promise, args, nodeFunc, self) {
-  var result = tryApply(nodeFunc, self, args);
-  if (result === ERROR) {
-    reject(promise, result.value);
-  }
-  return promise;
-}
-
-function handlePromiseInput(promise, args, nodeFunc, self) {
-  return Promise$1.all(args).then(function (args) {
-    var result = tryApply(nodeFunc, self, args);
-    if (result === ERROR) {
-      reject(promise, result.value);
-    }
-    return promise;
-  });
-}
-
-function needsPromiseInput(arg) {
-  if (arg && typeof arg === 'object') {
-    if (arg.constructor === Promise$1) {
-      return true;
-    } else {
-      return getThen$1(arg);
-    }
-  } else {
-    return false;
-  }
-}
-
-/**
-  This is a convenient alias for `RSVP.Promise.all`.
-
-  @method all
-  @static
-  @for RSVP
-  @param {Array} array Array of promises.
-  @param {String} label An optional label. This is useful
-  for tooling.
-*/
-function all$3(array, label) {
-  return Promise$1.all(array, label);
-}
-
-function AllSettled(Constructor, entries, label) {
-  this._superConstructor(Constructor, entries, false, /* don't abort on reject */label);
-}
-
-AllSettled.prototype = o_create(Enumerator.prototype);
-AllSettled.prototype._superConstructor = Enumerator;
-AllSettled.prototype._makeResult = makeSettledResult;
-AllSettled.prototype._validationError = function () {
-  return new Error('allSettled must be called with an array');
-};
-
-/**
-  `RSVP.allSettled` is similar to `RSVP.all`, but instead of implementing
-  a fail-fast method, it waits until all the promises have returned and
-  shows you all the results. This is useful if you want to handle multiple
-  promises' failure states together as a set.
-
-  Returns a promise that is fulfilled when all the given promises have been
-  settled. The return promise is fulfilled with an array of the states of
-  the promises passed into the `promises` array argument.
-
-  Each state object will either indicate fulfillment or rejection, and
-  provide the corresponding value or reason. The states will take one of
-  the following formats:
-
-  ```javascript
-  { state: 'fulfilled', value: value }
-    or
-  { state: 'rejected', reason: reason }
-  ```
-
-  Example:
-
-  ```javascript
-  let promise1 = RSVP.Promise.resolve(1);
-  let promise2 = RSVP.Promise.reject(new Error('2'));
-  let promise3 = RSVP.Promise.reject(new Error('3'));
-  let promises = [ promise1, promise2, promise3 ];
-
-  RSVP.allSettled(promises).then(function(array){
-    // array == [
-    //   { state: 'fulfilled', value: 1 },
-    //   { state: 'rejected', reason: Error },
-    //   { state: 'rejected', reason: Error }
-    // ]
-    // Note that for the second item, reason.message will be '2', and for the
-    // third item, reason.message will be '3'.
-  }, function(error) {
-    // Not run. (This block would only be called if allSettled had failed,
-    // for instance if passed an incorrect argument type.)
-  });
-  ```
-
-  @method allSettled
-  @static
-  @for RSVP
-  @param {Array} entries
-  @param {String} label - optional string that describes the promise.
-  Useful for tooling.
-  @return {Promise} promise that is fulfilled with an array of the settled
-  states of the constituent promises.
-*/
-function allSettled$1(entries, label) {
-  return new AllSettled(Promise$1, entries, label).promise;
-}
-
-/**
-  This is a convenient alias for `RSVP.Promise.race`.
-
-  @method race
-  @static
-  @for RSVP
-  @param {Array} array Array of promises.
-  @param {String} label An optional label. This is useful
-  for tooling.
- */
-function race$3(array, label) {
-  return Promise$1.race(array, label);
-}
-
-function PromiseHash(Constructor, object, label) {
-  this._superConstructor(Constructor, object, true, label);
-}
-
-PromiseHash.prototype = o_create(Enumerator.prototype);
-PromiseHash.prototype._superConstructor = Enumerator;
-PromiseHash.prototype._init = function () {
-  this._result = {};
-};
-
-PromiseHash.prototype._validateInput = function (input) {
-  return input && typeof input === 'object';
-};
-
-PromiseHash.prototype._validationError = function () {
-  return new Error('Promise.hash must be called with an object');
-};
-
-PromiseHash.prototype._enumerate = function () {
-  var enumerator = this;
-  var promise = enumerator.promise;
-  var input = enumerator._input;
-  var results = [];
-
-  for (var key in input) {
-    if (promise._state === PENDING && Object.prototype.hasOwnProperty.call(input, key)) {
-      results.push({
-        position: key,
-        entry: input[key]
-      });
-    }
-  }
-
-  var length = results.length;
-  enumerator._remaining = length;
-  var result = undefined;
-
-  for (var i = 0; promise._state === PENDING && i < length; i++) {
-    result = results[i];
-    enumerator._eachEntry(result.entry, result.position);
-  }
-};
-
-/**
-  `RSVP.hash` is similar to `RSVP.all`, but takes an object instead of an array
-  for its `promises` argument.
-
-  Returns a promise that is fulfilled when all the given promises have been
-  fulfilled, or rejected if any of them become rejected. The returned promise
-  is fulfilled with a hash that has the same key names as the `promises` object
-  argument. If any of the values in the object are not promises, they will
-  simply be copied over to the fulfilled object.
-
-  Example:
-
-  ```javascript
-  let promises = {
-    myPromise: RSVP.resolve(1),
-    yourPromise: RSVP.resolve(2),
-    theirPromise: RSVP.resolve(3),
-    notAPromise: 4
-  };
-
-  RSVP.hash(promises).then(function(hash){
-    // hash here is an object that looks like:
-    // {
-    //   myPromise: 1,
-    //   yourPromise: 2,
-    //   theirPromise: 3,
-    //   notAPromise: 4
-    // }
-  });
-  ````
-
-  If any of the `promises` given to `RSVP.hash` are rejected, the first promise
-  that is rejected will be given as the reason to the rejection handler.
-
-  Example:
-
-  ```javascript
-  let promises = {
-    myPromise: RSVP.resolve(1),
-    rejectedPromise: RSVP.reject(new Error('rejectedPromise')),
-    anotherRejectedPromise: RSVP.reject(new Error('anotherRejectedPromise')),
-  };
-
-  RSVP.hash(promises).then(function(hash){
-    // Code here never runs because there are rejected promises!
-  }, function(reason) {
-    // reason.message === 'rejectedPromise'
-  });
-  ```
-
-  An important note: `RSVP.hash` is intended for plain JavaScript objects that
-  are just a set of keys and values. `RSVP.hash` will NOT preserve prototype
-  chains.
-
-  Example:
-
-  ```javascript
-  function MyConstructor(){
-    this.example = RSVP.resolve('Example');
-  }
-
-  MyConstructor.prototype = {
-    protoProperty: RSVP.resolve('Proto Property')
-  };
-
-  let myObject = new MyConstructor();
-
-  RSVP.hash(myObject).then(function(hash){
-    // protoProperty will not be present, instead you will just have an
-    // object that looks like:
-    // {
-    //   example: 'Example'
-    // }
-    //
-    // hash.hasOwnProperty('protoProperty'); // false
-    // 'undefined' === typeof hash.protoProperty
-  });
-  ```
-
-  @method hash
-  @static
-  @for RSVP
-  @param {Object} object
-  @param {String} label optional string that describes the promise.
-  Useful for tooling.
-  @return {Promise} promise that is fulfilled when all properties of `promises`
-  have been fulfilled, or rejected if any of them become rejected.
-*/
-function hash$1(object, label) {
-  return new PromiseHash(Promise$1, object, label).promise;
-}
-
-function HashSettled(Constructor, object, label) {
-  this._superConstructor(Constructor, object, false, label);
-}
-
-HashSettled.prototype = o_create(PromiseHash.prototype);
-HashSettled.prototype._superConstructor = Enumerator;
-HashSettled.prototype._makeResult = makeSettledResult;
-
-HashSettled.prototype._validationError = function () {
-  return new Error('hashSettled must be called with an object');
-};
-
-/**
-  `RSVP.hashSettled` is similar to `RSVP.allSettled`, but takes an object
-  instead of an array for its `promises` argument.
-
-  Unlike `RSVP.all` or `RSVP.hash`, which implement a fail-fast method,
-  but like `RSVP.allSettled`, `hashSettled` waits until all the
-  constituent promises have returned and then shows you all the results
-  with their states and values/reasons. This is useful if you want to
-  handle multiple promises' failure states together as a set.
-
-  Returns a promise that is fulfilled when all the given promises have been
-  settled, or rejected if the passed parameters are invalid.
-
-  The returned promise is fulfilled with a hash that has the same key names as
-  the `promises` object argument. If any of the values in the object are not
-  promises, they will be copied over to the fulfilled object and marked with state
-  'fulfilled'.
-
-  Example:
-
-  ```javascript
-  let promises = {
-    myPromise: RSVP.Promise.resolve(1),
-    yourPromise: RSVP.Promise.resolve(2),
-    theirPromise: RSVP.Promise.resolve(3),
-    notAPromise: 4
-  };
-
-  RSVP.hashSettled(promises).then(function(hash){
-    // hash here is an object that looks like:
-    // {
-    //   myPromise: { state: 'fulfilled', value: 1 },
-    //   yourPromise: { state: 'fulfilled', value: 2 },
-    //   theirPromise: { state: 'fulfilled', value: 3 },
-    //   notAPromise: { state: 'fulfilled', value: 4 }
-    // }
-  });
-  ```
-
-  If any of the `promises` given to `RSVP.hash` are rejected, the state will
-  be set to 'rejected' and the reason for rejection provided.
-
-  Example:
-
-  ```javascript
-  let promises = {
-    myPromise: RSVP.Promise.resolve(1),
-    rejectedPromise: RSVP.Promise.reject(new Error('rejection')),
-    anotherRejectedPromise: RSVP.Promise.reject(new Error('more rejection')),
-  };
-
-  RSVP.hashSettled(promises).then(function(hash){
-    // hash here is an object that looks like:
-    // {
-    //   myPromise:              { state: 'fulfilled', value: 1 },
-    //   rejectedPromise:        { state: 'rejected', reason: Error },
-    //   anotherRejectedPromise: { state: 'rejected', reason: Error },
-    // }
-    // Note that for rejectedPromise, reason.message == 'rejection',
-    // and for anotherRejectedPromise, reason.message == 'more rejection'.
-  });
-  ```
-
-  An important note: `RSVP.hashSettled` is intended for plain JavaScript objects that
-  are just a set of keys and values. `RSVP.hashSettled` will NOT preserve prototype
-  chains.
-
-  Example:
-
-  ```javascript
-  function MyConstructor(){
-    this.example = RSVP.Promise.resolve('Example');
-  }
-
-  MyConstructor.prototype = {
-    protoProperty: RSVP.Promise.resolve('Proto Property')
-  };
-
-  let myObject = new MyConstructor();
-
-  RSVP.hashSettled(myObject).then(function(hash){
-    // protoProperty will not be present, instead you will just have an
-    // object that looks like:
-    // {
-    //   example: { state: 'fulfilled', value: 'Example' }
-    // }
-    //
-    // hash.hasOwnProperty('protoProperty'); // false
-    // 'undefined' === typeof hash.protoProperty
-  });
-  ```
-
-  @method hashSettled
-  @for RSVP
-  @param {Object} object
-  @param {String} label optional string that describes the promise.
-  Useful for tooling.
-  @return {Promise} promise that is fulfilled when when all properties of `promises`
-  have been settled.
-  @static
-*/
-function hashSettled$1(object, label) {
-  return new HashSettled(Promise$1, object, label).promise;
-}
-
-/**
-  `RSVP.rethrow` will rethrow an error on the next turn of the JavaScript event
-  loop in order to aid debugging.
-
-  Promises A+ specifies that any exceptions that occur with a promise must be
-  caught by the promises implementation and bubbled to the last handler. For
-  this reason, it is recommended that you always specify a second rejection
-  handler function to `then`. However, `RSVP.rethrow` will throw the exception
-  outside of the promise, so it bubbles up to your console if in the browser,
-  or domain/cause uncaught exception in Node. `rethrow` will also throw the
-  error again so the error can be handled by the promise per the spec.
-
-  ```javascript
-  function throws(){
-    throw new Error('Whoops!');
-  }
-
-  let promise = new RSVP.Promise(function(resolve, reject){
-    throws();
-  });
-
-  promise.catch(RSVP.rethrow).then(function(){
-    // Code here doesn't run because the promise became rejected due to an
-    // error!
-  }, function (err){
-    // handle the error here
-  });
-  ```
-
-  The 'Whoops' error will be thrown on the next turn of the event loop
-  and you can watch for it in your console. You can also handle it using a
-  rejection handler given to `.then` or `.catch` on the returned promise.
-
-  @method rethrow
-  @static
-  @for RSVP
-  @param {Error} reason reason the promise became rejected.
-  @throws Error
-  @static
-*/
-function rethrow$1(reason) {
-  setTimeout(function () {
-    throw reason;
-  });
-  throw reason;
-}
-
-/**
-  `RSVP.defer` returns an object similar to jQuery's `$.Deferred`.
-  `RSVP.defer` should be used when porting over code reliant on `$.Deferred`'s
-  interface. New code should use the `RSVP.Promise` constructor instead.
-
-  The object returned from `RSVP.defer` is a plain object with three properties:
-
-  * promise - an `RSVP.Promise`.
-  * reject - a function that causes the `promise` property on this object to
-    become rejected
-  * resolve - a function that causes the `promise` property on this object to
-    become fulfilled.
-
-  Example:
-
-   ```javascript
-   let deferred = RSVP.defer();
-
-   deferred.resolve("Success!");
-
-   deferred.promise.then(function(value){
-     // value here is "Success!"
-   });
-   ```
-
-  @method defer
-  @static
-  @for RSVP
-  @param {String} label optional string for labeling the promise.
-  Useful for tooling.
-  @return {Object}
- */
-function defer$1(label) {
-  var deferred = { resolve: undefined, reject: undefined };
-
-  deferred.promise = new Promise$1(function (resolve, reject) {
-    deferred.resolve = resolve;
-    deferred.reject = reject;
-  }, label);
-
-  return deferred;
-}
-
-/**
- `RSVP.map` is similar to JavaScript's native `map` method, except that it
-  waits for all promises to become fulfilled before running the `mapFn` on
-  each item in given to `promises`. `RSVP.map` returns a promise that will
-  become fulfilled with the result of running `mapFn` on the values the promises
-  become fulfilled with.
-
-  For example:
-
-  ```javascript
-
-  let promise1 = RSVP.resolve(1);
-  let promise2 = RSVP.resolve(2);
-  let promise3 = RSVP.resolve(3);
-  let promises = [ promise1, promise2, promise3 ];
-
-  let mapFn = function(item){
-    return item + 1;
-  };
-
-  RSVP.map(promises, mapFn).then(function(result){
-    // result is [ 2, 3, 4 ]
-  });
-  ```
-
-  If any of the `promises` given to `RSVP.map` are rejected, the first promise
-  that is rejected will be given as an argument to the returned promise's
-  rejection handler. For example:
-
-  ```javascript
-  let promise1 = RSVP.resolve(1);
-  let promise2 = RSVP.reject(new Error('2'));
-  let promise3 = RSVP.reject(new Error('3'));
-  let promises = [ promise1, promise2, promise3 ];
-
-  let mapFn = function(item){
-    return item + 1;
-  };
-
-  RSVP.map(promises, mapFn).then(function(array){
-    // Code here never runs because there are rejected promises!
-  }, function(reason) {
-    // reason.message === '2'
-  });
-  ```
-
-  `RSVP.map` will also wait if a promise is returned from `mapFn`. For example,
-  say you want to get all comments from a set of blog posts, but you need
-  the blog posts first because they contain a url to those comments.
-
-  ```javscript
-
-  let mapFn = function(blogPost){
-    // getComments does some ajax and returns an RSVP.Promise that is fulfilled
-    // with some comments data
-    return getComments(blogPost.comments_url);
-  };
-
-  // getBlogPosts does some ajax and returns an RSVP.Promise that is fulfilled
-  // with some blog post data
-  RSVP.map(getBlogPosts(), mapFn).then(function(comments){
-    // comments is the result of asking the server for the comments
-    // of all blog posts returned from getBlogPosts()
-  });
-  ```
-
-  @method map
-  @static
-  @for RSVP
-  @param {Array} promises
-  @param {Function} mapFn function to be called on each fulfilled promise.
-  @param {String} label optional string for labeling the promise.
-  Useful for tooling.
-  @return {Promise} promise that is fulfilled with the result of calling
-  `mapFn` on each fulfilled promise or value when they become fulfilled.
-   The promise will be rejected if any of the given `promises` become rejected.
-  @static
-*/
-function map$1(promises, mapFn, label) {
-  return Promise$1.all(promises, label).then(function (values) {
-    if (!isFunction(mapFn)) {
-      throw new TypeError("You must pass a function as map's second argument.");
-    }
-
-    var length = values.length;
-    var results = new Array(length);
-
-    for (var i = 0; i < length; i++) {
-      results[i] = mapFn(values[i]);
-    }
-
-    return Promise$1.all(results, label);
-  });
-}
-
-/**
-  This is a convenient alias for `RSVP.Promise.resolve`.
-
-  @method resolve
-  @static
-  @for RSVP
-  @param {*} value value that the returned promise will be resolved with
-  @param {String} label optional string for identifying the returned promise.
-  Useful for tooling.
-  @return {Promise} a promise that will become fulfilled with the given
-  `value`
-*/
-function resolve$3(value, label) {
-  return Promise$1.resolve(value, label);
-}
-
-/**
-  This is a convenient alias for `RSVP.Promise.reject`.
-
-  @method reject
-  @static
-  @for RSVP
-  @param {*} reason value that the returned promise will be rejected with.
-  @param {String} label optional string for identifying the returned promise.
-  Useful for tooling.
-  @return {Promise} a promise rejected with the given `reason`.
-*/
-function reject$3(reason, label) {
-  return Promise$1.reject(reason, label);
-}
-
-/**
- `RSVP.filter` is similar to JavaScript's native `filter` method, except that it
-  waits for all promises to become fulfilled before running the `filterFn` on
-  each item in given to `promises`. `RSVP.filter` returns a promise that will
-  become fulfilled with the result of running `filterFn` on the values the
-  promises become fulfilled with.
-
-  For example:
-
-  ```javascript
-
-  let promise1 = RSVP.resolve(1);
-  let promise2 = RSVP.resolve(2);
-  let promise3 = RSVP.resolve(3);
-
-  let promises = [promise1, promise2, promise3];
-
-  let filterFn = function(item){
-    return item > 1;
-  };
-
-  RSVP.filter(promises, filterFn).then(function(result){
-    // result is [ 2, 3 ]
-  });
-  ```
-
-  If any of the `promises` given to `RSVP.filter` are rejected, the first promise
-  that is rejected will be given as an argument to the returned promise's
-  rejection handler. For example:
-
-  ```javascript
-  let promise1 = RSVP.resolve(1);
-  let promise2 = RSVP.reject(new Error('2'));
-  let promise3 = RSVP.reject(new Error('3'));
-  let promises = [ promise1, promise2, promise3 ];
-
-  let filterFn = function(item){
-    return item > 1;
-  };
-
-  RSVP.filter(promises, filterFn).then(function(array){
-    // Code here never runs because there are rejected promises!
-  }, function(reason) {
-    // reason.message === '2'
-  });
-  ```
-
-  `RSVP.filter` will also wait for any promises returned from `filterFn`.
-  For instance, you may want to fetch a list of users then return a subset
-  of those users based on some asynchronous operation:
-
-  ```javascript
-
-  let alice = { name: 'alice' };
-  let bob   = { name: 'bob' };
-  let users = [ alice, bob ];
-
-  let promises = users.map(function(user){
-    return RSVP.resolve(user);
-  });
-
-  let filterFn = function(user){
-    // Here, Alice has permissions to create a blog post, but Bob does not.
-    return getPrivilegesForUser(user).then(function(privs){
-      return privs.can_create_blog_post === true;
-    });
-  };
-  RSVP.filter(promises, filterFn).then(function(users){
-    // true, because the server told us only Alice can create a blog post.
-    users.length === 1;
-    // false, because Alice is the only user present in `users`
-    users[0] === bob;
-  });
-  ```
-
-  @method filter
-  @static
-  @for RSVP
-  @param {Array} promises
-  @param {Function} filterFn - function to be called on each resolved value to
-  filter the final results.
-  @param {String} label optional string describing the promise. Useful for
-  tooling.
-  @return {Promise}
-*/
-
-function resolveAll(promises, label) {
-  return Promise$1.all(promises, label);
-}
-
-function resolveSingle(promise, label) {
-  return Promise$1.resolve(promise, label).then(function (promises) {
-    return resolveAll(promises, label);
-  });
-}
-function filter$1(promises, filterFn, label) {
-  var promise = isArray(promises) ? resolveAll(promises, label) : resolveSingle(promises, label);
-  return promise.then(function (values) {
-    if (!isFunction(filterFn)) {
-      throw new TypeError("You must pass a function as filter's second argument.");
-    }
-
-    var length = values.length;
-    var filtered = new Array(length);
-
-    for (var i = 0; i < length; i++) {
-      filtered[i] = filterFn(values[i]);
-    }
-
-    return resolveAll(filtered, label).then(function (filtered) {
-      var results = new Array(length);
-      var newLength = 0;
-
-      for (var i = 0; i < length; i++) {
-        if (filtered[i]) {
-          results[newLength] = values[i];
-          newLength++;
-        }
-      }
-
-      results.length = newLength;
-
-      return results;
-    });
-  });
-}
-
-var len = 0;
-var vertxNext = undefined;
-function asap$1(callback, arg) {
-  queue$1[len] = callback;
-  queue$1[len + 1] = arg;
-  len += 2;
-  if (len === 2) {
-    // If len is 1, that means that we need to schedule an async flush.
-    // If additional callbacks are queued before the queue is flushed, they
-    // will be processed by this flush that we are scheduling.
-    scheduleFlush$1();
-  }
-}
-
-var browserWindow = typeof window !== 'undefined' ? window : undefined;
-var browserGlobal = browserWindow || {};
-var BrowserMutationObserver = browserGlobal.MutationObserver || browserGlobal.WebKitMutationObserver;
-var isNode = typeof self === 'undefined' && typeof process !== 'undefined' && ({}).toString.call(process) === '[object process]';
-
-// test for web worker but not in IE10
-var isWorker = typeof Uint8ClampedArray !== 'undefined' && typeof importScripts !== 'undefined' && typeof MessageChannel !== 'undefined';
-
-// node
-function useNextTick() {
-  var nextTick = process.nextTick;
-  // node version 0.10.x displays a deprecation warning when nextTick is used recursively
-  // setImmediate should be used instead instead
-  var version = process.versions.node.match(/^(?:(\d+)\.)?(?:(\d+)\.)?(\*|\d+)$/);
-  if (Array.isArray(version) && version[1] === '0' && version[2] === '10') {
-    nextTick = setImmediate;
-  }
-  return function () {
-    return nextTick(flush);
-  };
-}
-
-// vertx
-function useVertxTimer() {
-  if (typeof vertxNext !== 'undefined') {
-    return function () {
-      vertxNext(flush);
-    };
-  }
-  return useSetTimeout();
-}
-
-function useMutationObserver() {
-  var iterations = 0;
-  var observer = new BrowserMutationObserver(flush);
-  var node = document.createTextNode('');
-  observer.observe(node, { characterData: true });
-
-  return function () {
-    return node.data = iterations = ++iterations % 2;
-  };
-}
-
-// web worker
-function useMessageChannel() {
-  var channel = new MessageChannel();
-  channel.port1.onmessage = flush;
-  return function () {
-    return channel.port2.postMessage(0);
-  };
-}
-
-function useSetTimeout() {
-  return function () {
-    return setTimeout(flush, 1);
-  };
-}
-
-var queue$1 = new Array(1000);
-
-function flush() {
-  for (var i = 0; i < len; i += 2) {
-    var callback = queue$1[i];
-    var arg = queue$1[i + 1];
-
-    callback(arg);
-
-    queue$1[i] = undefined;
-    queue$1[i + 1] = undefined;
-  }
-
-  len = 0;
-}
-
-function attemptVertex() {
-  try {
-    var r = require;
-    var vertx = r('vertx');
-    vertxNext = vertx.runOnLoop || vertx.runOnContext;
-    return useVertxTimer();
-  } catch (e) {
-    return useSetTimeout();
-  }
-}
-
-var scheduleFlush$1 = undefined;
-// Decide what async method to use to triggering processing of queued callbacks:
-if (isNode) {
-  scheduleFlush$1 = useNextTick();
-} else if (BrowserMutationObserver) {
-  scheduleFlush$1 = useMutationObserver();
-} else if (isWorker) {
-  scheduleFlush$1 = useMessageChannel();
-} else if (browserWindow === undefined && typeof require === 'function') {
-  scheduleFlush$1 = attemptVertex();
-} else {
-  scheduleFlush$1 = useSetTimeout();
-}
-
-var platform = undefined;
-
-/* global self */
-if (typeof self === 'object') {
-  platform = self;
-
-  /* global global */
-} else if (typeof global === 'object') {
-    platform = global;
-  } else {
-    throw new Error('no global: `self` or `global` found');
-  }
-
-var _async$filter;
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-// defaults
-
-// the default export here is for backwards compat:
-//   https://github.com/tildeio/rsvp.js/issues/434
-config.async = asap$1;
-config.after = function (cb) {
-  return setTimeout(cb, 0);
-};
-var cast = resolve$3;
-
-var async = function async(callback, arg) {
-  return config.async(callback, arg);
-};
-
-function on() {
-  config['on'].apply(config, arguments);
-}
-
-function off() {
-  config['off'].apply(config, arguments);
-}
-
-// Set up instrumentation through `window.__PROMISE_INTRUMENTATION__`
-if (typeof window !== 'undefined' && typeof window['__PROMISE_INSTRUMENTATION__'] === 'object') {
-  var callbacks = window['__PROMISE_INSTRUMENTATION__'];
-  configure('instrument', true);
-  for (var eventName in callbacks) {
-    if (callbacks.hasOwnProperty(eventName)) {
-      on(eventName, callbacks[eventName]);
-    }
-  }
-}var rsvp = (_async$filter = {
-  asap: asap$1,
-  cast: cast,
-  Promise: Promise$1,
-  EventTarget: EventTarget,
-  all: all$3,
-  allSettled: allSettled$1,
-  race: race$3,
-  hash: hash$1,
-  hashSettled: hashSettled$1,
-  rethrow: rethrow$1,
-  defer: defer$1,
-  denodeify: denodeify$1,
-  configure: configure,
-  on: on,
-  off: off,
-  resolve: resolve$3,
-  reject: reject$3,
-  map: map$1
-}, _defineProperty(_async$filter, 'async', async), _defineProperty(_async$filter, 'filter', // babel seems to error if async isn't a computed prop here...
-filter$1), _async$filter);
-
-exports['default'] = rsvp;
-exports.asap = asap$1;
-exports.cast = cast;
-exports.Promise = Promise$1;
-exports.EventTarget = EventTarget;
-exports.all = all$3;
-exports.allSettled = allSettled$1;
-exports.race = race$3;
-exports.hash = hash$1;
-exports.hashSettled = hashSettled$1;
-exports.rethrow = rethrow$1;
-exports.defer = defer$1;
-exports.denodeify = denodeify$1;
-exports.configure = configure;
-exports.on = on;
-exports.off = off;
-exports.resolve = resolve$3;
-exports.reject = reject$3;
-exports.map = map$1;
-exports.async = async;
-exports.filter = filter$1;
-
-Object.defineProperty(exports, '__esModule', { value: true });
-
-})));
-
-//
-
-'use strict';
-
-var EPUBJS = EPUBJS || {};
-EPUBJS.VERSION = "0.2.19";
-
-EPUBJS.plugins = EPUBJS.plugins || {};
-
-EPUBJS.filePath = EPUBJS.filePath || "/epubjs/";
-
-EPUBJS.Render = {};
-
-(function(root) {
-
-	var previousEpub = root.ePub || {};
-
-	var ePub = root.ePub = function() {
-		var bookPath, options;
-
-		//-- var book = ePub("path/to/book.epub", { restore: true })
-		if(typeof(arguments[0]) != 'undefined' &&
-			(typeof arguments[0] === 'string' || arguments[0] instanceof ArrayBuffer)) {
-
-			bookPath = arguments[0];
-
-			if( arguments[1] && typeof arguments[1] === 'object' ) {
-				options = arguments[1];
-				options.bookPath = bookPath;
-			} else {
-				options = { 'bookPath' : bookPath };
-			}
-
-		}
-
-		/*
-		*   var book = ePub({ bookPath: "path/to/book.epub", restore: true });
-		*
-		*   - OR -
-		*
-		*   var book = ePub({ restore: true });
-		*   book.open("path/to/book.epub");
-		*/
-
-		if( arguments[0] && typeof arguments[0] === 'object' && !(arguments[0] instanceof ArrayBuffer)) {
-			options = arguments[0];
-		}
-
-
-		return new EPUBJS.Book(options);
-	};
-
-	//exports to multiple environments
-	if (typeof define === 'function' && define.amd) {
-		//AMD
-		define(['rsvp', 'jszip', 'localforage'], function(RSVP, JSZip, localForage){ return ePub; });
-	} else if (typeof module != "undefined" && module.exports) {
-		//Node
-		global.RSVP = require('rsvp');
-		global.JSZip = require('jszip');
-		global.localForage = require('localforage');
-		module.exports = ePub;
+function Url(urlString, baseString) {
+	var absolute = (urlString.indexOf('://') > -1);
+
+	this.href = urlString;
+	this.protocol = "";
+	this.origin = "";
+	this.fragment = "";
+	this.search = "";
+	this.base = baseString || undefined;
+
+	if (!absolute && !baseString) {
+		this.base = window && window.location.href;
 	}
 
-})(window);
+	try {
+		this.Url = new URL(urlString, this.base);
+		this.href = this.Url.href;
 
-EPUBJS.Book = function(options){
-
-	var book = this;
-
-	this.settings = EPUBJS.core.defaults(options || {}, {
-		bookPath : undefined,
-		bookKey : undefined,
-		packageUrl : undefined,
-		storage: false, //-- true (auto) or false (none) | override: 'ram', 'websqldatabase', 'indexeddb', 'filesystem'
-		fromStorage : false,
-		saved : false,
-		online : true,
-		contained : false,
-		width : undefined,
-		height: undefined,
-		layoutOveride : undefined, // Default: { spread: 'reflowable', layout: 'auto', orientation: 'auto'}
-		orientation : undefined,
-		minSpreadWidth: 768, //-- overridden by spread: none (never) / both (always)
-		gap: "auto", //-- "auto" or int
-		version: 1,
-		restore: false,
-		reload : false,
-		goto : false,
-		styles : {},
-		classes : [],
-		headTags : {},
-		withCredentials: false,
-		render_method: "Iframe",
-		displayLastPage: false
-	});
-
-	this.settings.EPUBJSVERSION = EPUBJS.VERSION;
-
-	this.spinePos = 0;
-	this.stored = false;
-
-	//-- All Book events for listening
-	/*
-		book:ready
-		book:stored
-		book:online
-		book:offline
-		book:pageChanged
-		book:loadFailed
-		book:loadChapterFailed
-	*/
-
-	//-- Adds Hook methods to the Book prototype
-	//   Hooks will all return before triggering the callback.
-	// EPUBJS.Hooks.mixin(this);
-	//-- Get pre-registered hooks for events
-	// this.getHooks("beforeChapterDisplay");
-
-	this.online = this.settings.online || navigator.onLine;
-	this.networkListeners();
-
-	this.ready = {
-		manifest: new RSVP.defer(),
-		spine: new RSVP.defer(),
-		metadata: new RSVP.defer(),
-		cover: new RSVP.defer(),
-		toc: new RSVP.defer(),
-		pageList: new RSVP.defer()
-	};
-
-	this.readyPromises = [
-		this.ready.manifest.promise,
-		this.ready.spine.promise,
-		this.ready.metadata.promise,
-		this.ready.cover.promise,
-		this.ready.toc.promise
-	];
-
-	this.pageList = [];
-	this.pagination = new EPUBJS.Pagination();
-	this.pageListReady = this.ready.pageList.promise;
-
-	this.ready.all = RSVP.all(this.readyPromises);
-
-	this.ready.all.then(this._ready.bind(this));
-
-	// Queue for methods used before rendering
-	this.isRendered = false;
-	this._q = EPUBJS.core.queue(this);
-	// Queue for rendering
-	this._rendering = false;
-	this._displayQ = EPUBJS.core.queue(this);
-	// Queue for going to another location
-	this._moving = false;
-	this._gotoQ = EPUBJS.core.queue(this);
-
-	/**
-	* Creates a new renderer.
-	* The renderer will handle displaying the content using the method provided in the settings
-	*/
-	this.renderer = new EPUBJS.Renderer(this.settings.render_method);
-	//-- Set the width at which to switch from spreads to single pages
-	this.renderer.setMinSpreadWidth(this.settings.minSpreadWidth);
-	this.renderer.setGap(this.settings.gap);
-	//-- Pass through the renderer events
-	this.listenToRenderer(this.renderer);
-
-	this.defer_opened = new RSVP.defer();
-	this.opened = this.defer_opened.promise;
-
-	this.store = false; //-- False if not using storage;
-
-	//-- Determine storage method
-	//-- Override options: none | ram | websqldatabase | indexeddb | filesystem
-	if(this.settings.storage !== false){
-		// this.storage = new fileStorage.storage(this.settings.storage);
-		this.fromStorage(true);
+		this.protocol = this.Url.protocol;
+		this.origin = this.Url.origin;
+		this.fragment = this.Url.fragment;
+		this.search = this.Url.search;
+	} catch (e) {
+		// console.error(e);
+		this.Url = undefined;
 	}
 
-	// BookUrl is optional, but if present start loading process
-	if(typeof this.settings.bookPath === 'string' || this.settings.bookPath instanceof ArrayBuffer) {
-		this.open(this.settings.bookPath, this.settings.reload);
-	}
+	this.Path = new Path(this.Url.pathname);
+	this.directory = this.Path.directory;
+	this.filename = this.Path.filename;
+	this.extension = this.Path.extension;
 
-	window.addEventListener("beforeunload", this.unload.bind(this), false);
+	this.path = this.origin + this.directory;
 
-	//-- Listen for these promises:
-	//-- book.opened.then()
-	//-- book.rendered.then()
+}
+
+Url.prototype.resolve = function (what) {
+	var fullpath = path.resolve(this.directory, what);
+	return this.origin + fullpath;
 };
 
-//-- Check bookUrl and start parsing book Assets or load them from storage
-EPUBJS.Book.prototype.open = function(bookPath, forceReload){
-	var book = this,
-			epubpackage,
-			opened = new RSVP.defer();
-
-	this.settings.bookPath = bookPath;
-
-	if(this.settings.contained || this.isContained(bookPath)){
-
-		this.settings.contained = this.contained = true;
-
-		this.bookUrl = '';
-
-		epubpackage = this.unarchive(bookPath).
-			then(function(){
-				return book.loadPackage();
-			});
-
-	}	else {
-		//-- Get a absolute URL from the book path
-		this.bookUrl = this.urlFrom(bookPath);
-
-		epubpackage = this.loadPackage();
-	}
-
-	if(this.settings.restore && !forceReload && localStorage){
-		//-- Will load previous package json, or re-unpack if error
-		epubpackage.then(function(packageXml) {
-			var identifier = book.packageIdentifier(packageXml);
-			var restored = book.restore(identifier);
-
-			if(!restored) {
-				book.unpack(packageXml);
-			}
-			opened.resolve();
-			book.defer_opened.resolve();
-		});
-
-	}else{
-
-		//-- Get package information from epub opf
-		epubpackage.then(function(packageXml) {
-			book.unpack(packageXml);
-			opened.resolve();
-			book.defer_opened.resolve();
-		});
-	}
-
-	this._registerReplacements(this.renderer);
-
-	return opened.promise;
-
+Url.prototype.relative = function (what) {
+	return path.relative(what, this.directory);
 };
 
-EPUBJS.Book.prototype.loadPackage = function(_containerPath){
-	var book = this,
-			parse = new EPUBJS.Parser(),
-			containerPath = _containerPath || "META-INF/container.xml",
-			containerXml,
-			packageXml;
+function Path(pathString) {
+	var protocol;
+	var parsed;
 
-	if(!this.settings.packageUrl) { //-- provide the packageUrl to skip this step
-		packageXml = book.loadXml(book.bookUrl + containerPath).
-			then(function(containerXml){
-				return parse.container(containerXml); // Container has path to content
-			}).
-			then(function(paths){
-				book.settings.contentsPath = book.bookUrl + paths.basePath;
-				book.settings.packageUrl = book.bookUrl + paths.packagePath;
-				book.settings.encoding = paths.encoding;
-				return book.loadXml(book.settings.packageUrl); // Containes manifest, spine and metadata
-			});
+	protocol = pathString.indexOf('://');
+	if (protocol > -1) {
+		pathString = new URL(pathString).pathname;
+	}
+
+	parsed = this.parse(pathString);
+
+	this.path = pathString;
+
+	if (this.isDirectory(pathString)) {
+		this.directory = pathString;
 	} else {
-		packageXml = book.loadXml(book.settings.packageUrl);
+		this.directory = parsed.dir + "/";
 	}
 
-	packageXml.catch(function(error) {
-		// handle errors in either of the two requests
-		console.error("Could not load book at: "+ containerPath);
-		book.trigger("book:loadFailed", containerPath);
-	});
-	return packageXml;
+	this.filename = parsed.base;
+	this.extension = parsed.ext.slice(1);
+
+}
+
+Path.prototype.parse = function (what) {
+	return path.parse(what);
 };
 
-EPUBJS.Book.prototype.packageIdentifier = function(packageXml){
-	var book = this,
-			parse = new EPUBJS.Parser();
-
-	return parse.identifier(packageXml);
+Path.prototype.isDirectory = function (what) {
+	return (what.charAt(what.length-1) === '/');
 };
 
-EPUBJS.Book.prototype.unpack = function(packageXml){
-	var book = this,
-			parse = new EPUBJS.Parser();
-
-	book.contents = parse.packageContents(packageXml, book.settings.contentsPath); // Extract info from contents
-
-	book.manifest = book.contents.manifest;
-	book.spine = book.contents.spine;
-	book.spineIndexByURL = book.contents.spineIndexByURL;
-	book.metadata = book.contents.metadata;
-	if(!book.settings.bookKey) {
-		book.settings.bookKey = book.generateBookKey(book.metadata.identifier);
-	}
-
-	//-- Set Globbal Layout setting based on metadata
-	book.globalLayoutProperties = book.parseLayoutProperties(book.metadata);
-
-	if(book.contents.coverPath) {
-		book.cover = book.contents.cover = book.settings.contentsPath + book.contents.coverPath;
-	}
-
-	book.spineNodeIndex = book.contents.spineNodeIndex;
-
-	book.ready.manifest.resolve(book.contents.manifest);
-	book.ready.spine.resolve(book.contents.spine);
-	book.ready.metadata.resolve(book.contents.metadata);
-	book.ready.cover.resolve(book.contents.cover);
-
-	book.locations = new EPUBJS.Locations(book.spine, book.store, book.settings.withCredentials);
-
-	//-- Load the TOC, optional; either the EPUB3 XHTML Navigation file or the EPUB2 NCX file
-	if(book.contents.navPath) {
-		book.settings.navUrl = book.settings.contentsPath + book.contents.navPath;
-
-		book.loadXml(book.settings.navUrl).
-			then(function(navHtml){
-				return parse.nav(navHtml, book.spineIndexByURL, book.spine); // Grab Table of Contents
-			}).then(function(toc){
-				book.toc = book.contents.toc = toc;
-				book.ready.toc.resolve(book.contents.toc);
-			}, function(error) {
-				book.ready.toc.resolve(false);
-			});
-
-		// Load the optional pageList
-		book.loadXml(book.settings.navUrl).
-			then(function(navHtml){
-				return parse.pageList(navHtml, book.spineIndexByURL, book.spine);
-			}).then(function(pageList){
-				var epubcfi = new EPUBJS.EpubCFI();
-				var wait = 0; // need to generate a cfi
-
-				// No pageList found
-				if(pageList.length === 0) {
-					return;
-				}
-
-				book.pageList = book.contents.pageList = pageList;
-
-				// Replace HREFs with CFI
-				book.pageList.forEach(function(pg){
-					if(!pg.cfi) {
-						wait += 1;
-						epubcfi.generateCfiFromHref(pg.href, book).then(function(cfi){
-							pg.cfi = cfi;
-							pg.packageUrl = book.settings.packageUrl;
-
-							wait -= 1;
-							if(wait === 0) {
-								book.pagination.process(book.pageList);
-								book.ready.pageList.resolve(book.pageList);
-							}
-						});
-					}
-				});
-
-				if(!wait) {
-					book.pagination.process(book.pageList);
-					book.ready.pageList.resolve(book.pageList);
-				}
-
-			}, function(error) {
-				book.ready.pageList.resolve([]);
-			});
-	} else if(book.contents.tocPath) {
-		book.settings.tocUrl = book.settings.contentsPath + book.contents.tocPath;
-
-		book.loadXml(book.settings.tocUrl).
-			then(function(tocXml){
-					return parse.toc(tocXml, book.spineIndexByURL, book.spine); // Grab Table of Contents
-			}, function(err) {
-				console.error(err);
-			}).then(function(toc){
-				book.toc = book.contents.toc = toc;
-				book.ready.toc.resolve(book.contents.toc);
-			}, function(error) {
-				book.ready.toc.resolve(false);
-			});
-
-	} else {
-		book.ready.toc.resolve(false);
-	}
-
+Path.prototype.resolve = function (what) {
+	return path.resolve(this.directory, what);
 };
 
-EPUBJS.Book.prototype.createHiddenRender = function(renderer, _width, _height) {
-	var box = this.element.getBoundingClientRect();
-	var width = _width || this.settings.width || box.width;
-	var height = _height || this.settings.height || box.height;
-	var hiddenContainer;
-	var hiddenEl;
-	renderer.setMinSpreadWidth(this.settings.minSpreadWidth);
-	renderer.setGap(this.settings.gap);
-
-	this._registerReplacements(renderer);
-	if(this.settings.forceSingle) {
-		renderer.forceSingle(true);
-	}
-
-	hiddenContainer = document.createElement("div");
-	hiddenContainer.style.visibility = "hidden";
-	hiddenContainer.style.overflow = "hidden";
-	hiddenContainer.style.width = "0";
-	hiddenContainer.style.height = "0";
-	this.element.appendChild(hiddenContainer);
-
-	hiddenEl = document.createElement("div");
-	hiddenEl.style.visibility = "hidden";
-	hiddenEl.style.overflow = "hidden";
-	hiddenEl.style.width = width + "px";//"0";
-	hiddenEl.style.height = height +"px"; //"0";
-	hiddenContainer.appendChild(hiddenEl);
-
-	renderer.initialize(hiddenEl, this.settings.width, this.settings.height);
-	return hiddenContainer;
+Path.prototype.relative = function (what) {
+	console.log(what, this.directory);
+	return path.relative(what, this.directory);
 };
 
-// Generates the pageList array by loading every chapter and paging through them
-EPUBJS.Book.prototype.generatePageList = function(width, height, flag){
-	var pageList = [];
-	var pager = new EPUBJS.Renderer(this.settings.render_method, false); //hidden
-	var hiddenContainer = this.createHiddenRender(pager, width, height);
-	var deferred = new RSVP.defer();
-	var spinePos = -1;
-	var spineLength = this.spine.length;
-	var totalPages = 0;
-	var currentPage = 0;
-	var nextChapter = function(deferred){
-		var chapter;
-		var next = spinePos + 1;
-		var done = deferred || new RSVP.defer();
-		var loaded;
-		if(next >= spineLength) {
-			done.resolve();
-		} else {
-            if (flag && flag.cancelled) {
-                pager.remove();
-                this.element.removeChild(hiddenContainer);
-                done.reject(new Error("User cancelled"));
-                return;
-            }
-
-			spinePos = next;
-			chapter = new EPUBJS.Chapter(this.spine[spinePos], this.store);
-			pager.displayChapter(chapter, this.globalLayoutProperties).then(function(chap){
-				pager.pageMap.forEach(function(item){
-					currentPage += 1;
-					pageList.push({
-						"cfi" : item.start,
-						"page" : currentPage
-					});
-
-				});
-
-				if(pager.pageMap.length % 2 > 0 &&
-					 pager.spreads) {
-					currentPage += 1; // Handle Spreads
-					pageList.push({
-						"cfi" : pager.pageMap[pager.pageMap.length - 1].end,
-						"page" : currentPage
-					});
-				}
-
-				// Load up the next chapter
-				setTimeout(function(){
-					nextChapter(done);
-				}, 1);
-			});
-		}
-		return done.promise;
-	}.bind(this);
-
-	var finished = nextChapter().then(function(){
-		pager.remove();
-		this.element.removeChild(hiddenContainer);
-		deferred.resolve(pageList);
-	}.bind(this), function(reason) {
-        deferred.reject(reason);
-    });
-
-	return deferred.promise;
+Path.prototype.splitPath = function(filename) {
+	return this.splitPathRe.exec(filename).slice(1);
 };
 
-// Render out entire book and generate the pagination
-// Width and Height are optional and will default to the current dimensions
-EPUBJS.Book.prototype.generatePagination = function(width, height, flag) {
-	var book = this;
-	var defered = new RSVP.defer();
-
-	this.ready.spine.promise.then(function(){
-		book.generatePageList(width, height, flag).then(function(pageList){
-			book.pageList = book.contents.pageList = pageList;
-			book.pagination.process(pageList);
-			book.ready.pageList.resolve(book.pageList);
-			defered.resolve(book.pageList);
-		}, function(reason) {
-            defered.reject(reason);
-		});
-	});
-
-	return defered.promise;
-};
-
-// Process the pagination from a JSON array containing the pagelist
-EPUBJS.Book.prototype.loadPagination = function(pagelistJSON) {
-	var pageList;
-
-	if (typeof(pagelistJSON) === "string") {
-		pageList = JSON.parse(pagelistJSON);
-	} else {
-		pageList = pagelistJSON;
-	}
-
-	if(pageList && pageList.length) {
-		this.pageList = pageList;
-		this.pagination.process(this.pageList);
-		this.ready.pageList.resolve(this.pageList);
-	}
-	return this.pageList;
-};
-
-EPUBJS.Book.prototype.getPageList = function() {
-	return this.ready.pageList.promise;
-};
-
-EPUBJS.Book.prototype.getMetadata = function() {
-	return this.ready.metadata.promise;
-};
-
-EPUBJS.Book.prototype.getToc = function() {
-	return this.ready.toc.promise;
-};
-
-/* Private Helpers */
-
-//-- Listeners for browser events
-EPUBJS.Book.prototype.networkListeners = function(){
-	var book = this;
-	window.addEventListener("offline", function(e) {
-		book.online = false;
-		if (book.settings.storage) {
-			book.fromStorage(true);
-		}
-		book.trigger("book:offline");
-	}, false);
-
-	window.addEventListener("online", function(e) {
-		book.online = true;
-		if (book.settings.storage) {
-			book.fromStorage(false);
-		}
-		book.trigger("book:online");
-	}, false);
-
-};
-
-// Listen to all events the renderer triggers and pass them as book events
-EPUBJS.Book.prototype.listenToRenderer = function(renderer){
-	var book = this;
-	renderer.Events.forEach(function(eventName){
-		renderer.on(eventName, function(e){
-			book.trigger(eventName, e);
-		});
-	});
-
-	renderer.on("renderer:visibleRangeChanged", function(range) {
-		var startPage, endPage, percent;
-		var pageRange = [];
-
-		if(this.pageList.length > 0) {
-			startPage = this.pagination.pageFromCfi(range.start);
-			percent = this.pagination.percentageFromPage(startPage);
-			pageRange.push(startPage);
-
-			if(range.end) {
-				endPage = this.pagination.pageFromCfi(range.end);
-				//if(startPage != endPage) {
-					pageRange.push(endPage);
-				//}
-			}
-			this.trigger("book:pageChanged", {
-				"anchorPage": startPage,
-				"percentage": percent,
-				"pageRange" : pageRange
-			});
-
-			// TODO: Add event for first and last page.
-			// (though last is going to be hard, since it could be several reflowed pages long)
-		}
-	}.bind(this));
-
-	renderer.on("render:loaded", this.loadChange.bind(this));
-};
-
-// Listens for load events from the Renderer and checks against the current chapter
-// Prevents the Render from loading a different chapter when back button is pressed
-EPUBJS.Book.prototype.loadChange = function(url){
-	var uri = EPUBJS.core.uri(url);
-	var chapterUri = EPUBJS.core.uri(this.currentChapter.absolute);
-	var spinePos, chapter;
-
-	if(uri.path != chapterUri.path){
-		console.warn("Miss Match", uri.path, this.currentChapter.absolute);
-		// this.goto(uri.filename);
-
-		// Set the current chapter to what is being displayed
-		spinePos = this.spineIndexByURL[uri.filename];
-		chapter = new EPUBJS.Chapter(this.spine[spinePos], this.store);
-		this.currentChapter = chapter;
-
-		// setup the renderer with the displayed chapter
-		this.renderer.currentChapter = chapter;
-		this.renderer.afterLoad(this.renderer.render.docEl);
-		this.renderer.beforeDisplay(function () {
-			this.renderer.afterDisplay();
-		}.bind(this));
-
-	} else if(!this._rendering) {
-		this.renderer.reformat();
+function assertPath(path) {
+	if (typeof path !== 'string') {
+		throw new TypeError('Path must be a string. Received ', path);
 	}
 };
 
-EPUBJS.Book.prototype.unlistenToRenderer = function(renderer){
-	renderer.Events.forEach(function(eventName){
-		renderer.off(eventName);
-	});
-};
-
-//-- Returns the cover
-EPUBJS.Book.prototype.coverUrl = function(){
-	var retrieved = this.ready.cover.promise
-		.then(function(url) {
-			if(this.settings.fromStorage) {
-				return this.store.getUrl(this.contents.cover);
-			} else if(this.settings.contained) {
-				return this.zip.getUrl(this.contents.cover);
-			}else{
-				return this.contents.cover;
-			}
-		}.bind(this));
-
-	retrieved.then(function(url) {
-			this.cover = url;
-		}.bind(this));
-
-	return retrieved;
-};
-
-//-- Choose between a request from store or a request from network
-EPUBJS.Book.prototype.loadXml = function(url){
-	if(this.settings.fromStorage) {
-		return this.store.getXml(url, this.settings.encoding);
-	} else if(this.settings.contained) {
-		return this.zip.getXml(url, this.settings.encoding);
-	}else{
-		return EPUBJS.core.request(url, 'xml', this.settings.withCredentials);
-	}
-};
-
-//-- Turns a url into a absolute url
-EPUBJS.Book.prototype.urlFrom = function(bookPath){
-	var uri = EPUBJS.core.uri(bookPath),
-		absolute = uri.protocol,
-		fromRoot = uri.path[0] == "/",
-		location = window.location,
-		//-- Get URL orgin, try for native or combine
-		origin = location.origin || location.protocol + "//" + location.host,
-		baseTag = document.getElementsByTagName('base'),
-		base;
-
-
-	//-- Check is Base tag is set
-
-	if(baseTag.length) {
-		base = baseTag[0].href;
-	}
-
-	//-- 1. Check if url is absolute
-	if(uri.protocol){
-		return uri.origin + uri.path;
-	}
-
-	//-- 2. Check if url starts with /, add base url
-	if(!absolute && fromRoot){
-		return (base || origin) + uri.path;
-	}
-
-	//-- 3. Or find full path to url and add that
-	if(!absolute && !fromRoot){
-		return EPUBJS.core.resolveUrl(base || location.pathname, uri.path);
-	}
-
-};
-
-
-EPUBJS.Book.prototype.unarchive = function(bookPath){
-	var book = this,
-		unarchived;
-
-	//-- Must use storage
-	// if(this.settings.storage == false ){
-		// this.settings.storage = true;
-		// this.storage = new fileStorage.storage();
-	// }
-
-	this.zip = new EPUBJS.Unarchiver();
-	this.store = this.zip; // Use zip storaged in ram
-	return this.zip.open(bookPath);
-};
-
-//-- Checks if url has a .epub or .zip extension, or is ArrayBuffer (of zip/epub)
-EPUBJS.Book.prototype.isContained = function(bookUrl){
-	if (bookUrl instanceof ArrayBuffer) {
-		return true;
-	}
-	var uri = EPUBJS.core.uri(bookUrl);
-
-	if(uri.extension && (uri.extension == "epub" || uri.extension == "zip")){
-		return true;
-	}
-
-	return false;
-};
-
-//-- Checks if the book can be retrieved from localStorage
-EPUBJS.Book.prototype.isSaved = function(bookKey) {
-	var storedSettings;
-
-	if(!localStorage) {
-		return false;
-	}
-
-	storedSettings = localStorage.getItem(bookKey);
-
-	if( !localStorage ||
-		storedSettings === null) {
-		return false;
-	} else {
-		return true;
-	}
-};
-
-// Generates the Book Key using the identifer in the manifest or other string provided
-EPUBJS.Book.prototype.generateBookKey = function(identifier){
-	return "epubjs:" + EPUBJS.VERSION + ":" + window.location.host + ":" + identifier;
-};
-
-EPUBJS.Book.prototype.saveContents = function(){
-	if(!localStorage) {
-		return false;
-	}
-	localStorage.setItem(this.settings.bookKey, JSON.stringify(this.contents));
-};
-
-EPUBJS.Book.prototype.removeSavedContents = function() {
-	if(!localStorage) {
-		return false;
-	}
-	localStorage.removeItem(this.settings.bookKey);
-};
-
-
-
-//-- Takes a string or a element
-EPUBJS.Book.prototype.renderTo = function(elem){
-	var book = this,
-		rendered;
-
-	if(EPUBJS.core.isElement(elem)) {
-		this.element = elem;
-	} else if (typeof elem == "string") {
-		this.element = EPUBJS.core.getEl(elem);
-	} else {
-		console.error("Not an Element");
-		return;
-	}
-
-	rendered = this.opened.
-				then(function(){
-					// book.render = new EPUBJS.Renderer[this.settings.renderer](book);
-					book.renderer.initialize(book.element, book.settings.width, book.settings.height);
-
-					if(book.metadata.direction) {
-						book.renderer.setDirection(book.metadata.direction);
-					}
-
-					book._rendered();
-					return book.startDisplay();
-				});
-
-	// rendered.then(null, function(error) { console.error(error); });
-
-	return rendered;
-};
-
-EPUBJS.Book.prototype.startDisplay = function(){
-	var display;
-
-	if(this.settings.goto) {
-		display = this.goto(this.settings.goto);
-	}else if(this.settings.previousLocationCfi) {
-		display = this.gotoCfi(this.settings.previousLocationCfi);
-	}else{
-		display = this.displayChapter(this.spinePos, this.settings.displayLastPage);
-	}
-
-	return display;
-};
-
-EPUBJS.Book.prototype.restore = function(identifier){
-
-	var book = this,
-			fetch = ['manifest', 'spine', 'metadata', 'cover', 'toc', 'spineNodeIndex', 'spineIndexByURL', 'globalLayoutProperties'],
-			reject = false,
-			bookKey = this.generateBookKey(identifier),
-			fromStore = localStorage.getItem(bookKey),
-			len = fetch.length,
-			i;
-
-	if(this.settings.clearSaved) reject = true;
-
-	if(!reject && fromStore != 'undefined' && fromStore !== null){
-		book.contents = JSON.parse(fromStore);
-
-		for(i = 0; i < len; i++) {
-			var item = fetch[i];
-
-			if(!book.contents[item]) {
-				reject = true;
-				break;
-			}
-			book[item] = book.contents[item];
-		}
-	}
-
-	if(reject || !fromStore || !this.contents || !this.settings.contentsPath){
-		return false;
-	}else{
-		this.settings.bookKey = bookKey;
-		this.ready.manifest.resolve(this.manifest);
-		this.ready.spine.resolve(this.spine);
-		this.ready.metadata.resolve(this.metadata);
-		this.ready.cover.resolve(this.cover);
-		this.ready.toc.resolve(this.toc);
-		return true;
-	}
-
-};
-
-EPUBJS.Book.prototype.displayChapter = function(chap, end, deferred){
-	var book = this,
-		render,
-		cfi,
-		pos,
-		store,
-		defer = deferred || new RSVP.defer();
-
-	var chapter;
-
-	if(!this.isRendered) {
-		this._q.enqueue("displayChapter", arguments);
-		// Reject for now. TODO: pass promise to queue
-		defer.reject({
-				message : "Rendering",
-				stack : new Error().stack
-			});
-		return defer.promise;
-	}
-
-
-	if(this._rendering || this.renderer._moving) {
-		// Pass along the current defer
-		this._displayQ.enqueue("displayChapter", [chap, end, defer]);
-		return defer.promise;
-	}
-
-	if(EPUBJS.core.isNumber(chap)){
-		pos = chap;
-	}else{
-		cfi = new EPUBJS.EpubCFI(chap);
-		pos = cfi.spinePos;
-	}
-
-	if(pos < 0 || pos >= this.spine.length){
-		console.warn("Not A Valid Location");
-		pos = 0;
-		end = false;
-		cfi = false;
-	}
-
-	//-- Create a new chapter
-	chapter = new EPUBJS.Chapter(this.spine[pos], this.store);
-
-	this._rendering = true;
-
-	if(this._needsAssetReplacement()) {
-
-		chapter.registerHook("beforeChapterRender", [
-			EPUBJS.replace.head,
-			EPUBJS.replace.resources,
-			EPUBJS.replace.posters,
-			EPUBJS.replace.svg
-		], true);
-
-	}
-
-	book.currentChapter = chapter;
-
-	render = book.renderer.displayChapter(chapter, this.globalLayoutProperties);
-	if(cfi) {
-		book.renderer.gotoCfi(cfi);
-	} else if(end) {
-		book.renderer.lastPage();
-	}
-	//-- Success, Clear render queue
-	render.then(function(rendered){
-		// var inwait;
-		//-- Set the book's spine position
-		book.spinePos = pos;
-
-		defer.resolve(book.renderer);
-
-		if(book.settings.fromStorage === false &&
-			book.settings.contained === false) {
-			book.preloadNextChapter();
-		}
-
-		book._rendering = false;
-		book._displayQ.dequeue();
-		if(book._displayQ.length() === 0) {
-			book._gotoQ.dequeue();
-		}
-
-	}, function(error) {
-		// handle errors in either of the two requests
-		console.error("Could not load Chapter: "+ chapter.absolute, error);
-		book.trigger("book:chapterLoadFailed", chapter.absolute);
-		book._rendering = false;
-		defer.reject(error);
-	});
-
-	return defer.promise;
-};
-
-EPUBJS.Book.prototype.nextPage = function(defer){
-    var defer = defer || new RSVP.defer();
-
-	if (!this.isRendered) {
-        this._q.enqueue("nextPage", [defer]);
-        return defer.promise;
-    }
-
-	var next = this.renderer.nextPage();
-	if (!next){
-		return this.nextChapter(defer);
-	}
-
-    defer.resolve(true);
-    return defer.promise;
-};
-
-EPUBJS.Book.prototype.prevPage = function(defer) {
-    var defer = defer || new RSVP.defer();
-
-	if (!this.isRendered) {
-        this._q.enqueue("prevPage", [defer]);
-        return defer.promise;
-    }
-
-	var prev = this.renderer.prevPage();
-	if (!prev){
-		return this.prevChapter(defer);
-	}
-
-    defer.resolve(true);
-    return defer.promise;
-};
-
-EPUBJS.Book.prototype.nextChapter = function(defer) {
-    var defer = defer || new RSVP.defer();
-
-    if (this.spinePos < this.spine.length - 1) {
-		var next = this.spinePos + 1;
-		// Skip non linear chapters
-		while (this.spine[next] && this.spine[next].linear && this.spine[next].linear == 'no') {
-			next++;
-		}
-		if (next < this.spine.length) {
-			return this.displayChapter(next, false, defer);
-		}
-	}
-
-    this.trigger("book:atEnd");
-    defer.resolve(true);
-    return defer.promise;
-};
-
-EPUBJS.Book.prototype.prevChapter = function(defer) {
-    var defer = defer || new RSVP.defer();
-
-    if (this.spinePos > 0) {
-		var prev = this.spinePos - 1;
-		while (this.spine[prev] && this.spine[prev].linear && this.spine[prev].linear == 'no') {
-			prev--;
-		}
-		if (prev >= 0) {
-			return this.displayChapter(prev, true, defer);
-		}
-    }
-
-    this.trigger("book:atStart");
-    defer.resolve(true);
-    return defer.promise;
-};
-
-EPUBJS.Book.prototype.getCurrentLocationCfi = function() {
-	if(!this.isRendered) return false;
-	return this.renderer.currentLocationCfi;
-};
-
-EPUBJS.Book.prototype.goto = function(target){
-
-	if(target.indexOf("epubcfi(") === 0) {
-		return this.gotoCfi(target);
-	} else if(target.indexOf("%") === target.length-1) {
-		return this.gotoPercentage(parseInt(target.substring(0, target.length-1))/100);
-	} else if(typeof target === "number" || isNaN(target) === false){
-		return this.gotoPage(target);
-	} else {
-		return this.gotoHref(target);
-	}
-
-};
-
-EPUBJS.Book.prototype.gotoCfi = function(cfiString, defer){
-	var cfi,
-			spinePos,
-			spineItem,
-			rendered,
-			promise,
-			render,
-			deferred = defer || new RSVP.defer();
-
-	if(!this.isRendered) {
-		console.warn("Not yet Rendered");
-		this.settings.previousLocationCfi = cfiString;
-		return false;
-	}
-
-	// Currently going to a chapter
-	if(this._moving || this._rendering) {
-		console.warn("Renderer is moving");
-		this._gotoQ.enqueue("gotoCfi", [cfiString, deferred]);
-		return false;
-	}
-
-	cfi = new EPUBJS.EpubCFI(cfiString);
-	spinePos = cfi.spinePos;
-
-	if(spinePos == -1) {
-		return false;
-	}
-
-	spineItem = this.spine[spinePos];
-	promise = deferred.promise;
-	this._moving = true;
-	//-- If same chapter only stay on current chapter
-	if(this.currentChapter && this.spinePos === spinePos){
-		this.renderer.gotoCfi(cfi);
-		this._moving = false;
-		deferred.resolve(this.renderer.currentLocationCfi);
-	} else {
-
-		if(!spineItem || spinePos == -1) {
-			spinePos = 0;
-			spineItem = this.spine[spinePos];
-		}
-
-		render = this.displayChapter(cfiString);
-
-		render.then(function(rendered){
-			this._moving = false;
-			deferred.resolve(rendered.currentLocationCfi);
-		}.bind(this), function() {
-			this._moving = false;
-        }.bind(this));
-
-	}
-
-	promise.then(function(){
-		this._gotoQ.dequeue();
-	}.bind(this));
-
-	return promise;
-};
-
-EPUBJS.Book.prototype.gotoHref = function(url, defer){
-	var split, chapter, section, relativeURL, spinePos;
-	var deferred = defer || new RSVP.defer();
-
-	if(!this.isRendered) {
-		this.settings.goto = url;
-		return false;
-	}
-
-	// Currently going to a chapter
-	if(this._moving || this._rendering) {
-		this._gotoQ.enqueue("gotoHref", [url, deferred]);
-		return false;
-	}
-
-	split = url.split("#");
-	chapter = split[0];
-	section = split[1] || false;
-	if (chapter.search("://") == -1) {
-		relativeURL = chapter.replace(EPUBJS.core.uri(this.settings.contentsPath).path, '');
-	} else {
-		relativeURL = chapter.replace(this.settings.contentsPath, '');
-	}
-	spinePos = this.spineIndexByURL[relativeURL];
-
-	//-- If link fragment only stay on current chapter
-	if(!chapter){
-		spinePos = this.currentChapter ? this.currentChapter.spinePos : 0;
-	}
-
-	//-- Check that URL is present in the index, or stop
-	if(typeof(spinePos) != "number") return false;
-
-	if(!this.currentChapter || spinePos != this.currentChapter.spinePos){
-		//-- Load new chapter if different than current
-		return this.displayChapter(spinePos).then(function(){
-				if(section){
-					this.renderer.section(section);
-				}
-				deferred.resolve(this.renderer.currentLocationCfi);
-			}.bind(this));
-	}else{
-		//--  Goto section
-		if(section) {
-			this.renderer.section(section);
-		} else {
-			// Or jump to the start
-			this.renderer.firstPage();
-		}
-		deferred.resolve(this.renderer.currentLocationCfi);
-	}
-
-	deferred.promise.then(function(){
-		this._gotoQ.dequeue();
-	}.bind(this));
-
-	return deferred.promise;
-};
-
-EPUBJS.Book.prototype.gotoPage = function(pg){
-	var cfi = this.pagination.cfiFromPage(pg);
-	return this.gotoCfi(cfi);
-};
-
-EPUBJS.Book.prototype.gotoPercentage = function(percent){
-	var pg = this.pagination.pageFromPercentage(percent);
-	return this.gotoPage(pg);
-};
-
-EPUBJS.Book.prototype.preloadNextChapter = function() {
-	var next;
-	var chap = this.spinePos + 1;
-
-	if(chap >= this.spine.length){
-		return false;
-	}
-
-	next = new EPUBJS.Chapter(this.spine[chap]);
-	if(next) {
-		EPUBJS.core.request(next.absolute);
-	}
-};
-
-EPUBJS.Book.prototype.storeOffline = function() {
-	var book = this,
-		assets = EPUBJS.core.values(this.manifest);
-
-	//-- Creates a queue of all items to load
-	return this.store.put(assets).
-			then(function(){
-				book.settings.stored = true;
-				book.trigger("book:stored");
-			});
-};
-
-EPUBJS.Book.prototype.availableOffline = function() {
-	return this.settings.stored > 0 ? true : false;
-};
-
-EPUBJS.Book.prototype.toStorage = function () {
-	var key = this.settings.bookKey;
-	this.store.isStored(key).then(function(stored) {
-
-		if (stored === true) {
-			this.settings.stored = true;
-			return true;
-		}
-
-		return this.storeOffline()
-			.then(function() {
-				this.store.token(key, true);
-			}.bind(this));
-
-	}.bind(this));
-
-};
-EPUBJS.Book.prototype.fromStorage = function(stored) {
-	var hooks = [
-		EPUBJS.replace.head,
-		EPUBJS.replace.resources,
-		EPUBJS.replace.posters,
-		EPUBJS.replace.svg
-	];
-
-	if(this.contained || this.settings.contained) return;
-
-	//-- If there is network connection, store the books contents
-	if(this.online){
-		this.opened.then(this.toStorage.bind(this));
-	}
-
-	if(this.store && this.settings.fromStorage && stored === false){
-		this.settings.fromStorage = false;
-		this.store.off("offline");
-		// this.renderer.removeHook("beforeChapterRender", hooks, true);
-		this.store = false;
-	}else if(!this.settings.fromStorage){
-
-		this.store = new EPUBJS.Storage(this.settings.credentials);
-		this.store.on("offline", function (offline) {
-			if (!offline) {
-				// Online
-				this.offline = false;
-				this.settings.fromStorage = false;
-				// this.renderer.removeHook("beforeChapterRender", hooks, true);
-				this.trigger("book:online");
-			} else {
-				// Offline
-				this.offline = true;
-				this.settings.fromStorage = true;
-				// this.renderer.registerHook("beforeChapterRender", hooks, true);
-				this.trigger("book:offline");
-			}
-		}.bind(this));
-
-	}
-
-};
-
-EPUBJS.Book.prototype.setStyle = function(style, val, prefixed) {
-	var noreflow = ["color", "background", "background-color"];
-
-	if(!this.isRendered) return this._q.enqueue("setStyle", arguments);
-
-	this.settings.styles[style] = val;
-
-	this.renderer.setStyle(style, val, prefixed);
-
-	if(noreflow.indexOf(style) === -1) {
-		// clearTimeout(this.reformatTimeout);
-		// this.reformatTimeout = setTimeout(function(){
-		this.renderer.reformat();
-		// }.bind(this), 10);
-	}
-};
-
-EPUBJS.Book.prototype.removeStyle = function(style) {
-	if(!this.isRendered) return this._q.enqueue("removeStyle", arguments);
-	this.renderer.removeStyle(style);
-	this.renderer.reformat();
-	delete this.settings.styles[style];
-};
-
-EPUBJS.Book.prototype.resetClasses = function(classes) {
-
-	if(!this.isRendered) return this._q.enqueue("setClasses", arguments);
-
-  if(classes.constructor === String) classes = [ classes ];
-
-  this.settings.classes = classes;
-
-	this.renderer.setClasses(this.settings.classes);
-  this.renderer.reformat();
-};
-
-EPUBJS.Book.prototype.addClass = function(aClass) {
-
-	if(!this.isRendered) return this._q.enqueue("addClass", arguments);
-
-  if(this.settings.classes.indexOf(aClass) == -1) {
-    this.settings.classes.push(aClass);
-  }
-
-	this.renderer.setClasses(this.settings.classes);
-  this.renderer.reformat();
-};
-
-EPUBJS.Book.prototype.removeClass = function(aClass) {
-
-	if(!this.isRendered) return this._q.enqueue("removeClass", arguments);
-
-  var idx = this.settings.classes.indexOf(aClass);
-
-  if(idx != -1) {
-
-    delete this.settings.classes[idx];
-
-    this.renderer.setClasses(this.settings.classes);
-    this.renderer.reformat();
-
-  }
-
-};
-
-EPUBJS.Book.prototype.addHeadTag = function(tag, attrs) {
-	if(!this.isRendered) return this._q.enqueue("addHeadTag", arguments);
-	this.settings.headTags[tag] = attrs;
-};
-
-EPUBJS.Book.prototype.useSpreads = function(use) {
-	console.warn("useSpreads is deprecated, use forceSingle or set a layoutOveride instead");
-	if(use === false) {
-		this.forceSingle(true);
-	} else {
-		this.forceSingle(false);
-	}
-};
-
-EPUBJS.Book.prototype.forceSingle = function(_use) {
-	var force = typeof _use === "undefined" ? true : _use;
-
-	this.renderer.forceSingle(force);
-	this.settings.forceSingle = force;
-	if(this.isRendered) {
-		this.renderer.reformat();
-	}
-};
-
-EPUBJS.Book.prototype.setMinSpreadWidth = function(width) {
-	this.settings.minSpreadWidth = width;
-	if(this.isRendered) {
-		this.renderer.setMinSpreadWidth(this.settings.minSpreadWidth);
-		this.renderer.reformat();
-	}
-};
-
-EPUBJS.Book.prototype.setGap = function(gap) {
-	this.settings.gap = gap;
-	if(this.isRendered) {
-		this.renderer.setGap(this.settings.gap);
-		this.renderer.reformat();
-	}
-};
-
-EPUBJS.Book.prototype.chapter = function(path) {
-	var spinePos = this.spineIndexByURL[path];
-	var spineItem;
-	var chapter;
-
-	if(spinePos){
-		spineItem = this.spine[spinePos];
-		chapter = new EPUBJS.Chapter(spineItem, this.store, this.settings.withCredentials);
-		chapter.load();
-	}
-	return chapter;
-};
-
-EPUBJS.Book.prototype.unload = function(){
-
-	if(this.settings.restore && localStorage) {
-		this.saveContents();
-	}
-
-	this.unlistenToRenderer(this.renderer);
-
-	this.trigger("book:unload");
-};
-
-EPUBJS.Book.prototype.destroy = function() {
-
-	window.removeEventListener("beforeunload", this.unload);
-
-	if(this.currentChapter) this.currentChapter.unload();
-
-	this.unload();
-
-	if(this.renderer) this.renderer.remove();
-
-};
-
-EPUBJS.Book.prototype._ready = function() {
-
-	this.trigger("book:ready");
-
-};
-
-EPUBJS.Book.prototype._rendered = function(err) {
-	var book = this;
-
-	this.isRendered = true;
-	this.trigger("book:rendered");
-
-	this._q.flush();
-};
-
-
-EPUBJS.Book.prototype.applyStyles = function(renderer, callback){
-	// if(!this.isRendered) return this._q.enqueue("applyStyles", arguments);
-	renderer.applyStyles(this.settings.styles);
-	callback();
-};
-
-EPUBJS.Book.prototype.applyClasses = function(renderer, callback){
-	// if(!this.isRendered) return this._q.enqueue("applyClasses", arguments);
-	renderer.setClasses(this.settings.classes);
-	callback();
-};
-
-EPUBJS.Book.prototype.applyHeadTags = function(renderer, callback){
-	// if(!this.isRendered) return this._q.enqueue("applyHeadTags", arguments);
-	renderer.applyHeadTags(this.settings.headTags);
-	callback();
-};
-
-EPUBJS.Book.prototype._registerReplacements = function(renderer){
-	renderer.registerHook("beforeChapterDisplay", this.applyStyles.bind(this, renderer), true);
-	renderer.registerHook("beforeChapterDisplay", this.applyHeadTags.bind(this, renderer), true);
-	renderer.registerHook("beforeChapterDisplay", this.applyClasses.bind(this, renderer), true);
-	renderer.registerHook("beforeChapterDisplay", EPUBJS.replace.hrefs.bind(this), true);
-};
-
-EPUBJS.Book.prototype._needsAssetReplacement = function(){
-	if(this.settings.fromStorage) {
-
-		//-- Filesystem api links are relative, so no need to replace them
-		// if(this.storage.getStorageType() == "filesystem") {
-		// 	return false;
-		// }
-
-		return true;
-
-	} else if(this.settings.contained) {
-
-		return true;
-
-	} else {
-
-		return false;
-
-	}
-};
-
-
-//-- http://www.idpf.org/epub/fxl/
-EPUBJS.Book.prototype.parseLayoutProperties = function(metadata){
-	var layout = (this.settings.layoutOveride && this.settings.layoutOveride.layout) || metadata.layout || "reflowable";
-	var spread = (this.settings.layoutOveride && this.settings.layoutOveride.spread) || metadata.spread || "auto";
-	var orientation = (this.settings.layoutOveride && this.settings.layoutOveride.orientation) || metadata.orientation || "auto";
-	return {
-		layout : layout,
-		spread : spread,
-		orientation : orientation
-	};
-};
-
-//-- Enable binding events to book
-RSVP.EventTarget.mixin(EPUBJS.Book.prototype);
-
-//-- Handle RSVP Errors
-RSVP.on('error', function(event) {
-	console.error(event);
-});
-
-RSVP.configure('instrument', true); //-- true | will logging out all RSVP rejections
-// RSVP.on('created', listener);
-// RSVP.on('chained', listener);
-// RSVP.on('fulfilled', listener);
-// RSVP.on('rejected', function(event){
-// 	console.error(event.detail.message, event.detail.stack);
-// });
-
-EPUBJS.Chapter = function(spineObject, store, credentials){
-	this.href = spineObject.href;
-	this.absolute = spineObject.url;
-	this.id = spineObject.id;
-	this.spinePos = spineObject.index;
-	this.cfiBase = spineObject.cfiBase;
-	this.properties = spineObject.properties;
-	this.manifestProperties = spineObject.manifestProperties;
-	this.linear = spineObject.linear;
-	this.pages = 1;
-	this.store = store;
-	this.credentials = credentials;
-	this.epubcfi = new EPUBJS.EpubCFI();
-	this.deferred = new RSVP.defer();
-	this.loaded = this.deferred.promise;
-
-	EPUBJS.Hooks.mixin(this);
-	//-- Get pre-registered hooks for events
-	this.getHooks("beforeChapterRender");
-
-	// Cached for replacement urls from storage
-	this.caches = {};
-};
-
-
-EPUBJS.Chapter.prototype.load = function(_store, _credentials){
-	var store = _store || this.store;
-	var credentials = _credentials || this.credentials;
-	var promise;
-	// if(this.store && (!this.book.online || this.book.contained))
-	if(store){
-		promise = store.getXml(this.absolute);
-	}else{
-		promise = EPUBJS.core.request(this.absolute, false, credentials);
-	}
-
-	promise.then(function(xml){
-        try {
-            this.setDocument(xml);
-            this.deferred.resolve(this);
-        } catch (error) {
-            this.deferred.reject({
-                message : this.absolute + " -> " + error.message,
-                stack : new Error().stack
-            });
-        }
-	}.bind(this));
-
-	return promise;
-};
-
-EPUBJS.Chapter.prototype.render = function(_store){
-
-	return this.load().then(function(doc){
-
-		var head = doc.querySelector('head');
-		var base = doc.createElement("base");
-
-		base.setAttribute("href", this.absolute);
-		head.insertBefore(base, head.firstChild);
-
-		this.contents = doc;
-
-		return new RSVP.Promise(function (resolve, reject) {
-			this.triggerHooks("beforeChapterRender", function () {
-				resolve(doc);
-			}.bind(this), this);
-		}.bind(this));
-
-	}.bind(this))
-	.then(function(doc) {
-		var serializer = new XMLSerializer();
-		var contents = serializer.serializeToString(doc);
-		return contents;
-	}.bind(this));
-};
-
-EPUBJS.Chapter.prototype.url = function(_store){
-	var deferred = new RSVP.defer();
-	var store = _store || this.store;
-	var loaded;
-	var chapter = this;
+function extension(_url) {
 	var url;
+	var pathname;
+	var ext;
 
-	if(store){
-		if(!this.tempUrl) {
-			store.getUrl(this.absolute).then(function(url){
-				chapter.tempUrl = url;
-				deferred.resolve(url);
-			});
-		} else {
-			url = this.tempUrl;
-			deferred.resolve(url);
-		}
-	}else{
-		url = this.absolute;
-		deferred.resolve(url);
+	try {
+		url = new Url(url);
+		pathname = url.pathname;
+	} catch (e) {
+		pathname = _url;
 	}
 
-	return deferred.promise;
-};
-
-EPUBJS.Chapter.prototype.setPages = function(num){
-	this.pages = num;
-};
-
-EPUBJS.Chapter.prototype.getPages = function(num){
-	return this.pages;
-};
-
-EPUBJS.Chapter.prototype.getID = function(){
-	return this.ID;
-};
-
-EPUBJS.Chapter.prototype.unload = function(store){
-	this.document = null;
-	if(this.tempUrl && store) {
-		store.revokeUrl(this.tempUrl);
-		this.tempUrl = false;
-	}
-};
-
-EPUBJS.Chapter.prototype.setDocument = function(_document){
-	// var uri = _document.namespaceURI;
-	// var doctype = _document.doctype;
-	//
-	// // Creates an empty document
-	// this.document = _document.implementation.createDocument(
-	// 		uri,
-	// 		null,
-	// 		null
-	// );
-	// this.contents = this.document.importNode(
-	// 		_document.documentElement, //node to import
-	// 		true                         //clone its descendants
-	// );
-	//
-	// this.document.appendChild(this.contents);
-	this.document = _document;
-	this.contents = _document.documentElement;
-
-	// Fix to apply wgxpath to new document in IE
-	if(!this.document.evaluate && document.evaluate) {
-		this.document.evaluate = document.evaluate;
+	ext = path.extname(pathname);
+	if (ext) {
+		return ext.slice(1);
 	}
 
-	// this.deferred.resolve(this.contents);
-};
+	return '';
+}
 
-EPUBJS.Chapter.prototype.cfiFromRange = function(_range) {
-	var range;
-	var startXpath, endXpath;
-	var startContainer, endContainer;
-	var cleanTextContent, cleanStartTextContent, cleanEndTextContent;
+function directory(_url) {
+	var url;
+	var pathname;
+	var ext;
 
-	// Check for Contents
-	if(!this.document) return;
-
-	if(typeof document.evaluate != 'undefined') {
-
-		startXpath = EPUBJS.core.getElementXPath(_range.startContainer);
-		// console.log(startContainer)
-		endXpath = EPUBJS.core.getElementXPath(_range.endContainer);
-
-		startContainer = this.document.evaluate(startXpath, this.document, EPUBJS.core.nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-
-		if(!_range.collapsed) {
-			endContainer = this.document.evaluate(endXpath, this.document, EPUBJS.core.nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-		}
-
-		range = this.document.createRange();
-		// Find Exact Range in original document
-		if(startContainer) {
-			try {
-				range.setStart(startContainer, _range.startOffset);
-				if(!_range.collapsed && endContainer) {
-					range.setEnd(endContainer, _range.endOffset);
-				}
-			} catch (e) {
-				console.log("missed");
-				startContainer = false;
-			}
-
-		}
-
-		// Fuzzy Match
-		if(!startContainer) {
-			console.log("not found, try fuzzy match");
-			cleanStartTextContent = EPUBJS.core.cleanStringForXpath(_range.startContainer.textContent);
-			startXpath = "//text()[contains(.," + cleanStartTextContent + ")]";
-
-			startContainer = this.document.evaluate(startXpath, this.document, EPUBJS.core.nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-
-			if(startContainer){
-				// console.log("Found with Fuzzy");
-				range.setStart(startContainer, _range.startOffset);
-
-				if(!_range.collapsed) {
-					cleanEndTextContent = EPUBJS.core.cleanStringForXpath(_range.endContainer.textContent);
-					endXpath = "//text()[contains(.," + cleanEndTextContent + ")]";
-					endContainer = this.document.evaluate(endXpath, this.document, EPUBJS.core.nsResolver, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-					if(endContainer) {
-						range.setEnd(endContainer, _range.endOffset);
-					}
-				}
-
-			}
-		}
-	} else {
-		range = _range; // Just evaluate the current documents range
+	try {
+		url = new Url(url);
+		pathname = url.pathname;
+	} catch (e) {
+		pathname = _url;
 	}
 
-	// Generate the Cfi
-	return this.epubcfi.generateCfiFromRange(range, this.cfiBase);
-};
-
-EPUBJS.Chapter.prototype.find = function(_query){
-	var chapter = this;
-	var matches = [];
-	var query = _query.toLowerCase();
-	//var xpath = this.document.evaluate(".//text()[contains(translate(., '"+query.toUpperCase()+"', '"+query+"'),'"+query+"')]", this.document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
-	var find = function(node){
-		// Search String
-		var text = node.textContent.toLowerCase();
-		var range = chapter.document.createRange();
-		var cfi;
-		var pos;
-		var last = -1;
-		var excerpt;
-		var limit = 150;
-
-		while (pos != -1) {
-			pos = text.indexOf(query, last + 1);
-
-			if(pos != -1) {
-				// If Found, Create Range
-				range = chapter.document.createRange();
-				range.setStart(node, pos);
-				range.setEnd(node, pos + query.length);
-
-				//Generate CFI
-				cfi = chapter.cfiFromRange(range);
-
-				// Generate Excerpt
-				if(node.textContent.length < limit) {
-					excerpt = node.textContent;
-				} else {
-					excerpt = node.textContent.substring(pos-limit/2,pos+limit/2);
-					excerpt = "..." + excerpt + "...";
-				}
-
-				//Add CFI to list
-				matches.push({
-					cfi: cfi,
-					excerpt: excerpt
-				});
-			}
-
-			last = pos;
-		}
-
-	};
-
-	// Grab text nodes
-
-	/*
-	for ( var i=0 ; i < xpath.snapshotLength; i++ ) {
-		find(xpath.snapshotItem(i));
-	}
-	*/
-
-	this.textSprint(this.document, function(node){
-		find(node);
-	});
-
-
-	// Return List of CFIs
-	return matches;
-};
-
-
-EPUBJS.Chapter.prototype.textSprint = function(root, func) {
-	var treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
-			acceptNode: function (node) {
-					if (node.data && ! /^\s*$/.test(node.data) ) {
-						return NodeFilter.FILTER_ACCEPT;
-					} else {
-						return NodeFilter.FILTER_REJECT;
-					}
-			}
-	}, false);
-	var node;
-	while ((node = treeWalker.nextNode())) {
-		func(node);
-	}
-
-};
-
-EPUBJS.Chapter.prototype.replace = function(query, func, finished, progress){
-	var items = this.contents.querySelectorAll(query),
-		resources = Array.prototype.slice.call(items),
-		count = resources.length;
-
-
-	if(count === 0) {
-		finished(false);
-		return;
-	}
-	resources.forEach(function(item){
-		var called = false;
-		var after = function(result, full){
-			if(called === false) {
-				count--;
-				if(progress) progress(result, full, count);
-				if(count <= 0 && finished) finished(true);
-				called = true;
-			}
-		};
-
-		func(item, after);
-
-	}.bind(this));
-
-};
-
-EPUBJS.Chapter.prototype.replaceWithStored = function(query, attr, func, callback) {
-	var _oldUrls,
-			_newUrls = {},
-			_store = this.store,
-			_cache = this.caches[query],
-			_uri = EPUBJS.core.uri(this.absolute),
-			_chapterBase = _uri.base,
-			_attr = attr,
-			_wait = 5,
-			progress = function(url, full, count) {
-				_newUrls[full] = url;
-			},
-			finished = function(notempty) {
-				if(callback) callback();
-				EPUBJS.core.values(_oldUrls).forEach(function(url){
-					_store.revokeUrl(url);
-				});
-
-				_cache = _newUrls;
-			};
-
-	if(!_store) return;
-
-	if(!_cache) _cache = {};
-	_oldUrls = EPUBJS.core.clone(_cache);
-
-	this.replace(query, function(link, done){
-		var src = link.getAttribute(_attr),
-				full = EPUBJS.core.resolveUrl(_chapterBase, src);
-
-		var replaceUrl = function(url) {
-				var timeout;
-				link.onload = function(){
-					clearTimeout(timeout);
-					done(url, full);
-				};
-
-				/*
-				link.onerror = function(e){
-					clearTimeout(timeout);
-					done(url, full);
-					console.error(e);
-				};
-				*/
-
-				if(query == "svg image") {
-					//-- SVG needs this to trigger a load event
-					link.setAttribute("externalResourcesRequired", "true");
-				}
-
-				if(query == "link[href]" && link.getAttribute("rel") !== "stylesheet") {
-					//-- Only Stylesheet links seem to have a load events, just continue others
-					done(url, full);
-				} else {
-					timeout = setTimeout(function(){
-						done(url, full);
-					}, _wait);
-				}
-
-				if (url) {
-					link.setAttribute(_attr, url);
-				}
-
-			};
-
-		if(full in _oldUrls){
-			replaceUrl(_oldUrls[full]);
-			_newUrls[full] = _oldUrls[full];
-			delete _oldUrls[full];
-		}else{
-			func(_store, full, replaceUrl, link);
-		}
-
-	}, finished, progress);
-};
-
-var EPUBJS = EPUBJS || {};
-EPUBJS.core = {};
-
-var ELEMENT_NODE = 1;
-var TEXT_NODE = 3;
-var COMMENT_NODE = 8;
-var DOCUMENT_NODE = 9;
-
-//-- Get a element for an id
-EPUBJS.core.getEl = function(elem) {
-	return document.getElementById(elem);
-};
-
-//-- Get all elements for a class
-EPUBJS.core.getEls = function(classes) {
-	return document.getElementsByClassName(classes);
-};
-
-EPUBJS.core.request = function(url, type, withCredentials) {
-	var supportsURL = window.URL;
-	var BLOB_RESPONSE = supportsURL ? "blob" : "arraybuffer";
-	var deferred = new RSVP.defer();
-	var xhr = new XMLHttpRequest();
-	var uri;
-
-	//-- Check from PDF.js:
-	//   https://github.com/mozilla/pdf.js/blob/master/web/compatibility.js
-	var xhrPrototype = XMLHttpRequest.prototype;
-
-	var handler = function() {
-		var r;
-
-		if (this.readyState != this.DONE) return;
-
-		if ((this.status === 200 || this.status === 0) && this.response) { // Android & Firefox reporting 0 for local & blob urls
-			if (type == 'xml'){
-                // If this.responseXML wasn't set, try to parse using a DOMParser from text
-                if(!this.responseXML) {
-                    r = new DOMParser().parseFromString(this.response, "application/xml");
-                } else {
-                    r = this.responseXML;
-                }
-			} else if (type == 'xhtml') {
-                if (!this.responseXML){
-                    r = new DOMParser().parseFromString(this.response, "application/xhtml+xml");
-                } else {
-                    r = this.responseXML;
-                }
-			} else if (type == 'html') {
-				if (!this.responseXML){
-                    r = new DOMParser().parseFromString(this.response, "text/html");
-                } else {
-                    r = this.responseXML;
-                }
-			} else if (type == 'json') {
-				r = JSON.parse(this.response);
-			} else if (type == 'blob') {
-				if (supportsURL) {
-					r = this.response;
-				} else {
-					//-- Safari doesn't support responseType blob, so create a blob from arraybuffer
-					r = new Blob([this.response]);
-				}
-			} else {
-				r = this.response;
-			}
-
-			deferred.resolve(r);
-		} else {
-			deferred.reject({
-				message : this.response,
-				stack : new Error().stack
-			});
-		}
-	};
-
-	if (!('overrideMimeType' in xhrPrototype)) {
-		// IE10 might have response, but not overrideMimeType
-		Object.defineProperty(xhrPrototype, 'overrideMimeType', {
-			value: function xmlHttpRequestOverrideMimeType(mimeType) {}
-		});
-	}
-
-	xhr.onreadystatechange = handler;
-	xhr.open("GET", url, true);
-
-	if(withCredentials) {
-		xhr.withCredentials = true;
-	}
-
-	// If type isn't set, determine it from the file extension
-	if(!type) {
-		uri = EPUBJS.core.uri(url);
-		type = uri.extension;
-		type = {
-			'htm': 'html'
-		}[type] || type;
-	}
-
-	if(type == 'blob'){
-		xhr.responseType = BLOB_RESPONSE;
-	}
-
-	if(type == "json") {
-		xhr.setRequestHeader("Accept", "application/json");
-	}
-
-	if(type == 'xml') {
-		xhr.responseType = "document";
-		xhr.overrideMimeType('text/xml'); // for OPF parsing
-	}
-
-	if(type == 'xhtml') {
-		xhr.responseType = "document";
-	}
-
-	if(type == 'html') {
-		xhr.responseType = "document";
- 	}
-
-	if(type == "binary") {
-		xhr.responseType = "arraybuffer";
-	}
-
-	xhr.send();
-
-	return deferred.promise;
-};
-
-EPUBJS.core.toArray = function(obj) {
-	var arr = [];
-
-	for (var member in obj) {
-		var newitm;
-		if ( obj.hasOwnProperty(member) ) {
-			newitm = obj[member];
-			newitm.ident = member;
-			arr.push(newitm);
-		}
-	}
-
-	return arr;
-};
-
-//-- Parse the different parts of a url, returning a object
-EPUBJS.core.uri = function(url){
-	var uri = {
-				protocol : '',
-				host : '',
-				path : '',
-				origin : '',
-				directory : '',
-				base : '',
-				filename : '',
-				extension : '',
-				fragment : '',
-				href : url
-			},
-			blob = url.indexOf('blob:'),
-			doubleSlash = url.indexOf('://'),
-			search = url.indexOf('?'),
-			fragment = url.indexOf("#"),
-			withoutProtocol,
-			dot,
-			firstSlash;
-
-	if(blob === 0) {
-		uri.protocol = "blob";
-		uri.base = url.indexOf(0, fragment);
-		return uri;
-	}
-
-	if(fragment != -1) {
-		uri.fragment = url.slice(fragment + 1);
-		url = url.slice(0, fragment);
-	}
-
-	if(search != -1) {
-		uri.search = url.slice(search + 1);
-		url = url.slice(0, search);
-		href = uri.href;
-	}
-
-	if(doubleSlash != -1) {
-		uri.protocol = url.slice(0, doubleSlash);
-		withoutProtocol = url.slice(doubleSlash+3);
-		firstSlash = withoutProtocol.indexOf('/');
-
-		if(firstSlash === -1) {
-			uri.host = uri.path;
-			uri.path = "";
-		} else {
-			uri.host = withoutProtocol.slice(0, firstSlash);
-			uri.path = withoutProtocol.slice(firstSlash);
-		}
-
-
-		uri.origin = uri.protocol + "://" + uri.host;
-
-		uri.directory = EPUBJS.core.folder(uri.path);
-
-		uri.base = uri.origin + uri.directory;
-		// return origin;
-	} else {
-		uri.path = url;
-		uri.directory = EPUBJS.core.folder(url);
-		uri.base = uri.directory;
-	}
-
-	//-- Filename
-	uri.filename = url.replace(uri.base, '');
-	dot = uri.filename.lastIndexOf('.');
-	if(dot != -1) {
-		uri.extension = uri.filename.slice(dot+1);
-	}
-	return uri;
-};
-
-//-- Parse out the folder, will return everything before the last slash
-
-EPUBJS.core.folder = function(url){
-
-	var lastSlash = url.lastIndexOf('/');
-
-	if(lastSlash == -1) var folder = '';
-
-	folder = url.slice(0, lastSlash + 1);
-
-	return folder;
-
-};
-
-//-- https://github.com/ebidel/filer.js/blob/master/src/filer.js#L128
-EPUBJS.core.dataURLToBlob = function(dataURL) {
-	var BASE64_MARKER = ';base64,',
-		parts, contentType, raw, rawLength, uInt8Array;
-
-	if (dataURL.indexOf(BASE64_MARKER) == -1) {
-		parts = dataURL.split(',');
-		contentType = parts[0].split(':')[1];
-		raw = parts[1];
-
-		return new Blob([raw], {type: contentType});
-	}
-
-	parts = dataURL.split(BASE64_MARKER);
-	contentType = parts[0].split(':')[1];
-	raw = window.atob(parts[1]);
-	rawLength = raw.length;
-
-	uInt8Array = new Uint8Array(rawLength);
-
-	for (var i = 0; i < rawLength; ++i) {
-		uInt8Array[i] = raw.charCodeAt(i);
-	}
-
-	return new Blob([uInt8Array], {type: contentType});
-};
-
-//-- Load scripts async: http://stackoverflow.com/questions/7718935/load-scripts-asynchronously
-EPUBJS.core.addScript = function(src, callback, target) {
-	var s, r;
-	r = false;
-	s = document.createElement('script');
-	s.type = 'text/javascript';
-	s.async = false;
-	s.src = src;
-	s.onload = s.onreadystatechange = function() {
-		if ( !r && (!this.readyState || this.readyState == 'complete') ) {
-			r = true;
-			if(callback) callback();
-		}
-	};
-	target = target || document.body;
-	target.appendChild(s);
-};
-
-EPUBJS.core.addScripts = function(srcArr, callback, target) {
-	var total = srcArr.length,
-		curr = 0,
-		cb = function(){
-			curr++;
-			if(total == curr){
-				if(callback) callback();
-			}else{
-				EPUBJS.core.addScript(srcArr[curr], cb, target);
-			}
-		};
-
-	EPUBJS.core.addScript(srcArr[curr], cb, target);
-};
-
-EPUBJS.core.addCss = function(src, callback, target) {
-	var s, r;
-	r = false;
-	s = document.createElement('link');
-	s.type = 'text/css';
-	s.rel = "stylesheet";
-	s.href = src;
-	s.onload = s.onreadystatechange = function() {
-		if ( !r && (!this.readyState || this.readyState == 'complete') ) {
-			r = true;
-			if(callback) callback();
-		}
-	};
-	target = target || document.body;
-	target.appendChild(s);
-};
-
-EPUBJS.core.prefixed = function(unprefixed) {
-	var vendors = ["Webkit", "Moz", "O", "ms" ],
-		prefixes = ['-Webkit-', '-moz-', '-o-', '-ms-'],
-		upper = unprefixed[0].toUpperCase() + unprefixed.slice(1),
-		length = vendors.length;
-
-	if (typeof(document.documentElement.style[unprefixed]) != 'undefined') {
-		return unprefixed;
-	}
-
-	for ( var i=0; i < length; i++ ) {
-		if (typeof(document.documentElement.style[vendors[i] + upper]) != 'undefined') {
-			return vendors[i] + upper;
-		}
-	}
-
-	return unprefixed;
-};
-
-EPUBJS.core.resolveUrl = function(base, path) {
-	var url,
-		segments = [],
-		uri = EPUBJS.core.uri(path),
-		folders = base.split("/"),
-		paths;
-
-	if(uri.host) {
-		return path;
-	}
-
-	folders.pop();
-
-	paths = path.split("/");
-	paths.forEach(function(p){
-		if(p === ".."){
-			folders.pop();
-		}else{
-			segments.push(p);
-		}
-	});
-
-	url = folders.concat(segments);
-
-	return url.join("/");
+	return path.dirname(pathname);
+}
+
+function isElement(obj) {
+		return !!(obj && obj.nodeType == 1);
 };
 
 // http://stackoverflow.com/questions/105034/how-to-create-a-guid-uuid-in-javascript
-EPUBJS.core.uuid = function() {
+function uuid() {
 	var d = new Date().getTime();
 	var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
 			var r = (d + Math.random()*16)%16 | 0;
@@ -4799,16 +236,146 @@ EPUBJS.core.uuid = function() {
 	return uuid;
 };
 
+// From Lodash
+function values(object) {
+	var index = -1,
+			props = Object.keys(object),
+			length = props.length,
+			result = Array(length);
+
+	while (++index < length) {
+		result[index] = object[props[index]];
+	}
+	return result;
+};
+
+function resolveUrl(base, path) {
+	var url = [],
+		segments = [],
+		baseUri = uri(base),
+		pathUri = uri(path),
+		baseDirectory = baseUri.directory,
+		pathDirectory = pathUri.directory,
+		directories = [],
+		// folders = base.split("/"),
+		paths;
+
+	// if(uri.host) {
+	//	 return path;
+	// }
+
+	if(baseDirectory[0] === "/") {
+		baseDirectory = baseDirectory.substring(1);
+	}
+
+	if(pathDirectory[pathDirectory.length-1] === "/") {
+		baseDirectory = baseDirectory.substring(0, baseDirectory.length-1);
+	}
+
+	if(pathDirectory[0] === "/") {
+		pathDirectory = pathDirectory.substring(1);
+	}
+
+	if(pathDirectory[pathDirectory.length-1] === "/") {
+		pathDirectory = pathDirectory.substring(0, pathDirectory.length-1);
+	}
+
+	if(baseDirectory) {
+		directories = baseDirectory.split("/");
+	}
+
+	paths = pathDirectory.split("/");
+
+	paths.reverse().forEach(function(part, index){
+		if(part === ".."){
+			directories.pop();
+		} else if(part === directories[directories.length-1]) {
+			directories.pop();
+			segments.unshift(part);
+		} else {
+			segments.unshift(part);
+		}
+	});
+
+	url = [baseUri.origin];
+
+	if(directories.length) {
+		url = url.concat(directories);
+	}
+
+	if(segments) {
+		url = url.concat(segments);
+	}
+
+	url = url.concat(pathUri.filename);
+
+	return url.join("/");
+};
+
+function documentHeight() {
+	return Math.max(
+			document.documentElement.clientHeight,
+			document.body.scrollHeight,
+			document.documentElement.scrollHeight,
+			document.body.offsetHeight,
+			document.documentElement.offsetHeight
+	);
+};
+
+function isNumber(n) {
+	return !isNaN(parseFloat(n)) && isFinite(n);
+};
+
+function prefixed(unprefixed) {
+	var vendors = ["Webkit", "Moz", "O", "ms" ],
+		prefixes = ['-Webkit-', '-moz-', '-o-', '-ms-'],
+		upper = unprefixed[0].toUpperCase() + unprefixed.slice(1),
+		length = vendors.length;
+
+	if (typeof(document) === 'undefined' || typeof(document.body.style[unprefixed]) != 'undefined') {
+		return unprefixed;
+	}
+
+	for ( var i=0; i < length; i++ ) {
+		if (typeof(document.body.style[vendors[i] + upper]) != 'undefined') {
+			return vendors[i] + upper;
+		}
+	}
+
+	return unprefixed;
+};
+
+function defaults(obj) {
+	for (var i = 1, length = arguments.length; i < length; i++) {
+		var source = arguments[i];
+		for (var prop in source) {
+			if (obj[prop] === void 0) obj[prop] = source[prop];
+		}
+	}
+	return obj;
+};
+
+function extend(target) {
+		var sources = [].slice.call(arguments, 1);
+		sources.forEach(function (source) {
+			if(!source) return;
+			Object.getOwnPropertyNames(source).forEach(function(propName) {
+				Object.defineProperty(target, propName, Object.getOwnPropertyDescriptor(source, propName));
+			});
+		});
+		return target;
+};
+
 // Fast quicksort insert for sorted array -- based on:
 // http://stackoverflow.com/questions/1344500/efficient-way-to-insert-a-number-into-a-sorted-array-of-numbers
-EPUBJS.core.insert = function(item, array, compareFunction) {
-	var location = EPUBJS.core.locationOf(item, array, compareFunction);
+function insert(item, array, compareFunction) {
+	var location = locationOf(item, array, compareFunction);
 	array.splice(location, 0, item);
 
 	return location;
 };
-
-EPUBJS.core.locationOf = function(item, array, compareFunction, _start, _end) {
+// Returns where something would fit in
+function locationOf(item, array, compareFunction, _start, _end) {
 	var start = _start || 0;
 	var end = _end || array.length;
 	var pivot = parseInt(start + (end - start) / 2);
@@ -4833,13 +400,13 @@ EPUBJS.core.locationOf = function(item, array, compareFunction, _start, _end) {
 		return pivot;
 	}
 	if(compared === -1) {
-		return EPUBJS.core.locationOf(item, array, compareFunction, pivot, end);
+		return locationOf(item, array, compareFunction, pivot, end);
 	} else{
-		return EPUBJS.core.locationOf(item, array, compareFunction, start, pivot);
+		return locationOf(item, array, compareFunction, start, pivot);
 	}
 };
-
-EPUBJS.core.indexOfSorted = function(item, array, compareFunction, _start, _end) {
+// Returns -1 of mpt found
+function indexOfSorted(item, array, compareFunction, _start, _end) {
 	var start = _start || 0;
 	var end = _end || array.length;
 	var pivot = parseInt(start + (end - start) / 2);
@@ -4863,122 +430,81 @@ EPUBJS.core.indexOfSorted = function(item, array, compareFunction, _start, _end)
 		return pivot; // Found
 	}
 	if(compared === -1) {
-		return EPUBJS.core.indexOfSorted(item, array, compareFunction, pivot, end);
+		return indexOfSorted(item, array, compareFunction, pivot, end);
 	} else{
-		return EPUBJS.core.indexOfSorted(item, array, compareFunction, start, pivot);
+		return indexOfSorted(item, array, compareFunction, start, pivot);
 	}
 };
 
+function bounds(el) {
 
-EPUBJS.core.queue = function(_scope){
-	var _q = [];
-	var scope = _scope;
-	// Add an item to the queue
-	var enqueue = function(funcName, args, context) {
-		_q.push({
-			"funcName" : funcName,
-			"args"     : args,
-			"context"  : context
-		});
-		return _q;
-	};
-	// Run one item
-	var dequeue = function(){
-		var inwait;
-		if(_q.length) {
-			inwait = _q.shift();
-			// Defer to any current tasks
-			// setTimeout(function(){
-			scope[inwait.funcName].apply(inwait.context || scope, inwait.args);
-			// }, 0);
-		}
-	};
+	var style = window.getComputedStyle(el);
+	var widthProps = ["width", "paddingRight", "paddingLeft", "marginRight", "marginLeft", "borderRightWidth", "borderLeftWidth"];
+	var heightProps = ["height", "paddingTop", "paddingBottom", "marginTop", "marginBottom", "borderTopWidth", "borderBottomWidth"];
 
-	// Run All
-	var flush = function(){
-		while(_q.length) {
-			dequeue();
-		}
-	};
-	// Clear all items in wait
-	var clear = function(){
-		_q = [];
-	};
+	var width = 0;
+	var height = 0;
 
-	var length = function(){
-		return _q.length;
-	};
+	widthProps.forEach(function(prop){
+		width += parseFloat(style[prop]) || 0;
+	});
+
+	heightProps.forEach(function(prop){
+		height += parseFloat(style[prop]) || 0;
+	});
 
 	return {
-		"enqueue" : enqueue,
-		"dequeue" : dequeue,
-		"flush" : flush,
-		"clear" : clear,
-		"length" : length
+		height: height,
+		width: width
 	};
+
 };
 
-// From: https://code.google.com/p/fbug/source/browse/branches/firebug1.10/content/firebug/lib/xpath.js
-/**
- * Gets an XPath for an element which describes its hierarchical location.
- */
-EPUBJS.core.getElementXPath = function(element) {
-	if (element && element.id) {
-		return '//*[@id="' + element.id + '"]';
-	} else {
-		return EPUBJS.core.getElementTreeXPath(element);
-	}
-};
+function borders(el) {
 
-EPUBJS.core.getElementTreeXPath = function(element) {
-	var paths = [];
-	var 	isXhtml = (element.ownerDocument.documentElement.getAttribute('xmlns') === "http://www.w3.org/1999/xhtml");
-	var index, nodeName, tagName, pathIndex;
+	var style = window.getComputedStyle(el);
+	var widthProps = ["paddingRight", "paddingLeft", "marginRight", "marginLeft", "borderRightWidth", "borderLeftWidth"];
+	var heightProps = ["paddingTop", "paddingBottom", "marginTop", "marginBottom", "borderTopWidth", "borderBottomWidth"];
 
-	if(element.nodeType === Node.TEXT_NODE){
-		// index = Array.prototype.indexOf.call(element.parentNode.childNodes, element) + 1;
-		index = EPUBJS.core.indexOfTextNode(element) + 1;
+	var width = 0;
+	var height = 0;
 
-		paths.push("text()["+index+"]");
-		element = element.parentNode;
-	}
+	widthProps.forEach(function(prop){
+		width += parseFloat(style[prop]) || 0;
+	});
 
-	// Use nodeName (instead of localName) so namespace prefix is included (if any).
-	for (; element && element.nodeType == 1; element = element.parentNode)
-	{
-		index = 0;
-		for (var sibling = element.previousSibling; sibling; sibling = sibling.previousSibling)
-		{
-			// Ignore document type declaration.
-			if (sibling.nodeType == Node.DOCUMENT_TYPE_NODE) {
-				continue;
-			}
-			if (sibling.nodeName == element.nodeName) {
-				++index;
-			}
-		}
-		nodeName = element.nodeName.toLowerCase();
-		tagName = (isXhtml ? "xhtml:" + nodeName : nodeName);
-		pathIndex = (index ? "[" + (index+1) + "]" : "");
-		paths.splice(0, 0, tagName + pathIndex);
-	}
+	heightProps.forEach(function(prop){
+		height += parseFloat(style[prop]) || 0;
+	});
 
-	return paths.length ? "./" + paths.join("/") : null;
-};
-
-EPUBJS.core.nsResolver = function(prefix) {
-	var ns = {
-		'xhtml' : 'http://www.w3.org/1999/xhtml',
-		'epub': 'http://www.idpf.org/2007/ops'
+	return {
+		height: height,
+		width: width
 	};
-	return ns[prefix] || null;
+
+};
+
+function windowBounds() {
+
+	var width = window.innerWidth;
+	var height = window.innerHeight;
+
+	return {
+		top: 0,
+		left: 0,
+		right: width,
+		bottom: height,
+		width: width,
+		height: height
+	};
+
 };
 
 //https://stackoverflow.com/questions/13482352/xquery-looking-for-text-with-single-quote/13483496#13483496
-EPUBJS.core.cleanStringForXpath = function(str)  {
+function cleanStringForXpath(str)	{
 		var parts = str.match(/[^'"]+|['"]/g);
 		parts = parts.map(function(part){
-				if (part === "'")  {
+				if (part === "'")	{
 						return '\"\'\"'; // output "'"
 				}
 
@@ -4990,7 +516,7 @@ EPUBJS.core.cleanStringForXpath = function(str)  {
 		return "concat(\'\'," + parts.join(",") + ")";
 };
 
-EPUBJS.core.indexOfTextNode = function(textNode){
+function indexOfTextNode(textNode){
 	var parent = textNode.parentNode;
 	var children = parent.childNodes;
 	var sib;
@@ -5006,1337 +532,4595 @@ EPUBJS.core.indexOfTextNode = function(textNode){
 	return index;
 };
 
-// Underscore
-EPUBJS.core.defaults = function(obj) {
-  for (var i = 1, length = arguments.length; i < length; i++) {
-    var source = arguments[i];
-    for (var prop in source) {
-      if (obj[prop] === void 0) obj[prop] = source[prop];
-    }
-  }
-  return obj;
+function isXml(ext) {
+	return ['xml', 'opf', 'ncx'].indexOf(ext) > -1;
+}
+
+function createBlob(content, mime){
+	var blob = new Blob([content], {type : mime });
+
+	return blob;
 };
 
-EPUBJS.core.extend = function(target) {
-    var sources = [].slice.call(arguments, 1);
-    sources.forEach(function (source) {
-      if(!source) return;
-      Object.getOwnPropertyNames(source).forEach(function(propName) {
-        Object.defineProperty(target, propName, Object.getOwnPropertyDescriptor(source, propName));
-      });
-    });
-    return target;
+function createBlobUrl(content, mime){
+	var _URL = window.URL || window.webkitURL || window.mozURL;
+	var tempUrl;
+	var blob = this.createBlob(content, mime);
+
+	tempUrl = _URL.createObjectURL(blob);
+
+	return tempUrl;
 };
 
-EPUBJS.core.clone = function(obj) {
-  return EPUBJS.core.isArray(obj) ? obj.slice() : EPUBJS.core.extend({}, obj);
+function createBase64Url(content, mime){
+	var string;
+	var data;
+	var datauri;
+
+	if (typeof(content) !== "string") {
+		// Only handles strings
+		return;
+	}
+
+	data = btoa(content);
+
+	datauri = "data:" + mime + ";base64," + data;
+
+	return datauri;
 };
 
-EPUBJS.core.isElement = function(obj) {
-    return !!(obj && obj.nodeType == 1);
-};
+function type(obj){
+	return Object.prototype.toString.call(obj).slice(8, -1);
+}
 
-EPUBJS.core.isNumber = function(n) {
-  return !isNaN(parseFloat(n)) && isFinite(n);
-};
+function parse(markup, mime) {
+	var doc;
+	// console.log("parse", markup);
 
-EPUBJS.core.isString = function(str) {
-  return (typeof str === 'string' || str instanceof String);
-};
+	if (typeof DOMParser === "undefined") {
+		DOMParser = __webpack_require__(14).DOMParser;
+	}
 
-EPUBJS.core.isArray = Array.isArray || function(obj) {
-  return Object.prototype.toString.call(obj) === '[object Array]';
-};
 
-// Lodash
-EPUBJS.core.values = function(object) {
-	var index = -1;
-	var props, length, result;
+	doc = new DOMParser().parseFromString(markup, mime);
 
-	if(!object) return [];
+	return doc;
+}
 
-  props = Object.keys(object);
-  length = props.length;
-  result = Array(length);
+function qs(el, sel) {
+	var elements;
 
-  while (++index < length) {
-    result[index] = object[props[index]];
-  }
-  return result;
-};
-
-EPUBJS.core.indexOfNode = function(node, typeId) {
-	var parent = node.parentNode;
-	var children = parent.childNodes;
-	var sib;
-	var index = -1;
-	for (var i = 0; i < children.length; i++) {
-		sib = children[i];
-		if (sib.nodeType === typeId) {
-			index++;
+	if (typeof el.querySelector != "undefined") {
+		return el.querySelector(sel);
+	} else {
+		elements = el.getElementsByTagName(sel);
+		if (elements.length) {
+			return elements[0];
 		}
-		if (sib == node) break;
+	}
+}
+
+function qsa(el, sel) {
+
+	if (typeof el.querySelector != "undefined") {
+		return el.querySelectorAll(sel);
+	} else {
+		return el.getElementsByTagName(sel);
+	}
+}
+
+function qsp(el, sel, props) {
+	var q, filtered;
+	if (typeof el.querySelector != "undefined") {
+		sel += '[';
+		for (var prop in props) {
+			sel += prop + "='" + props[prop] + "'";
+		}
+		sel += ']';
+		return el.querySelector(sel);
+	} else {
+		q = el.getElementsByTagName(sel);
+		filtered = Array.prototype.slice.call(q, 0).filter(function(el) {
+			for (var prop in props) {
+				if(el.getAttribute(prop) === props[prop]){
+					return true;
+				}
+			}
+			return false;
+		});
+
+		if (filtered) {
+			return filtered[0];
+		}
+	}
+}
+
+function blob2base64(blob, cb) {
+	var reader = new FileReader();
+	reader.readAsDataURL(blob);
+	reader.onloadend = function() {
+		cb(reader.result);
+	}
+}
+
+function defer() {
+	// From: https://developer.mozilla.org/en-US/docs/Mozilla/JavaScript_code_modules/Promise.jsm/Deferred#backwards_forwards_compatible
+	/* A method to resolve the associated Promise with the value passed.
+	 * If the promise is already settled it does nothing.
+	 *
+	 * @param {anything} value : This value is used to resolve the promise
+	 * If the value is a Promise then the associated promise assumes the state
+	 * of Promise passed as value.
+	 */
+	this.resolve = null;
+
+	/* A method to reject the assocaited Promise with the value passed.
+	 * If the promise is already settled it does nothing.
+	 *
+	 * @param {anything} reason: The reason for the rejection of the Promise.
+	 * Generally its an Error object. If however a Promise is passed, then the Promise
+	 * itself will be the reason for rejection no matter the state of the Promise.
+	 */
+	this.reject = null;
+
+	/* A newly created Pomise object.
+	 * Initially in pending state.
+	 */
+	this.promise = new Promise(function(resolve, reject) {
+		this.resolve = resolve;
+		this.reject = reject;
+	}.bind(this));
+	Object.freeze(this);
+}
+
+module.exports = {
+	// 'uri': uri,
+	// 'folder': folder,
+	'extension' : extension,
+	'directory' : directory,
+	'isElement': isElement,
+	'uuid': uuid,
+	'values': values,
+	'resolveUrl': resolveUrl,
+	'indexOfSorted': indexOfSorted,
+	'documentHeight': documentHeight,
+	'isNumber': isNumber,
+	'prefixed': prefixed,
+	'defaults': defaults,
+	'extend': extend,
+	'insert': insert,
+	'locationOf': locationOf,
+	'indexOfSorted': indexOfSorted,
+	'requestAnimationFrame': requestAnimationFrame,
+	'bounds': bounds,
+	'borders': borders,
+	'windowBounds': windowBounds,
+	'cleanStringForXpath': cleanStringForXpath,
+	'indexOfTextNode': indexOfTextNode,
+	'isXml': isXml,
+	'createBlob': createBlob,
+	'createBlobUrl': createBlobUrl,
+	'type': type,
+	'parse' : parse,
+	'qs' : qs,
+	'qsa' : qsa,
+	'qsp' : qsp,
+	'blob2base64' : blob2base64,
+	'createBase64Url': createBase64Url,
+	'defer': defer,
+	'Url': Url,
+	'Path': Path
+
+};
+
+
+/***/ },
+/* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+var core = __webpack_require__(0);
+
+/**
+	EPUB CFI spec: http://www.idpf.org/epub/linking/cfi/epub-cfi.html
+
+	Implements:
+	- Character Offset: epubcfi(/6/4[chap01ref]!/4[body01]/10[para05]/2/1:3)
+	- Simple Ranges : epubcfi(/6/4[chap01ref]!/4[body01]/10[para05],/2/1:1,/3:4)
+
+	Does Not Implement:
+	- Temporal Offset (~)
+	- Spatial Offset (@)
+	- Temporal-Spatial Offset (~ + @)
+	- Text Location Assertion ([)
+*/
+
+function EpubCFI(cfiFrom, base, ignoreClass){
+	var type;
+
+	this.str = '';
+
+	this.base = {};
+	this.spinePos = 0; // For compatibility
+
+	this.range = false; // true || false;
+
+	this.path = {};
+	this.start = null;
+	this.end = null;
+
+	// Allow instantiation without the 'new' keyword
+	if (!(this instanceof EpubCFI)) {
+		return new EpubCFI(cfiFrom, base, ignoreClass);
+	}
+
+	if(typeof base === 'string') {
+		this.base = this.parseComponent(base);
+	} else if(typeof base === 'object' && base.steps) {
+		this.base = base;
+	}
+
+	type = this.checkType(cfiFrom);
+
+
+	if(type === 'string') {
+		this.str = cfiFrom;
+		return core.extend(this, this.parse(cfiFrom));
+	} else if (type === 'range') {
+		return core.extend(this, this.fromRange(cfiFrom, this.base, ignoreClass));
+	} else if (type === 'node') {
+		return core.extend(this, this.fromNode(cfiFrom, this.base, ignoreClass));
+	} else if (type === 'EpubCFI' && cfiFrom.path) {
+		return cfiFrom;
+	} else if (!cfiFrom) {
+		return this;
+	} else {
+		throw new TypeError('not a valid argument for EpubCFI');
+	}
+
+};
+
+EpubCFI.prototype.checkType = function(cfi) {
+
+	if (this.isCfiString(cfi)) {
+		return 'string';
+	// Is a range object
+	} else if (typeof cfi === 'object' && core.type(cfi) === "Range"){
+		return 'range';
+	} else if (typeof cfi === 'object' && typeof(cfi.nodeType) != "undefined" ){ // || typeof cfi === 'function'
+		return 'node';
+	} else if (typeof cfi === 'object' && cfi instanceof EpubCFI){
+		return 'EpubCFI';
+	} else {
+		return false;
+	}
+};
+
+EpubCFI.prototype.parse = function(cfiStr) {
+	var cfi = {
+			spinePos: -1,
+			range: false,
+			base: {},
+			path: {},
+			start: null,
+			end: null
+		};
+	var baseComponent, pathComponent, range;
+
+	if(typeof cfiStr !== "string") {
+		return {spinePos: -1};
+	}
+
+	if(cfiStr.indexOf("epubcfi(") === 0 && cfiStr[cfiStr.length-1] === ")") {
+		// Remove intial epubcfi( and ending )
+		cfiStr = cfiStr.slice(8, cfiStr.length-1);
+	}
+
+	baseComponent = this.getChapterComponent(cfiStr);
+
+	// Make sure this is a valid cfi or return
+	if(!baseComponent) {
+		return {spinePos: -1};
+	}
+
+	cfi.base = this.parseComponent(baseComponent);
+
+	pathComponent = this.getPathComponent(cfiStr);
+	cfi.path = this.parseComponent(pathComponent);
+
+	range = this.getRange(cfiStr);
+
+	if(range) {
+		cfi.range = true;
+		cfi.start = this.parseComponent(range[0]);
+		cfi.end = this.parseComponent(range[1]);
+	}
+
+	// Get spine node position
+	// cfi.spineSegment = cfi.base.steps[1];
+
+	// Chapter segment is always the second step
+	cfi.spinePos = cfi.base.steps[1].index;
+
+	return cfi;
+};
+
+EpubCFI.prototype.parseComponent = function(componentStr){
+	var component = {
+		steps: [],
+		terminal: {
+			offset: null,
+			assertion: null
+		}
+	};
+	var parts = componentStr.split(':');
+	var steps = parts[0].split('/');
+	var terminal;
+
+	if(parts.length > 1) {
+		terminal = parts[1];
+		component.terminal = this.parseTerminal(terminal);
+	}
+
+	if (steps[0] === '') {
+		steps.shift(); // Ignore the first slash
+	}
+
+	component.steps = steps.map(function(step){
+		return this.parseStep(step);
+	}.bind(this));
+
+	return component;
+};
+
+EpubCFI.prototype.parseStep = function(stepStr){
+	var type, num, index, has_brackets, id;
+
+	has_brackets = stepStr.match(/\[(.*)\]/);
+	if(has_brackets && has_brackets[1]){
+		id = has_brackets[1];
+	}
+
+	//-- Check if step is a text node or element
+	num = parseInt(stepStr);
+
+	if(isNaN(num)) {
+		return;
+	}
+
+	if(num % 2 === 0) { // Even = is an element
+		type = "element";
+		index = num / 2 - 1;
+	} else {
+		type = "text";
+		index = (num - 1 ) / 2;
+	}
+
+	return {
+		"type" : type,
+		'index' : index,
+		'id' : id || null
+	};
+};
+
+EpubCFI.prototype.parseTerminal = function(termialStr){
+	var characterOffset, textLocationAssertion;
+	var assertion = termialStr.match(/\[(.*)\]/);
+
+	if(assertion && assertion[1]){
+		characterOffset = parseInt(termialStr.split('[')[0]) || null;
+		textLocationAssertion = assertion[1];
+	} else {
+		characterOffset = parseInt(termialStr) || null;
+	}
+
+	return {
+		'offset': characterOffset,
+		'assertion': textLocationAssertion
+	};
+
+};
+
+EpubCFI.prototype.getChapterComponent = function(cfiStr) {
+
+	var indirection = cfiStr.split("!");
+
+	return indirection[0];
+};
+
+EpubCFI.prototype.getPathComponent = function(cfiStr) {
+
+	var indirection = cfiStr.split("!");
+
+	if(indirection[1]) {
+		ranges = indirection[1].split(',');
+		return ranges[0];
+	}
+
+};
+
+EpubCFI.prototype.getRange = function(cfiStr) {
+
+	var ranges = cfiStr.split(",");
+
+	if(ranges.length === 3){
+		return [
+			ranges[1],
+			ranges[2]
+		];
+	}
+
+	return false;
+};
+
+EpubCFI.prototype.getCharecterOffsetComponent = function(cfiStr) {
+	var splitStr = cfiStr.split(":");
+	return splitStr[1] || '';
+};
+
+EpubCFI.prototype.joinSteps = function(steps) {
+	if(!steps) {
+		return "";
+	}
+
+	return steps.map(function(part){
+		var segment = '';
+
+		if(part.type === 'element') {
+			segment += (part.index + 1) * 2;
+		}
+
+		if(part.type === 'text') {
+			segment += 1 + (2 * part.index); // TODO: double check that this is odd
+		}
+
+		if(part.id) {
+			segment += "[" + part.id + "]";
+		}
+
+		return segment;
+
+	}).join('/');
+
+};
+
+EpubCFI.prototype.segmentString = function(segment) {
+	var segmentString = '/';
+
+	segmentString += this.joinSteps(segment.steps);
+
+	if(segment.terminal && segment.terminal.offset != null){
+		segmentString += ':' + segment.terminal.offset;
+	}
+
+	if(segment.terminal && segment.terminal.assertion != null){
+		segmentString += '[' + segment.terminal.assertion + ']';
+	}
+
+	return segmentString;
+};
+
+EpubCFI.prototype.toString = function() {
+	var cfiString = 'epubcfi(';
+
+	cfiString += this.segmentString(this.base);
+
+	cfiString += '!';
+	cfiString += this.segmentString(this.path);
+
+	// Add Range, if present
+	if(this.start) {
+		cfiString += ',';
+		cfiString += this.segmentString(this.start);
+	}
+
+	if(this.end) {
+		cfiString += ',';
+		cfiString += this.segmentString(this.end);
+	}
+
+	cfiString += ")";
+
+	return cfiString;
+};
+
+EpubCFI.prototype.compare = function(cfiOne, cfiTwo) {
+	if(typeof cfiOne === 'string') {
+		cfiOne = new EpubCFI(cfiOne);
+	}
+	if(typeof cfiTwo === 'string') {
+		cfiTwo = new EpubCFI(cfiTwo);
+	}
+	// Compare Spine Positions
+	if(cfiOne.spinePos > cfiTwo.spinePos) {
+		return 1;
+	}
+	if(cfiOne.spinePos < cfiTwo.spinePos) {
+		return -1;
+	}
+
+
+	// Compare Each Step in the First item
+	for (var i = 0; i < cfiOne.path.steps.length; i++) {
+		if(!cfiTwo.path.steps[i]) {
+			return 1;
+		}
+		if(cfiOne.path.steps[i].index > cfiTwo.path.steps[i].index) {
+			return 1;
+		}
+		if(cfiOne.path.steps[i].index < cfiTwo.path.steps[i].index) {
+			return -1;
+		}
+		// Otherwise continue checking
+	}
+
+	// All steps in First equal to Second and First is Less Specific
+	if(cfiOne.path.steps.length < cfiTwo.path.steps.length) {
+		return 1;
+	}
+
+	// Compare the charecter offset of the text node
+	if(cfiOne.path.terminal.offset > cfiTwo.path.terminal.offset) {
+		return 1;
+	}
+	if(cfiOne.path.terminal.offset < cfiTwo.path.terminal.offset) {
+		return -1;
+	}
+
+	// TODO: compare ranges
+
+	// CFI's are equal
+	return 0;
+};
+
+EpubCFI.prototype.step = function(node) {
+	var nodeType = (node.nodeType === Node.TEXT_NODE) ? 'text' : 'element';
+
+	return {
+		'id' : node.id,
+		'tagName' : node.tagName,
+		'type' : nodeType,
+		'index' : this.position(node)
+	};
+};
+
+EpubCFI.prototype.filteredStep = function(node, ignoreClass) {
+	var filteredNode = this.filter(node, ignoreClass);
+	var nodeType;
+
+	// Node filtered, so ignore
+	if (!filteredNode) {
+		return;
+	}
+
+	// Otherwise add the filter node in
+	nodeType = (filteredNode.nodeType === Node.TEXT_NODE) ? 'text' : 'element';
+
+	return {
+		'id' : filteredNode.id,
+		'tagName' : filteredNode.tagName,
+		'type' : nodeType,
+		'index' : this.filteredPosition(filteredNode, ignoreClass)
+	};
+};
+
+EpubCFI.prototype.pathTo = function(node, offset, ignoreClass) {
+	var segment = {
+		steps: [],
+		terminal: {
+			offset: null,
+			assertion: null
+		}
+	};
+	var currentNode = node;
+	var step;
+
+	while(currentNode && currentNode.parentNode &&
+				currentNode.parentNode.nodeType != Node.DOCUMENT_NODE) {
+
+		if (ignoreClass) {
+			step = this.filteredStep(currentNode, ignoreClass);
+		} else {
+			step = this.step(currentNode);
+		}
+
+		if (step) {
+			segment.steps.unshift(step);
+		}
+
+		currentNode = currentNode.parentNode;
+
+	}
+
+	if (offset != null && offset >= 0) {
+
+		segment.terminal.offset = offset;
+
+		// Make sure we are getting to a textNode if there is an offset
+		if(segment.steps[segment.steps.length-1].type != "text") {
+			segment.steps.push({
+				'type' : "text",
+				'index' : 0
+			});
+		}
+
+	}
+
+
+	return segment;
+}
+
+EpubCFI.prototype.equalStep = function(stepA, stepB) {
+	if (!stepA || !stepB) {
+		return false;
+	}
+
+	if(stepA.index === stepB.index &&
+		 stepA.id === stepB.id &&
+		 stepA.type === stepB.type) {
+		return true;
+	}
+
+	return false;
+};
+EpubCFI.prototype.fromRange = function(range, base, ignoreClass) {
+	var cfi = {
+			range: false,
+			base: {},
+			path: {},
+			start: null,
+			end: null
+		};
+
+	var start = range.startContainer;
+	var end = range.endContainer;
+
+	var startOffset = range.startOffset;
+	var endOffset = range.endOffset;
+
+	var needsIgnoring = false;
+
+	if (ignoreClass) {
+		// Tell pathTo if / what to ignore
+		needsIgnoring = (start.ownerDocument.querySelector('.' + ignoreClass) != null);
+	}
+
+
+	if (typeof base === 'string') {
+		cfi.base = this.parseComponent(base);
+		cfi.spinePos = cfi.base.steps[1].index;
+	} else if (typeof base === 'object') {
+		cfi.base = base;
+	}
+
+	if (range.collapsed) {
+		if (needsIgnoring) {
+			startOffset = this.patchOffset(start, startOffset, ignoreClass);
+		}
+		cfi.path = this.pathTo(start, startOffset, ignoreClass);
+	} else {
+		cfi.range = true;
+
+		if (needsIgnoring) {
+			startOffset = this.patchOffset(start, startOffset, ignoreClass);
+		}
+
+		cfi.start = this.pathTo(start, startOffset, ignoreClass);
+
+		if (needsIgnoring) {
+			endOffset = this.patchOffset(end, endOffset, ignoreClass);
+		}
+
+		cfi.end = this.pathTo(end, endOffset, ignoreClass);
+
+		// Create a new empty path
+		cfi.path = {
+			steps: [],
+			terminal: null
+		};
+
+		// Push steps that are shared between start and end to the common path
+		var len = cfi.start.steps.length;
+		var i;
+
+		for (i = 0; i < len; i++) {
+			if (this.equalStep(cfi.start.steps[i], cfi.end.steps[i])) {
+				if(i == len-1) {
+					// Last step is equal, check terminals
+					if(cfi.start.terminal === cfi.end.terminal) {
+						// CFI's are equal
+						cfi.path.steps.push(cfi.start.steps[i]);
+						// Not a range
+						cfi.range = false;
+					}
+				} else {
+					cfi.path.steps.push(cfi.start.steps[i]);
+				}
+
+			} else {
+				break;
+			}
+		};
+
+		cfi.start.steps = cfi.start.steps.slice(cfi.path.steps.length);
+		cfi.end.steps = cfi.end.steps.slice(cfi.path.steps.length);
+
+		// TODO: Add Sanity check to make sure that the end if greater than the start
+	}
+
+	return cfi;
+}
+
+EpubCFI.prototype.fromNode = function(anchor, base, ignoreClass) {
+	var cfi = {
+			range: false,
+			base: {},
+			path: {},
+			start: null,
+			end: null
+		};
+
+	var needsIgnoring = false;
+
+	if (ignoreClass) {
+		// Tell pathTo if / what to ignore
+		needsIgnoring = (anchor.ownerDocument.querySelector('.' + ignoreClass) != null);
+	}
+
+	if (typeof base === 'string') {
+		cfi.base = this.parseComponent(base);
+		cfi.spinePos = cfi.base.steps[1].index;
+	} else if (typeof base === 'object') {
+		cfi.base = base;
+	}
+
+	cfi.path = this.pathTo(anchor, null, ignoreClass);
+
+	return cfi;
+};
+
+
+EpubCFI.prototype.filter = function(anchor, ignoreClass) {
+	var needsIgnoring;
+	var sibling; // to join with
+	var parent, prevSibling, nextSibling;
+	var isText = false;
+
+	if (anchor.nodeType === Node.TEXT_NODE) {
+		isText = true;
+		parent = anchor.parentNode;
+		needsIgnoring = anchor.parentNode.classList.contains(ignoreClass);
+	} else {
+		isText = false;
+		needsIgnoring = anchor.classList.contains(ignoreClass);
+	}
+
+	if (needsIgnoring && isText) {
+		previousSibling = parent.previousSibling;
+		nextSibling = parent.nextSibling;
+
+		// If the sibling is a text node, join the nodes
+		if (previousSibling && previousSibling.nodeType === Node.TEXT_NODE) {
+			sibling = previousSibling;
+		} else if (nextSibling && nextSibling.nodeType === Node.TEXT_NODE) {
+			sibling = nextSibling;
+		}
+
+		if (sibling) {
+			return sibling;
+		} else {
+			// Parent will be ignored on next step
+			return anchor;
+		}
+
+	} else if (needsIgnoring && !isText) {
+		// Otherwise just skip the element node
+		return false;
+	} else {
+		// No need to filter
+		return anchor;
+	}
+
+};
+
+EpubCFI.prototype.patchOffset = function(anchor, offset, ignoreClass) {
+	var needsIgnoring;
+	var sibling;
+
+	if (anchor.nodeType != Node.TEXT_NODE) {
+		console.error("Anchor must be a text node");
+		return;
+	}
+
+	var curr = anchor;
+	var totalOffset = offset;
+
+	// If the parent is a ignored node, get offset from it's start
+	if (anchor.parentNode.classList.contains(ignoreClass)) {
+		curr = anchor.parentNode;
+	}
+
+	while (curr.previousSibling) {
+		if(curr.previousSibling.nodeType === Node.ELEMENT_NODE) {
+			// Originally a text node, so join
+			if(curr.previousSibling.classList.contains(ignoreClass)){
+				totalOffset += curr.previousSibling.textContent.length;
+			} else {
+				break; // Normal node, dont join
+			}
+		} else {
+			// If the previous sibling is a text node, join the nodes
+			totalOffset += curr.previousSibling.textContent.length;
+		}
+
+		curr = curr.previousSibling;
+	}
+
+	return totalOffset;
+
+};
+
+EpubCFI.prototype.normalizedMap = function(children, nodeType, ignoreClass) {
+	var output = {};
+	var prevIndex = -1;
+	var i, len = children.length;
+	var currNodeType;
+	var prevNodeType;
+
+	for (i = 0; i < len; i++) {
+
+		currNodeType = children[i].nodeType;
+
+		// Check if needs ignoring
+		if (currNodeType === Node.ELEMENT_NODE &&
+				children[i].classList.contains(ignoreClass)) {
+			currNodeType = Node.TEXT_NODE;
+		}
+
+		if (i > 0 &&
+				currNodeType === Node.TEXT_NODE &&
+				prevNodeType === Node.TEXT_NODE) {
+			// join text nodes
+			output[i] = prevIndex;
+		} else if (nodeType === currNodeType){
+			prevIndex = prevIndex + 1;
+			output[i] = prevIndex;
+		}
+
+		prevNodeType = currNodeType;
+
+	}
+
+	return output;
+};
+
+EpubCFI.prototype.position = function(anchor) {
+	var children, index, map;
+
+	if (anchor.nodeType === Node.ELEMENT_NODE) {
+		children = anchor.parentNode.children;
+		index = Array.prototype.indexOf.call(children, anchor);
+	} else {
+		children = this.textNodes(anchor.parentNode);
+		index = children.indexOf(anchor);
 	}
 
 	return index;
-}
-
-EPUBJS.core.indexOfTextNode = function(textNode) {
-	return EPUBJS.core.indexOfNode(textNode, TEXT_NODE);
-}
-
-EPUBJS.core.indexOfElementNode = function(elementNode) {
-	return EPUBJS.core.indexOfNode(elementNode, ELEMENT_NODE);
-}
-
-EPUBJS.EpubCFI = function(cfiStr){
-  if(cfiStr) return this.parse(cfiStr);
 };
 
-EPUBJS.EpubCFI.prototype.generateChapterComponent = function(_spineNodeIndex, _pos, id) {
-  var pos = parseInt(_pos),
-    spineNodeIndex = (_spineNodeIndex + 1) * 2,
-    cfi = '/'+spineNodeIndex+'/';
-
-  cfi += (pos + 1) * 2;
-
-  if(id) cfi += "[" + id + "]";
-
-  //cfi += "!";
-
-  return cfi;
-};
-
-EPUBJS.EpubCFI.prototype.generatePathComponent = function(steps) {
-  return steps.map(function(part) {
-    return (part.index + 1) * 2 + (part.id ? '[' + part.id + ']' : '');
-  }).join('/');
-};
-
-EPUBJS.EpubCFI.prototype.generateCfiFromElement = function(element, chapter) {
-  var steps = this.pathTo(element);
-  var path = this.generatePathComponent(steps);
-  if(!path.length) {
-    // Start of Chapter
-    return "epubcfi(" + chapter + "!/4/)";
-  } else {
-    // First Text Node
-    return "epubcfi(" + chapter + "!/" + path + "/1:0)";
-  }
-};
-
-EPUBJS.EpubCFI.prototype.pathTo = function(node) {
-  var stack = [],
-      children;
-
-  while(node && node.parentNode !== null && node.parentNode.nodeType != 9) {
-    children = node.parentNode.children;
-
-    stack.unshift({
-      'id' : node.id,
-      // 'classList' : node.classList,
-      'tagName' : node.tagName,
-      'index' : children ? Array.prototype.indexOf.call(children, node) : 0
-    });
-
-    node = node.parentNode;
-  }
-
-  return stack;
-};
-
-EPUBJS.EpubCFI.prototype.getChapterComponent = function(cfiStr) {
-
-  var splitStr = cfiStr.split("!");
-
-  return splitStr[0];
-};
-
-EPUBJS.EpubCFI.prototype.getPathComponent = function(cfiStr) {
-
-  var splitStr = cfiStr.split("!");
-  var pathComponent = splitStr[1] ? splitStr[1].split(":") : '';
-
-  return pathComponent[0];
-};
-
-EPUBJS.EpubCFI.prototype.getCharecterOffsetComponent = // backwards-compat
-EPUBJS.EpubCFI.prototype.getCharacterOffsetComponent = function(cfiStr) {
-  var splitStr = cfiStr.split(":");
-  return splitStr[1] || '';
-};
-
-
-EPUBJS.EpubCFI.prototype.parse = function(cfiStr) {
-  var cfi = {},
-    chapSegment,
-    chapterComponent,
-    pathComponent,
-    characterOffsetComponent,
-    assertion,
-    chapId,
-    path,
-    end,
-    endInt,
-    text,
-    parseStep = function(part){
-      var type, index, has_brackets, id;
-
-      type = "element";
-      index = parseInt(part) / 2 - 1;
-      has_brackets = part.match(/\[(.*)\]/);
-      if(has_brackets && has_brackets[1]){
-        id = has_brackets[1];
-      }
-
-      return {
-        "type" : type,
-        'index' : index,
-        'id' : id || false
-      };
-    };
-
-  if(typeof cfiStr !== "string") {
-    return {spinePos: -1};
-  }
-
-  cfi.str = cfiStr;
-
-  if(cfiStr.indexOf("epubcfi(") === 0 && cfiStr[cfiStr.length-1] === ")") {
-    // Remove intial epubcfi( and ending )
-    cfiStr = cfiStr.slice(8, cfiStr.length-1);
-  }
-
-  chapterComponent = this.getChapterComponent(cfiStr);
-  pathComponent = this.getPathComponent(cfiStr) || '';
-  characterOffsetComponent = this.getCharacterOffsetComponent(cfiStr);
-  // Make sure this is a valid cfi or return
-  if(!chapterComponent) {
-    return {spinePos: -1};
-  }
-
-  // Chapter segment is always the second one
-  chapSegment = chapterComponent.split("/")[2] || '';
-  if(!chapSegment) return {spinePos:-1};
-
-  cfi.spinePos = (parseInt(chapSegment) / 2 - 1 ) || 0;
-
-  chapId = chapSegment.match(/\[(.*)\]/);
-
-  cfi.spineId = chapId ? chapId[1] : false;
-
-  if(pathComponent.indexOf(',') != -1) {
-    // Handle ranges -- not supported yet
-    console.warn("CFI Ranges are not supported");
-  }
-
-  path = pathComponent.split('/');
-  end = path.pop();
-
-  cfi.steps = [];
-
-  path.forEach(function(part){
-    var step;
-
-    if(part) {
-      step = parseStep(part);
-      cfi.steps.push(step);
-    }
-  });
-
-  //-- Check if END is a text node or element
-  endInt = parseInt(end);
-  if(!isNaN(endInt)) {
-
-    if(endInt % 2 === 0) { // Even = is an element
-      cfi.steps.push(parseStep(end));
-    } else {
-      cfi.steps.push({
-        "type" : "text",
-        'index' : (endInt - 1 ) / 2
-      });
-    }
-
-  }
-
-  assertion = characterOffsetComponent.match(/\[(.*)\]/);
-  if(assertion && assertion[1]){
-    cfi.characterOffset = parseInt(characterOffsetComponent.split('[')[0]);
-    // We arent handling these assertions yet
-    cfi.textLocationAssertion = assertion[1];
-  } else {
-    cfi.characterOffset = parseInt(characterOffsetComponent);
-  }
-
-  return cfi;
-};
-
-EPUBJS.EpubCFI.prototype.addMarker = function(cfi, _doc, _marker) {
-  var doc = _doc || document;
-  var marker = _marker || this.createMarker(doc);
-  var parent;
-  var lastStep;
-  var text;
-  var split;
-
-  if(typeof cfi === 'string') {
-    cfi = this.parse(cfi);
-  }
-  // Get the terminal step
-  lastStep = cfi.steps[cfi.steps.length-1];
-
-  // check spinePos
-  if(cfi.spinePos === -1) {
-    // Not a valid CFI
-    return false;
-  }
-
-  // Find the CFI elements parent
-  parent = this.findParent(cfi, doc);
-
-  if(!parent) {
-    // CFI didn't return an element
-    // Maybe it isnt in the current chapter?
-    return false;
-  }
-
-  if(lastStep && lastStep.type === "text") {
-    text = parent.childNodes[lastStep.index];
-    if(cfi.characterOffset){
-      split = text.splitText(cfi.characterOffset);
-      marker.classList.add("EPUBJS-CFI-SPLIT");
-      parent.insertBefore(marker, split);
-    } else {
-      parent.insertBefore(marker, text);
-    }
-  } else {
-    parent.insertBefore(marker, parent.firstChild);
-  }
-
-  return marker;
-};
-
-EPUBJS.EpubCFI.prototype.createMarker = function(_doc) {
-  var doc = _doc || document;
-  var element = doc.createElement('span');
-  element.id = "EPUBJS-CFI-MARKER:"+ EPUBJS.core.uuid();
-  element.classList.add("EPUBJS-CFI-MARKER");
-
-  return element;
-};
-
-EPUBJS.EpubCFI.prototype.removeMarker = function(marker, _doc) {
-  var doc = _doc || document;
-  // var id = marker.id;
-
-  // Cleanup textnodes if they were split
-  if(marker.classList.contains("EPUBJS-CFI-SPLIT")){
-    nextSib = marker.nextSibling;
-    prevSib = marker.previousSibling;
-    if(nextSib &&
-        prevSib &&
-        nextSib.nodeType === 3 &&
-        prevSib.nodeType === 3){
-
-      prevSib.textContent += nextSib.textContent;
-      marker.parentNode.removeChild(nextSib);
-    }
-    marker.parentNode.removeChild(marker);
-  } else if(marker.classList.contains("EPUBJS-CFI-MARKER")) {
-    // Remove only elements added as markers
-    marker.parentNode.removeChild(marker);
-  }
-
-};
-
-EPUBJS.EpubCFI.prototype.findParent = function(cfi, _doc) {
-  var doc = _doc || document,
-      element = doc.getElementsByTagName('html')[0],
-      children = Array.prototype.slice.call(element.children),
-      num, index, part, sections,
-      text, textBegin, textEnd;
-
-  if(typeof cfi === 'string') {
-    cfi = this.parse(cfi);
-  }
-
-  sections = cfi.steps.slice(0); // Clone steps array
-  if(!sections.length) {
-    return doc.getElementsByTagName('body')[0];
-  }
-
-  while(sections && sections.length > 0) {
-    part = sections.shift();
-    // Find textNodes Parent
-    if(part.type === "text") {
-      text = element.childNodes[part.index];
-      element = text.parentNode || element;
-    // Find element by id if present
-    } else if(part.id){
-      element = doc.getElementById(part.id);
-    // Find element in parent
-    }else{
-      element = children[part.index];
-    }
-    // Element can't be found
-    if(!element || typeof element === "undefined") {
-      console.error("No Element For", part, cfi.str);
-      return false;
-    }
-    // Get current element children and continue through steps
-    children = Array.prototype.slice.call(element.children);
-  }
-
-  return element;
-};
-
-EPUBJS.EpubCFI.prototype.compare = function(cfiOne, cfiTwo) {
-  if(typeof cfiOne === 'string') {
-    cfiOne = new EPUBJS.EpubCFI(cfiOne);
-  }
-  if(typeof cfiTwo === 'string') {
-    cfiTwo = new EPUBJS.EpubCFI(cfiTwo);
-  }
-  // Compare Spine Positions
-  if(cfiOne.spinePos > cfiTwo.spinePos) {
-    return 1;
-  }
-  if(cfiOne.spinePos < cfiTwo.spinePos) {
-    return -1;
-  }
-
-
-  // Compare Each Step in the First item
-  for (var i = 0; i < cfiOne.steps.length; i++) {
-    if(!cfiTwo.steps[i]) {
-      return 1;
-    }
-    if(cfiOne.steps[i].index > cfiTwo.steps[i].index) {
-      return 1;
-    }
-    if(cfiOne.steps[i].index < cfiTwo.steps[i].index) {
-      return -1;
-    }
-    // Otherwise continue checking
-  }
-
-  // All steps in First present in Second
-  if(cfiOne.steps.length < cfiTwo.steps.length) {
-    return -1;
-  }
-
-  // Compare the character offset of the text node
-  if(cfiOne.characterOffset > cfiTwo.characterOffset) {
-    return 1;
-  }
-  if(cfiOne.characterOffset < cfiTwo.characterOffset) {
-    return -1;
-  }
-
-  // CFI's are equal
-  return 0;
-};
-
-EPUBJS.EpubCFI.prototype.generateCfiFromHref = function(href, book) {
-  var uri = EPUBJS.core.uri(href);
-  var path = uri.path;
-  var fragment = uri.fragment;
-  var spinePos = book.spineIndexByURL[path];
-  var loaded;
-  var deferred = new RSVP.defer();
-  var epubcfi = new EPUBJS.EpubCFI();
-  var spineItem;
-
-  if(typeof spinePos !== "undefined"){
-    spineItem = book.spine[spinePos];
-    loaded = book.loadXml(spineItem.url);
-    loaded.then(function(doc){
-      var element = doc.getElementById(fragment);
-      var cfi;
-      cfi = epubcfi.generateCfiFromElement(element, spineItem.cfiBase);
-      deferred.resolve(cfi);
-    });
-  }
-
-  return deferred.promise;
-};
-
-EPUBJS.EpubCFI.prototype.generateCfiFromTextNode = function(anchor, offset, base) {
-  var parent = anchor.parentNode;
-  var steps = this.pathTo(parent);
-  var path = this.generatePathComponent(steps);
-  var index = 1 + (2 * Array.prototype.indexOf.call(parent.childNodes, anchor));
-  return "epubcfi(" + base + "!/" + path + "/"+index+":"+(offset || 0)+")";
-};
-
-EPUBJS.EpubCFI.prototype.generateCfiFromRangeAnchor = function(range, base) {
-  var anchor = range.anchorNode;
-  var offset = range.anchorOffset;
-  return this.generateCfiFromTextNode(anchor, offset, base);
-};
-
-EPUBJS.EpubCFI.prototype.generateCfiFromRange = function(range, base) {
-  var start, startElement, startSteps, startPath, startOffset, startIndex;
-  var end, endElement, endSteps, endPath, endOffset, endIndex;
-
-  start = range.startContainer;
-
-  if(start.nodeType === 3) { // text node
-    startElement = start.parentNode;
-    //startIndex = 1 + (2 * Array.prototype.indexOf.call(startElement.childNodes, start));
-    startIndex = 1 + (2 * EPUBJS.core.indexOfTextNode(start));
-    startSteps = this.pathTo(startElement);
-  } else if(range.collapsed) {
-    return this.generateCfiFromElement(start, base); // single element
-  } else {
-    startSteps = this.pathTo(start);
-  }
-
-  startPath = this.generatePathComponent(startSteps);
-  startOffset = range.startOffset;
-
-  if(!range.collapsed) {
-    end = range.endContainer;
-
-    if(end.nodeType === 3) { // text node
-      endElement = end.parentNode;
-      // endIndex = 1 + (2 * Array.prototype.indexOf.call(endElement.childNodes, end));
-      endIndex = 1 + (2 * EPUBJS.core.indexOfTextNode(end));
-
-      endSteps = this.pathTo(endElement);
-    } else {
-      endSteps = this.pathTo(end);
-    }
-
-    endPath = this.generatePathComponent(endSteps);
-    endOffset = range.endOffset;
-
-    // Remove steps present in startPath
-    endPath = endPath.replace(startPath, '');
-
-    if (endPath.length) {
-      endPath = endPath + "/";
-    }
-
-    return "epubcfi(" + base + "!/" + startPath + "/" + startIndex + ":" + startOffset + "," + endPath + endIndex + ":" + endOffset + ")";
-
-  } else {
-    return "epubcfi(" + base + "!/" + startPath + "/"+ startIndex +":"+ startOffset +")";
-  }
-};
-
-EPUBJS.EpubCFI.prototype.generateXpathFromSteps = function(steps) {
-  var xpath = [".", "*"];
-
-  steps.forEach(function(step){
-    var position = step.index + 1;
-
-    if(step.id){
-      xpath.push("*[position()=" + position + " and @id='" + step.id + "']");
-    } else if(step.type === "text") {
-      xpath.push("text()[" + position + "]");
-    } else {
-      xpath.push("*[" + position + "]");
-    }
-  });
-
-  return xpath.join("/");
-};
-
-EPUBJS.EpubCFI.prototype.generateQueryFromSteps = function(steps) {
-  var query = ["html"];
-
-  steps.forEach(function(step){
-    var position = step.index + 1;
-
-    if(step.id){
-      query.push("#" + step.id);
-    } else if(step.type === "text") {
-      // unsupported in querySelector
-      // query.push("text()[" + position + "]");
-    } else {
-      query.push("*:nth-child(" + position + ")");
-    }
-  });
-
-  return query.join(">");
-};
-
-
-EPUBJS.EpubCFI.prototype.generateRangeFromCfi = function(cfi, _doc) {
-  var doc = _doc || document;
-  var range = doc.createRange();
-  var lastStep;
-  var xpath;
-  var startContainer;
-  var textLength;
-  var query;
-  var startContainerParent;
-
-  if(typeof cfi === 'string') {
-    cfi = this.parse(cfi);
-  }
-
-  // check spinePos
-  if(cfi.spinePos === -1) {
-    // Not a valid CFI
-    return false;
-  }
-
-  // Get the terminal step
-  lastStep = cfi.steps[cfi.steps.length-1];
-
-  if(typeof document.evaluate != 'undefined') {
-    xpath = this.generateXpathFromSteps(cfi.steps);
-    startContainer = doc.evaluate(xpath, doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-  } else {
-      // Get the query string
-      query = this.generateQueryFromSteps(cfi.steps);
-      // Find the containing element
-      startContainerParent = doc.querySelector(query);
-      // Find the text node within that element
-      if(startContainerParent && lastStep.type == "text") {
-        startContainer = startContainerParent.childNodes[lastStep.index];
-      }
-  }
-
-  if(!startContainer) {
-    return null;
-  }
-
-  if(startContainer && cfi.characterOffset >= 0) {
-    textLength = startContainer.length;
-
-    if(cfi.characterOffset < textLength) {
-      range.setStart(startContainer, cfi.characterOffset);
-      range.setEnd(startContainer, textLength );
-    } else {
-      console.debug("offset greater than length:", cfi.characterOffset, textLength);
-      range.setStart(startContainer, textLength - 1 );
-      range.setEnd(startContainer, textLength );
-    }
-  } else if(startContainer) {
-    range.selectNode(startContainer);
-  }
-  // doc.defaultView.getSelection().addRange(range);
-  return range;
-};
-
-EPUBJS.EpubCFI.prototype.isCfiString = function(target) {
-  return typeof target === 'string' && target.indexOf('epubcfi(') === 0;
-};
-
-EPUBJS.Events = function(obj, el){
-
-	this.events = {};
-
-	if(!el){
-		this.el = document.createElement('div');
-	}else{
-		this.el = el;
+EpubCFI.prototype.filteredPosition = function(anchor, ignoreClass) {
+	var children, index, map;
+
+	if (anchor.nodeType === Node.ELEMENT_NODE) {
+		children = anchor.parentNode.children;
+		map = this.normalizedMap(children, Node.ELEMENT_NODE, ignoreClass);
+	} else {
+		children = anchor.parentNode.childNodes;
+		// Inside an ignored node
+		if(anchor.parentNode.classList.contains(ignoreClass)) {
+			anchor = anchor.parentNode;
+			children = anchor.parentNode.childNodes;
+		}
+		map = this.normalizedMap(children, Node.TEXT_NODE, ignoreClass);
 	}
 
-	obj.createEvent = this.createEvent;
-	obj.tell = this.tell;
-	obj.listen = this.listen;
-	obj.deafen = this.deafen;
-	obj.listenUntil = this.listenUntil;
+
+	index = Array.prototype.indexOf.call(children, anchor);
+
+	return map[index];
+};
+
+EpubCFI.prototype.stepsToXpath = function(steps) {
+	var xpath = [".", "*"];
+
+	steps.forEach(function(step){
+		var position = step.index + 1;
+
+		if(step.id){
+			xpath.push("*[position()=" + position + " and @id='" + step.id + "']");
+		} else if(step.type === "text") {
+			xpath.push("text()[" + position + "]");
+		} else {
+			xpath.push("*[" + position + "]");
+		}
+	});
+
+	return xpath.join("/");
+};
+
+
+/*
+
+To get the last step if needed:
+
+// Get the terminal step
+lastStep = steps[steps.length-1];
+// Get the query string
+query = this.stepsToQuery(steps);
+// Find the containing element
+startContainerParent = doc.querySelector(query);
+// Find the text node within that element
+if(startContainerParent && lastStep.type == "text") {
+	container = startContainerParent.childNodes[lastStep.index];
+}
+*/
+EpubCFI.prototype.stepsToQuerySelector = function(steps) {
+	var query = ["html"];
+
+	steps.forEach(function(step){
+		var position = step.index + 1;
+
+		if(step.id){
+			query.push("#" + step.id);
+		} else if(step.type === "text") {
+			// unsupported in querySelector
+			// query.push("text()[" + position + "]");
+		} else {
+			query.push("*:nth-child(" + position + ")");
+		}
+	});
+
+	return query.join(">");
+
+};
+
+EpubCFI.prototype.textNodes = function(container, ignoreClass) {
+	return Array.prototype.slice.call(container.childNodes).
+		filter(function (node) {
+			if (node.nodeType === Node.TEXT_NODE) {
+				return true;
+			} else if (ignoreClass && node.classList.contains(ignoreClass)) {
+				return true;
+			}
+			return false;
+		});
+};
+
+EpubCFI.prototype.walkToNode = function(steps, _doc, ignoreClass) {
+	var doc = _doc || document;
+	var container = doc.documentElement;
+	var step;
+	var len = steps.length;
+	var i;
+
+	for (i = 0; i < len; i++) {
+		step = steps[i];
+
+		if(step.type === "element") {
+			container = container.children[step.index];
+		} else if(step.type === "text"){
+			container = this.textNodes(container, ignoreClass)[step.index];
+		}
+
+	};
+
+	return container;
+};
+
+EpubCFI.prototype.findNode = function(steps, _doc, ignoreClass) {
+	var doc = _doc || document;
+	var container;
+	var xpath;
+
+	if(!ignoreClass && typeof doc.evaluate != 'undefined') {
+		xpath = this.stepsToXpath(steps);
+		container = doc.evaluate(xpath, doc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+	} else if(ignoreClass) {
+		container = this.walkToNode(steps, doc, ignoreClass);
+	} else {
+		container = this.walkToNode(steps, doc);
+	}
+
+	return container;
+};
+
+EpubCFI.prototype.fixMiss = function(steps, offset, _doc, ignoreClass) {
+	var container = this.findNode(steps.slice(0,-1), _doc, ignoreClass);
+	var children = container.childNodes;
+	var map = this.normalizedMap(children, Node.TEXT_NODE, ignoreClass);
+	var i;
+	var child;
+	var len;
+	var childIndex;
+	var lastStepIndex = steps[steps.length-1].index;
+
+	for (var childIndex in map) {
+		if (!map.hasOwnProperty(childIndex)) return;
+
+		if(map[childIndex] === lastStepIndex) {
+			child = children[childIndex];
+			len = child.textContent.length;
+			if(offset > len) {
+				offset = offset - len;
+			} else {
+				if (child.nodeType === Node.ELEMENT_NODE) {
+					container = child.childNodes[0];
+				} else {
+					container = child;
+				}
+				break;
+			}
+		}
+	}
+
+	return {
+		container: container,
+		offset: offset
+	};
+
+};
+
+EpubCFI.prototype.toRange = function(_doc, ignoreClass) {
+	var doc = _doc || document;
+	var range = doc.createRange();
+	var start, end, startContainer, endContainer;
+	var cfi = this;
+	var startSteps, endSteps;
+	var needsIgnoring = ignoreClass ? (doc.querySelector('.' + ignoreClass) != null) : false;
+	var missed;
+
+	if (cfi.range) {
+		start = cfi.start;
+		startSteps = cfi.path.steps.concat(start.steps);
+		startContainer = this.findNode(startSteps, doc, needsIgnoring ? ignoreClass : null);
+		end = cfi.end;
+		endSteps = cfi.path.steps.concat(end.steps);
+		endContainer = this.findNode(endSteps, doc, needsIgnoring ? ignoreClass : null);
+	} else {
+		start = cfi.path;
+		startSteps = cfi.path.steps;
+		startContainer = this.findNode(cfi.path.steps, doc, needsIgnoring ? ignoreClass : null);
+	}
+
+	if(startContainer) {
+		try {
+
+			if(start.terminal.offset != null) {
+				range.setStart(startContainer, start.terminal.offset);
+			} else {
+				range.setStart(startContainer, 0);
+			}
+
+		} catch (e) {
+			missed = this.fixMiss(startSteps, start.terminal.offset, doc, needsIgnoring ? ignoreClass : null);
+			range.setStart(missed.container, missed.offset);
+		}
+	} else {
+		// No start found
+		return null;
+	}
+
+	if (endContainer) {
+		try {
+
+			if(end.terminal.offset != null) {
+				range.setEnd(endContainer, end.terminal.offset);
+			} else {
+				range.setEnd(endContainer, 0);
+			}
+
+		} catch (e) {
+			missed = this.fixMiss(endSteps, cfi.end.terminal.offset, doc, needsIgnoring ? ignoreClass : null);
+			range.setEnd(missed.container, missed.offset);
+		}
+	}
+
+
+	// doc.defaultView.getSelection().addRange(range);
+	return range;
+};
+
+// is a cfi string, should be wrapped with "epubcfi()"
+EpubCFI.prototype.isCfiString = function(str) {
+	if(typeof str === 'string' &&
+			str.indexOf("epubcfi(") === 0 &&
+			str[str.length-1] === ")") {
+		return true;
+	}
+
+	return false;
+};
+
+EpubCFI.prototype.generateChapterComponent = function(_spineNodeIndex, _pos, id) {
+	var pos = parseInt(_pos),
+		spineNodeIndex = _spineNodeIndex + 1,
+		cfi = '/'+spineNodeIndex+'/';
+
+	cfi += (pos + 1) * 2;
+
+	if(id) {
+		cfi += "[" + id + "]";
+	}
+
+	return cfi;
+};
+
+module.exports = EpubCFI;
+
+
+/***/ },
+/* 2 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+'use strict';
+
+var d        = __webpack_require__(22)
+  , callable = __webpack_require__(31)
+
+  , apply = Function.prototype.apply, call = Function.prototype.call
+  , create = Object.create, defineProperty = Object.defineProperty
+  , defineProperties = Object.defineProperties
+  , hasOwnProperty = Object.prototype.hasOwnProperty
+  , descriptor = { configurable: true, enumerable: false, writable: true }
+
+  , on, once, off, emit, methods, descriptors, base;
+
+on = function (type, listener) {
+	var data;
+
+	callable(listener);
+
+	if (!hasOwnProperty.call(this, '__ee__')) {
+		data = descriptor.value = create(null);
+		defineProperty(this, '__ee__', descriptor);
+		descriptor.value = null;
+	} else {
+		data = this.__ee__;
+	}
+	if (!data[type]) data[type] = listener;
+	else if (typeof data[type] === 'object') data[type].push(listener);
+	else data[type] = [data[type], listener];
 
 	return this;
 };
 
-EPUBJS.Events.prototype.createEvent = function(evt){
-	var e = new CustomEvent(evt);
-	this.events[evt] = e;
-	return e;
+once = function (type, listener) {
+	var once, self;
+
+	callable(listener);
+	self = this;
+	on.call(this, type, once = function () {
+		off.call(self, type, once);
+		apply.call(listener, this, arguments);
+	});
+
+	once.__eeOnceListener__ = listener;
+	return this;
 };
 
-EPUBJS.Events.prototype.tell = function(evt, msg){
-	var e;
+off = function (type, listener) {
+	var data, listeners, candidate, i;
 
-	if(!this.events[evt]){
-		console.warn("No event:", evt, "defined yet, creating.");
-		e = this.createEvent(evt);
-	}else{
-		e = this.events[evt];
-	}
+	callable(listener);
 
-	if(msg) e.msg = msg;
-	this.el.dispatchEvent(e);
+	if (!hasOwnProperty.call(this, '__ee__')) return this;
+	data = this.__ee__;
+	if (!data[type]) return this;
+	listeners = data[type];
 
-};
-
-EPUBJS.Events.prototype.listen = function(evt, func, bindto){
-	if(!this.events[evt]){
-		console.warn("No event:", evt, "defined yet, creating.");
-		this.createEvent(evt);
-		return;
-	}
-
-	if(bindto){
-		this.el.addEventListener(evt, func.bind(bindto), false);
-	}else{
-		this.el.addEventListener(evt, func, false);
-	}
-
-};
-
-EPUBJS.Events.prototype.deafen = function(evt, func){
-	this.el.removeEventListener(evt, func, false);
-};
-
-EPUBJS.Events.prototype.listenUntil = function(OnEvt, OffEvt, func, bindto){
-	this.listen(OnEvt, func, bindto);
-
-	function unlisten(){
-		this.deafen(OnEvt, func);
-		this.deafen(OffEvt, unlisten);
-	}
-
-	this.listen(OffEvt, unlisten, this);
-};
-EPUBJS.hooks = {};
-EPUBJS.Hooks = (function(){
-	function hooks(){}
-
-	//-- Get pre-registered hooks
-	hooks.prototype.getHooks = function(){
-		var plugs;
-		this.hooks = {};
-		Array.prototype.slice.call(arguments).forEach(function(arg){
-			this.hooks[arg] = [];
-		}, this);
-
-		for (var plugType in this.hooks) {
-			plugs = EPUBJS.core.values(EPUBJS.hooks[plugType]);
-
-			plugs.forEach(function(hook){
-				this.registerHook(plugType, hook);
-			}, this);
-		}
-	};
-
-	//-- Hooks allow for injecting async functions that must all complete before continuing
-	//   Functions must have a callback as their first argument.
-	hooks.prototype.registerHook = function(type, toAdd, toFront){
-
-		if(typeof(this.hooks[type]) != "undefined"){
-
-			if(typeof(toAdd) === "function"){
-				if(toFront) {
-					this.hooks[type].unshift(toAdd);
-				}else{
-					this.hooks[type].push(toAdd);
-				}
-			}else if(Array.isArray(toAdd)){
-				toAdd.forEach(function(hook){
-					if(toFront) {
-						this.hooks[type].unshift(hook);
-					}else{
-						this.hooks[type].push(hook);
-					}
-				}, this);
-			}
-		}else{
-			//-- Allows for undefined hooks
-			this.hooks[type] = [toAdd];
-
-			if(typeof(toAdd) === "function"){
-				this.hooks[type] = [toAdd];
-			}else if(Array.isArray(toAdd)){
-				this.hooks[type] = [];
-				toAdd.forEach(function(hook){
-					this.hooks[type].push(hook);
-				}, this);
-			}
-
-		}
-	};
-
-	hooks.prototype.removeHook = function(type, toRemove){
-		var index;
-
-		if(typeof(this.hooks[type]) != "undefined"){
-
-			if(typeof(toRemove) === "function"){
-				index = this.hooks[type].indexOf(toRemove);
-				if (index > -1) {
-					this.hooks[type].splice(index, 1);
-				}
-			}else if(Array.isArray(toRemove)){
-				toRemove.forEach(function(hook){
-					index = this.hooks[type].indexOf(hook);
-					if (index > -1) {
-						this.hooks[type].splice(index, 1);
-					}
-				}, this);
+	if (typeof listeners === 'object') {
+		for (i = 0; (candidate = listeners[i]); ++i) {
+			if ((candidate === listener) ||
+					(candidate.__eeOnceListener__ === listener)) {
+				if (listeners.length === 2) data[type] = listeners[i ? 0 : 1];
+				else listeners.splice(i, 1);
 			}
 		}
-	};
-
-	hooks.prototype.triggerHooks = function(type, callback, passed){
-		var hooks, count;
-
-		if(typeof(this.hooks[type]) == "undefined") return false;
-
-		hooks = this.hooks[type];
-
-		count = hooks.length;
-		if(count === 0 && callback) {
-			callback();
+	} else {
+		if ((listeners === listener) ||
+				(listeners.__eeOnceListener__ === listener)) {
+			delete data[type];
 		}
+	}
 
-		function countdown(){
-			count--;
-			if(count <= 0 && callback) callback();
+	return this;
+};
+
+emit = function (type) {
+	var i, l, listener, listeners, args;
+
+	if (!hasOwnProperty.call(this, '__ee__')) return;
+	listeners = this.__ee__[type];
+	if (!listeners) return;
+
+	if (typeof listeners === 'object') {
+		l = arguments.length;
+		args = new Array(l - 1);
+		for (i = 1; i < l; ++i) args[i - 1] = arguments[i];
+
+		listeners = listeners.slice();
+		for (i = 0; (listener = listeners[i]); ++i) {
+			apply.call(listener, this, args);
 		}
-
-		hooks.forEach(function(hook){
-			hook(countdown, passed);
-		});
-	};
-
-	return {
-		register: function(name) {
-			if(EPUBJS.hooks[name] === undefined) { EPUBJS.hooks[name] = {}; }
-			if(typeof EPUBJS.hooks[name] !== 'object') { throw "Already registered: "+name; }
-			return EPUBJS.hooks[name];
-		},
-		mixin: function(object) {
-			for (var prop in hooks.prototype) {
-				object[prop] = hooks.prototype[prop];
+	} else {
+		switch (arguments.length) {
+		case 1:
+			call.call(listeners, this);
+			break;
+		case 2:
+			call.call(listeners, this, arguments[1]);
+			break;
+		case 3:
+			call.call(listeners, this, arguments[1], arguments[2]);
+			break;
+		default:
+			l = arguments.length;
+			args = new Array(l - 1);
+			for (i = 1; i < l; ++i) {
+				args[i - 1] = arguments[i];
 			}
-		}
-	};
-})();
-
-EPUBJS.Layout = EPUBJS.Layout || {};
-
-// EPUB2 documents won't provide us with "rendition:layout", so this is used to
-// duck type the documents instead.
-EPUBJS.Layout.isFixedLayout = function (documentElement) {
-	var viewport = documentElement.querySelector("[name=viewport]");
-	if (!viewport || !viewport.hasAttribute("content")) {
-		return false;
-	}
-	var content = viewport.getAttribute("content");
-	return (/width=(\d+)/.test(content) && /height=(\d+)/.test(content));
-};
-
-EPUBJS.Layout.Reflowable = function(){
-	this.documentElement = null;
-	this.spreadWidth = null;
-};
-
-EPUBJS.Layout.Reflowable.prototype.format = function(documentElement, _width, _height, _gap){
-	// Get the prefixed CSS commands
-	var columnAxis = EPUBJS.core.prefixed('columnAxis');
-	var columnGap = EPUBJS.core.prefixed('columnGap');
-	var columnWidth = EPUBJS.core.prefixed('columnWidth');
-	var columnFill = EPUBJS.core.prefixed('columnFill');
-
-	//-- Check the width and create even width columns
-	var width = Math.floor(_width);
-	// var width = (fullWidth % 2 === 0) ? fullWidth : fullWidth - 0; // Not needed for single
-	var section = Math.floor(width / 8);
-	var gap = (_gap >= 0) ? _gap : ((section % 2 === 0) ? section : section - 1);
-	this.documentElement = documentElement;
-	//-- Single Page
-	this.spreadWidth = (width + gap);
-
-
-	documentElement.style.overflow = "hidden";
-
-	// Must be set to the new calculated width or the columns will be off
-	documentElement.style.width = width + "px";
-
-	//-- Adjust height
-	documentElement.style.height = _height + "px";
-
-	//-- Add columns
-	documentElement.style[columnAxis] = "horizontal";
-	documentElement.style[columnFill] = "auto";
-	documentElement.style[columnWidth] = width+"px";
-	documentElement.style[columnGap] = gap+"px";
-	this.colWidth = width;
-	this.gap = gap;
-
-	return {
-		pageWidth : this.spreadWidth,
-		pageHeight : _height
-	};
-};
-
-EPUBJS.Layout.Reflowable.prototype.calculatePages = function() {
-	var totalWidth, displayedPages;
-	this.documentElement.style.width = "auto"; //-- reset width for calculations
-	totalWidth = this.documentElement.scrollWidth;
-	displayedPages = Math.ceil(totalWidth / this.spreadWidth);
-
-	return {
-		displayedPages : displayedPages,
-		pageCount : displayedPages
-	};
-};
-
-EPUBJS.Layout.ReflowableSpreads = function(){
-	this.documentElement = null;
-	this.spreadWidth = null;
-};
-
-EPUBJS.Layout.ReflowableSpreads.prototype.format = function(documentElement, _width, _height, _gap){
-	var columnAxis = EPUBJS.core.prefixed('columnAxis');
-	var columnGap = EPUBJS.core.prefixed('columnGap');
-	var columnWidth = EPUBJS.core.prefixed('columnWidth');
-	var columnFill = EPUBJS.core.prefixed('columnFill');
-
-	var divisor = 2,
-			cutoff = 800;
-
-	//-- Check the width and create even width columns
-	var fullWidth = Math.floor(_width);
-	var width = (fullWidth % 2 === 0) ? fullWidth : fullWidth - 1;
-
-	var section = Math.floor(width / 8);
-	var gap = (_gap >= 0) ? _gap : ((section % 2 === 0) ? section : section - 1);
-
-	//-- Double Page
-	var colWidth = Math.floor((width - gap) / divisor);
-
-	this.documentElement = documentElement;
-	this.spreadWidth = (colWidth + gap) * divisor;
-
-
-	documentElement.style.overflow = "hidden";
-
-	// Must be set to the new calculated width or the columns will be off
-	documentElement.style.width = width + "px";
-
-	//-- Adjust height
-	documentElement.style.height = _height + "px";
-
-	//-- Add columns
-	documentElement.style[columnAxis] = "horizontal";
-	documentElement.style[columnFill] = "auto";
-	documentElement.style[columnGap] = gap+"px";
-	documentElement.style[columnWidth] = colWidth+"px";
-
-	this.colWidth = colWidth;
-	this.gap = gap;
-	return {
-		pageWidth : this.spreadWidth,
-		pageHeight : _height
-	};
-};
-
-EPUBJS.Layout.ReflowableSpreads.prototype.calculatePages = function() {
-	var totalWidth = this.documentElement.scrollWidth;
-	var displayedPages = Math.ceil(totalWidth / this.spreadWidth);
-
-	//-- Add a page to the width of the document to account an for odd number of pages
-	this.documentElement.style.width = ((displayedPages * this.spreadWidth) - this.gap) + "px";
-
-	return {
-		displayedPages : displayedPages,
-		pageCount : displayedPages * 2
-	};
-};
-
-EPUBJS.Layout.Fixed = function(){
-	this.documentElement = null;
-};
-
-EPUBJS.Layout.Fixed.prototype.format = function(documentElement, _width, _height, _gap){
-	var columnWidth = EPUBJS.core.prefixed('columnWidth');
-	var transform = EPUBJS.core.prefixed('transform');
-	var transformOrigin = EPUBJS.core.prefixed('transformOrigin');
-	var viewport = documentElement.querySelector("[name=viewport]");
-	var content;
-	var contents;
-	var width, height;
-	this.documentElement = documentElement;
-	/**
-	* check for the viewport size
-	* <meta name="viewport" content="width=1024,height=697" />
-	*/
-	if(viewport && viewport.hasAttribute("content")) {
-		content = viewport.getAttribute("content");
-		contents = content.split(',');
-		if(contents[0]){
-			width = contents[0].replace("width=", '');
-		}
-		if(contents[1]){
-			height = contents[1].replace("height=", '');
+			apply.call(listeners, this, args);
 		}
 	}
-
-	//-- Scale fixed documents so their contents don't overflow, and
-	// vertically and horizontally center the contents
-	var widthScale = _width / width;
-	var heightScale = _height / height;
-	var scale = widthScale < heightScale ? widthScale : heightScale;
-	documentElement.style.position = "absolute";
-	documentElement.style.top = "50%";
-	documentElement.style.left = "50%";
-	documentElement.style[transform] = "scale(" + scale + ") translate(-50%, -50%)";
-	documentElement.style[transformOrigin] = "0px 0px 0px";
-
-	//-- Adjust width and height
-	documentElement.style.width =  width + "px" || "auto";
-	documentElement.style.height =  height + "px" || "auto";
-
-	//-- Remove columns
-	documentElement.style[columnWidth] = "auto";
-
-	//-- Scroll
-	documentElement.style.overflow = "auto";
-
-	this.colWidth = width;
-	this.gap = 0;
-
-	return {
-		pageWidth : width,
-		pageHeight : height
-	};
-
 };
 
-EPUBJS.Layout.Fixed.prototype.calculatePages = function(){
-	return {
-		displayedPages : 1,
-		pageCount : 1
-	};
+methods = {
+	on: on,
+	once: once,
+	off: off,
+	emit: emit
 };
 
-EPUBJS.Locations = function(spine, store, credentials) {
-  this.spine = spine;
-  this.store = store;
-  this.credentials = credentials;
-
-  this.epubcfi = new EPUBJS.EpubCFI();
-
-  this._locations = [];
-  this.total = 0;
-
-  this.break = 150;
-
-  this._current = 0;
-
+descriptors = {
+	on: d(on),
+	once: d(once),
+	off: d(off),
+	emit: d(emit)
 };
 
-EPUBJS.Locations.prototype.generate = function(chars) {
-	var deferred = new RSVP.defer();
-	var spinePos = -1;
-	var spineLength = this.spine.length;
-  var finished;
-	var nextChapter = function(deferred){
-		var chapter;
-		var next = spinePos + 1;
-		var done = deferred || new RSVP.defer();
-		var loaded;
-		if(next >= spineLength) {
-			done.resolve();
-		} else {
-			spinePos = next;
-			chapter = new EPUBJS.Chapter(this.spine[spinePos], this.store, this.credentials);
+base = defineProperties({}, descriptors);
 
-      this.process(chapter).then(function() {
-        // Load up the next chapter
-				setTimeout(function(){
-					nextChapter(done);
-				}, 1);
+module.exports = exports = function (o) {
+	return (o == null) ? create(base) : defineProperties(Object(o), descriptors);
+};
+exports.methods = methods;
 
-      });
-		}
-		return done.promise;
-	}.bind(this);
 
-  if(typeof chars === 'number') {
-    this.break = chars;
+/***/ },
+/* 3 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(process) {'use strict';
+
+function assertPath(path) {
+  if (typeof path !== 'string') {
+    throw new TypeError('Path must be a string. Received ' + path);
   }
+}
 
-	finished = nextChapter().then(function(){
-    this.total = this._locations.length-1;
-
-    if (this._currentCfi) {
-      this.currentLocation = this._currentCfi;
+// Resolves . and .. elements in a path with directory names
+function normalizeStringPosix(path, allowAboveRoot) {
+  var res = '';
+  var lastSlash = -1;
+  var dots = 0;
+  var code;
+  for (var i = 0; i <= path.length; ++i) {
+    if (i < path.length)
+      code = path.charCodeAt(i);
+    else if (code === 47/*/*/)
+      break;
+    else
+      code = 47/*/*/;
+    if (code === 47/*/*/) {
+      if (lastSlash === i - 1 || dots === 1) {
+        // NOOP
+      } else if (lastSlash !== i - 1 && dots === 2) {
+        if (res.length < 2 ||
+            res.charCodeAt(res.length - 1) !== 46/*.*/ ||
+            res.charCodeAt(res.length - 2) !== 46/*.*/) {
+          if (res.length > 2) {
+            const start = res.length - 1;
+            var j = start;
+            for (; j >= 0; --j) {
+              if (res.charCodeAt(j) === 47/*/*/)
+                break;
+            }
+            if (j !== start) {
+              if (j === -1)
+                res = '';
+              else
+                res = res.slice(0, j);
+              lastSlash = i;
+              dots = 0;
+              continue;
+            }
+          } else if (res.length === 2 || res.length === 1) {
+            res = '';
+            lastSlash = i;
+            dots = 0;
+            continue;
+          }
+        }
+        if (allowAboveRoot) {
+          if (res.length > 0)
+            res += '/..';
+          else
+            res = '..';
+        }
+      } else {
+        if (res.length > 0)
+          res += '/' + path.slice(lastSlash + 1, i);
+        else
+          res = path.slice(lastSlash + 1, i);
+      }
+      lastSlash = i;
+      dots = 0;
+    } else if (code === 46/*.*/ && dots !== -1) {
+      ++dots;
+    } else {
+      dots = -1;
     }
-		deferred.resolve(this._locations);
-	}.bind(this));
+  }
+  return res;
+}
+
+function _format(sep, pathObject) {
+  const dir = pathObject.dir || pathObject.root;
+  const base = pathObject.base ||
+    ((pathObject.name || '') + (pathObject.ext || ''));
+  if (!dir) {
+    return base;
+  }
+  if (dir === pathObject.root) {
+    return dir + base;
+  }
+  return dir + sep + base;
+}
+
+const posix = {
+  // path.resolve([from ...], to)
+  resolve: function resolve() {
+    var resolvedPath = '';
+    var resolvedAbsolute = false;
+    var cwd;
+
+    for (var i = arguments.length - 1; i >= -1 && !resolvedAbsolute; i--) {
+      var path;
+      if (i >= 0)
+        path = arguments[i];
+      else {
+        if (cwd === undefined)
+          cwd = process.cwd();
+        path = cwd;
+      }
+
+      assertPath(path);
+
+      // Skip empty entries
+      if (path.length === 0) {
+        continue;
+      }
+
+      resolvedPath = path + '/' + resolvedPath;
+      resolvedAbsolute = path.charCodeAt(0) === 47/*/*/;
+    }
+
+    // At this point the path should be resolved to a full absolute path, but
+    // handle relative paths to be safe (might happen when process.cwd() fails)
+
+    // Normalize the path
+    resolvedPath = normalizeStringPosix(resolvedPath, !resolvedAbsolute);
+
+    if (resolvedAbsolute) {
+      if (resolvedPath.length > 0)
+        return '/' + resolvedPath;
+      else
+        return '/';
+    } else if (resolvedPath.length > 0) {
+      return resolvedPath;
+    } else {
+      return '.';
+    }
+  },
+
+
+  normalize: function normalize(path) {
+    assertPath(path);
+
+    if (path.length === 0)
+      return '.';
+
+    const isAbsolute = path.charCodeAt(0) === 47/*/*/;
+    const trailingSeparator = path.charCodeAt(path.length - 1) === 47/*/*/;
+
+    // Normalize the path
+    path = normalizeStringPosix(path, !isAbsolute);
+
+    if (path.length === 0 && !isAbsolute)
+      path = '.';
+    if (path.length > 0 && trailingSeparator)
+      path += '/';
+
+    if (isAbsolute)
+      return '/' + path;
+    return path;
+  },
+
+
+  isAbsolute: function isAbsolute(path) {
+    assertPath(path);
+    return path.length > 0 && path.charCodeAt(0) === 47/*/*/;
+  },
+
+
+  join: function join() {
+    if (arguments.length === 0)
+      return '.';
+    var joined;
+    for (var i = 0; i < arguments.length; ++i) {
+      var arg = arguments[i];
+      assertPath(arg);
+      if (arg.length > 0) {
+        if (joined === undefined)
+          joined = arg;
+        else
+          joined += '/' + arg;
+      }
+    }
+    if (joined === undefined)
+      return '.';
+    return posix.normalize(joined);
+  },
+
+
+  relative: function relative(from, to) {
+    assertPath(from);
+    assertPath(to);
+
+    if (from === to)
+      return '';
+
+    from = posix.resolve(from);
+    to = posix.resolve(to);
+
+    if (from === to)
+      return '';
+
+    // Trim any leading backslashes
+    var fromStart = 1;
+    for (; fromStart < from.length; ++fromStart) {
+      if (from.charCodeAt(fromStart) !== 47/*/*/)
+        break;
+    }
+    var fromEnd = from.length;
+    var fromLen = (fromEnd - fromStart);
+
+    // Trim any leading backslashes
+    var toStart = 1;
+    for (; toStart < to.length; ++toStart) {
+      if (to.charCodeAt(toStart) !== 47/*/*/)
+        break;
+    }
+    var toEnd = to.length;
+    var toLen = (toEnd - toStart);
+
+    // Compare paths to find the longest common path from root
+    var length = (fromLen < toLen ? fromLen : toLen);
+    var lastCommonSep = -1;
+    var i = 0;
+    for (; i <= length; ++i) {
+      if (i === length) {
+        if (toLen > length) {
+          if (to.charCodeAt(toStart + i) === 47/*/*/) {
+            // We get here if `from` is the exact base path for `to`.
+            // For example: from='/foo/bar'; to='/foo/bar/baz'
+            return to.slice(toStart + i + 1);
+          } else if (i === 0) {
+            // We get here if `from` is the root
+            // For example: from='/'; to='/foo'
+            return to.slice(toStart + i);
+          }
+        } else if (fromLen > length) {
+          if (from.charCodeAt(fromStart + i) === 47/*/*/) {
+            // We get here if `to` is the exact base path for `from`.
+            // For example: from='/foo/bar/baz'; to='/foo/bar'
+            lastCommonSep = i;
+          } else if (i === 0) {
+            // We get here if `to` is the root.
+            // For example: from='/foo'; to='/'
+            lastCommonSep = 0;
+          }
+        }
+        break;
+      }
+      var fromCode = from.charCodeAt(fromStart + i);
+      var toCode = to.charCodeAt(toStart + i);
+      if (fromCode !== toCode)
+        break;
+      else if (fromCode === 47/*/*/)
+        lastCommonSep = i;
+    }
+
+    var out = '';
+    // Generate the relative path based on the path difference between `to`
+    // and `from`
+    for (i = fromStart + lastCommonSep + 1; i <= fromEnd; ++i) {
+      if (i === fromEnd || from.charCodeAt(i) === 47/*/*/) {
+        if (out.length === 0)
+          out += '..';
+        else
+          out += '/..';
+      }
+    }
+
+    // Lastly, append the rest of the destination (`to`) path that comes after
+    // the common path parts
+    if (out.length > 0)
+      return out + to.slice(toStart + lastCommonSep);
+    else {
+      toStart += lastCommonSep;
+      if (to.charCodeAt(toStart) === 47/*/*/)
+        ++toStart;
+      return to.slice(toStart);
+    }
+  },
+
+
+  _makeLong: function _makeLong(path) {
+    return path;
+  },
+
+
+  dirname: function dirname(path) {
+    assertPath(path);
+    if (path.length === 0)
+      return '.';
+    var code = path.charCodeAt(0);
+    var hasRoot = (code === 47/*/*/);
+    var end = -1;
+    var matchedSlash = true;
+    for (var i = path.length - 1; i >= 1; --i) {
+      code = path.charCodeAt(i);
+      if (code === 47/*/*/) {
+        if (!matchedSlash) {
+          end = i;
+          break;
+        }
+      } else {
+        // We saw the first non-path separator
+        matchedSlash = false;
+      }
+    }
+
+    if (end === -1)
+      return hasRoot ? '/' : '.';
+    if (hasRoot && end === 1)
+      return '//';
+    return path.slice(0, end);
+  },
+
+
+  basename: function basename(path, ext) {
+    if (ext !== undefined && typeof ext !== 'string')
+      throw new TypeError('"ext" argument must be a string');
+    assertPath(path);
+
+    var start = 0;
+    var end = -1;
+    var matchedSlash = true;
+    var i;
+
+    if (ext !== undefined && ext.length > 0 && ext.length <= path.length) {
+      if (ext.length === path.length && ext === path)
+        return '';
+      var extIdx = ext.length - 1;
+      var firstNonSlashEnd = -1;
+      for (i = path.length - 1; i >= 0; --i) {
+        const code = path.charCodeAt(i);
+        if (code === 47/*/*/) {
+          // If we reached a path separator that was not part of a set of path
+          // separators at the end of the string, stop now
+          if (!matchedSlash) {
+            start = i + 1;
+            break;
+          }
+        } else {
+          if (firstNonSlashEnd === -1) {
+            // We saw the first non-path separator, remember this index in case
+            // we need it if the extension ends up not matching
+            matchedSlash = false;
+            firstNonSlashEnd = i + 1;
+          }
+          if (extIdx >= 0) {
+            // Try to match the explicit extension
+            if (code === ext.charCodeAt(extIdx)) {
+              if (--extIdx === -1) {
+                // We matched the extension, so mark this as the end of our path
+                // component
+                end = i;
+              }
+            } else {
+              // Extension does not match, so our result is the entire path
+              // component
+              extIdx = -1;
+              end = firstNonSlashEnd;
+            }
+          }
+        }
+      }
+
+      if (start === end)
+        end = firstNonSlashEnd;
+      else if (end === -1)
+        end = path.length;
+      return path.slice(start, end);
+    } else {
+      for (i = path.length - 1; i >= 0; --i) {
+        if (path.charCodeAt(i) === 47/*/*/) {
+          // If we reached a path separator that was not part of a set of path
+          // separators at the end of the string, stop now
+          if (!matchedSlash) {
+            start = i + 1;
+            break;
+          }
+        } else if (end === -1) {
+          // We saw the first non-path separator, mark this as the end of our
+          // path component
+          matchedSlash = false;
+          end = i + 1;
+        }
+      }
+
+      if (end === -1)
+        return '';
+      return path.slice(start, end);
+    }
+  },
+
+
+  extname: function extname(path) {
+    assertPath(path);
+    var startDot = -1;
+    var startPart = 0;
+    var end = -1;
+    var matchedSlash = true;
+    // Track the state of characters (if any) we see before our first dot and
+    // after any path separator we find
+    var preDotState = 0;
+    for (var i = path.length - 1; i >= 0; --i) {
+      const code = path.charCodeAt(i);
+      if (code === 47/*/*/) {
+        // If we reached a path separator that was not part of a set of path
+        // separators at the end of the string, stop now
+        if (!matchedSlash) {
+          startPart = i + 1;
+          break;
+        }
+        continue;
+      }
+      if (end === -1) {
+        // We saw the first non-path separator, mark this as the end of our
+        // extension
+        matchedSlash = false;
+        end = i + 1;
+      }
+      if (code === 46/*.*/) {
+        // If this is our first dot, mark it as the start of our extension
+        if (startDot === -1)
+          startDot = i;
+        else if (preDotState !== 1)
+          preDotState = 1;
+      } else if (startDot !== -1) {
+        // We saw a non-dot and non-path separator before our dot, so we should
+        // have a good chance at having a non-empty extension
+        preDotState = -1;
+      }
+    }
+
+    if (startDot === -1 ||
+        end === -1 ||
+        // We saw a non-dot character immediately before the dot
+        preDotState === 0 ||
+        // The (right-most) trimmed path component is exactly '..'
+        (preDotState === 1 &&
+         startDot === end - 1 &&
+         startDot === startPart + 1)) {
+      return '';
+    }
+    return path.slice(startDot, end);
+  },
+
+
+  format: function format(pathObject) {
+    if (pathObject === null || typeof pathObject !== 'object') {
+      throw new TypeError(
+        `Parameter "pathObject" must be an object, not ${typeof pathObject}`
+      );
+    }
+    return _format('/', pathObject);
+  },
+
+
+  parse: function parse(path) {
+    assertPath(path);
+
+    var ret = { root: '', dir: '', base: '', ext: '', name: '' };
+    if (path.length === 0)
+      return ret;
+    var code = path.charCodeAt(0);
+    var isAbsolute = (code === 47/*/*/);
+    var start;
+    if (isAbsolute) {
+      ret.root = '/';
+      start = 1;
+    } else {
+      start = 0;
+    }
+    var startDot = -1;
+    var startPart = 0;
+    var end = -1;
+    var matchedSlash = true;
+    var i = path.length - 1;
+
+    // Track the state of characters (if any) we see before our first dot and
+    // after any path separator we find
+    var preDotState = 0;
+
+    // Get non-dir info
+    for (; i >= start; --i) {
+      code = path.charCodeAt(i);
+      if (code === 47/*/*/) {
+        // If we reached a path separator that was not part of a set of path
+        // separators at the end of the string, stop now
+        if (!matchedSlash) {
+          startPart = i + 1;
+          break;
+        }
+        continue;
+      }
+      if (end === -1) {
+        // We saw the first non-path separator, mark this as the end of our
+        // extension
+        matchedSlash = false;
+        end = i + 1;
+      }
+      if (code === 46/*.*/) {
+        // If this is our first dot, mark it as the start of our extension
+        if (startDot === -1)
+          startDot = i;
+        else if (preDotState !== 1)
+          preDotState = 1;
+      } else if (startDot !== -1) {
+        // We saw a non-dot and non-path separator before our dot, so we should
+        // have a good chance at having a non-empty extension
+        preDotState = -1;
+      }
+    }
+
+    if (startDot === -1 ||
+        end === -1 ||
+        // We saw a non-dot character immediately before the dot
+        preDotState === 0 ||
+        // The (right-most) trimmed path component is exactly '..'
+        (preDotState === 1 &&
+         startDot === end - 1 &&
+         startDot === startPart + 1)) {
+      if (end !== -1) {
+        if (startPart === 0 && isAbsolute)
+          ret.base = ret.name = path.slice(1, end);
+        else
+          ret.base = ret.name = path.slice(startPart, end);
+      }
+    } else {
+      if (startPart === 0 && isAbsolute) {
+        ret.name = path.slice(1, startDot);
+        ret.base = path.slice(1, end);
+      } else {
+        ret.name = path.slice(startPart, startDot);
+        ret.base = path.slice(startPart, end);
+      }
+      ret.ext = path.slice(startDot, end);
+    }
+
+    if (startPart > 0)
+      ret.dir = path.slice(0, startPart - 1);
+    else if (isAbsolute)
+      ret.dir = '/';
+
+    return ret;
+  },
+
+
+  sep: '/',
+  delimiter: ':',
+  posix: null
+};
+
+
+module.exports = posix;
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(5)))
+
+/***/ },
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+var core = __webpack_require__(0);
+
+function request(url, type, withCredentials, headers) {
+	var supportsURL = (typeof window != "undefined") ? window.URL : false; // TODO: fallback for url if window isn't defined
+	var BLOB_RESPONSE = supportsURL ? "blob" : "arraybuffer";
+	var uri;
+
+	var deferred = new core.defer();
+
+	var xhr = new XMLHttpRequest();
+
+	//-- Check from PDF.js:
+	//   https://github.com/mozilla/pdf.js/blob/master/web/compatibility.js
+	var xhrPrototype = XMLHttpRequest.prototype;
+
+	var header;
+
+	if (!('overrideMimeType' in xhrPrototype)) {
+		// IE10 might have response, but not overrideMimeType
+		Object.defineProperty(xhrPrototype, 'overrideMimeType', {
+			value: function xmlHttpRequestOverrideMimeType(mimeType) {}
+		});
+	}
+	if(withCredentials) {
+		xhr.withCredentials = true;
+	}
+
+	xhr.onreadystatechange = handler;
+	xhr.onerror = err;
+
+	xhr.open("GET", url, true);
+
+	for(header in headers) {
+		xhr.setRequestHeader(header, headers[header]);
+	}
+
+	if(type == "json") {
+		xhr.setRequestHeader("Accept", "application/json");
+	}
+
+	// If type isn't set, determine it from the file extension
+	if(!type) {
+		// uri = new URI(url);
+		// type = uri.suffix();
+		type = core.extension(url);
+	}
+
+	if(type == 'blob'){
+		xhr.responseType = BLOB_RESPONSE;
+	}
+
+
+	if(core.isXml(type)) {
+		// xhr.responseType = "document";
+		xhr.overrideMimeType('text/xml'); // for OPF parsing
+	}
+
+	if(type == 'xhtml') {
+		// xhr.responseType = "document";
+	}
+
+	if(type == 'html' || type == 'htm') {
+		// xhr.responseType = "document";
+	 }
+
+	if(type == "binary") {
+		xhr.responseType = "arraybuffer";
+	}
+
+	xhr.send();
+
+	function err(e) {
+		console.error(e);
+		deferred.reject(e);
+	}
+
+	function handler() {
+		if (this.readyState === XMLHttpRequest.DONE) {
+			var responseXML = false;
+
+			if(this.responseType === '' || this.responseType === "document") {
+				responseXML = this.responseXML;
+			}
+
+			if (this.status === 200 || responseXML ) { //-- Firefox is reporting 0 for blob urls
+				var r;
+
+				if (!this.response && !responseXML) {
+					deferred.reject({
+						status: this.status,
+						message : "Empty Response",
+						stack : new Error().stack
+					});
+					return deferred.promise;
+				}
+
+				if (this.status === 403) {
+					deferred.reject({
+						status: this.status,
+						response: this.response,
+						message : "Forbidden",
+						stack : new Error().stack
+					});
+					return deferred.promise;
+				}
+
+				if(responseXML){
+					r = this.responseXML;
+				} else
+				if(core.isXml(type)){
+					// xhr.overrideMimeType('text/xml'); // for OPF parsing
+					// If this.responseXML wasn't set, try to parse using a DOMParser from text
+					r = core.parse(this.response, "text/xml");
+				}else
+				if(type == 'xhtml'){
+					r = core.parse(this.response, "application/xhtml+xml");
+				}else
+				if(type == 'html' || type == 'htm'){
+					r = core.parse(this.response, "text/html");
+				}else
+				if(type == 'json'){
+					r = JSON.parse(this.response);
+				}else
+				if(type == 'blob'){
+
+					if(supportsURL) {
+						r = this.response;
+					} else {
+						//-- Safari doesn't support responseType blob, so create a blob from arraybuffer
+						r = new Blob([this.response]);
+					}
+
+				}else{
+					r = this.response;
+				}
+
+				deferred.resolve(r);
+			} else {
+
+				deferred.reject({
+					status: this.status,
+					message : this.response,
+					stack : new Error().stack
+				});
+
+			}
+		}
+	}
 
 	return deferred.promise;
 };
 
-EPUBJS.Locations.prototype.process = function(chapter) {
-  return chapter.load()
-    .then(function(_doc) {
+module.exports = request;
 
-      var range;
-      var doc = _doc;
-      var contents = doc.documentElement.querySelector("body");
-      var counter = 0;
-      var prev;
-      var cfi;
 
-      this.sprint(contents, function(node) {
-        var len = node.length;
-        var dist;
-        var pos = 0;
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
 
-        // Start range
-        if (counter === 0) {
-          range = doc.createRange();
-          range.setStart(node, 0);
+// shim for using process in browser
+var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
         }
-
-        dist = this.break - counter;
-
-        // Node is smaller than a break
-        if(dist > len){
-          counter += len;
-          pos = len;
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
         }
-
-        while (pos < len) {
-          counter = this.break;
-          pos += this.break;
-
-          // Gone over
-          if(pos >= len){
-            // Continue counter for next node
-            counter = len - (pos - this.break);
-
-          // At End
-          } else {
-            // End the previous range
-            range.setEnd(node, pos);
-            cfi = chapter.cfiFromRange(range);
-            this._locations.push(cfi);
-            counter = 0;
-
-            // Start new range
-            pos += 1;
-            range = doc.createRange();
-            range.setStart(node, pos);
-          }
-
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
         }
+    }
 
-        prev = node;
 
-      }.bind(this));
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
 
-      // Close remaining
-      if (range) {
-        range.setEnd(prev, prev.length);
-        cfi = chapter.cfiFromRange(range);
-        this._locations.push(cfi);
-        counter = 0;
-      }
 
-    }.bind(this));
 
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        runTimeout(drainQueue);
+    }
 };
 
-EPUBJS.Locations.prototype.sprint = function(root, func) {
-  var node;
-	var treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
 
-	while ((node = treeWalker.nextNode())) {
-		func(node);
-	}
+function noop() {}
 
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
 };
 
-EPUBJS.Locations.prototype.locationFromCfi = function(cfi){
-  // Check if the location has not been set yet
-	if(this._locations.length === 0) {
-		return -1;
-	}
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
 
-  return EPUBJS.core.locationOf(cfi, this._locations, this.epubcfi.compare);
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+//-- Hooks allow for injecting functions that must all complete in order before finishing
+//   They will execute in parallel but all must finish before continuing
+//   Functions may return a promise if they are asycn.
+
+// this.content = new EPUBJS.Hook();
+// this.content.register(function(){});
+// this.content.trigger(args).then(function(){});
+
+function Hook(context){
+	this.context = context || this;
+	this.hooks = [];
 };
 
-EPUBJS.Locations.prototype.percentageFromCfi = function(cfi) {
-  // Find closest cfi
-  var loc = this.locationFromCfi(cfi);
-  // Get percentage in total
-  return this.percentageFromLocation(loc);
-};
-
-EPUBJS.Locations.prototype.percentageFromLocation = function(loc) {
-  if (!loc || !this.total) {
-    return 0;
-  }
-  return (loc / this.total);
-};
-
-EPUBJS.Locations.prototype.cfiFromLocation = function(loc){
-	var cfi = -1;
-	// check that pg is an int
-	if(typeof loc != "number"){
-		loc = parseInt(loc);
-	}
-
-	if(loc >= 0 && loc < this._locations.length) {
-		cfi = this._locations[loc];
-	}
-
-	return cfi;
-};
-
-EPUBJS.Locations.prototype.cfiFromPercentage = function(value){
-  var percentage = (value > 1) ? value / 100 : value; // Normalize value to 0-1
-	var loc = Math.ceil(this.total * percentage);
-
-	return this.cfiFromLocation(loc);
-};
-
-EPUBJS.Locations.prototype.load = function(locations){
-	this._locations = JSON.parse(locations);
-  this.total = this._locations.length-1;
-  return this._locations;
-};
-
-EPUBJS.Locations.prototype.save = function(json){
-	return JSON.stringify(this._locations);
-};
-
-EPUBJS.Locations.prototype.getCurrent = function(json){
-	return this._current;
-};
-
-EPUBJS.Locations.prototype.setCurrent = function(curr){
-  var loc;
-
-  if(typeof curr == "string"){
-    this._currentCfi = curr;
-  } else if (typeof curr == "number") {
-    this._current = curr;
-  } else {
-    return;
-  }
-
-  if(this._locations.length === 0) {
-    return;
-	}
-
-  if(typeof curr == "string"){
-    loc = this.locationFromCfi(curr);
-    this._current = loc;
-  } else {
-    loc = curr;
-  }
-
-  this.trigger("changed", {
-    percentage: this.percentageFromLocation(loc)
-  });
-};
-
-Object.defineProperty(EPUBJS.Locations.prototype, 'currentLocation', {
-  get: function () {
-    return this._current;
-  },
-  set: function (curr) {
-    this.setCurrent(curr);
-  }
-});
-
-RSVP.EventTarget.mixin(EPUBJS.Locations.prototype);
-
-EPUBJS.Pagination = function(pageList) {
-	this.pages = [];
-	this.locations = [];
-	this.epubcfi = new EPUBJS.EpubCFI();
-	if(pageList && pageList.length) {
-		this.process(pageList);
-	}
-};
-
-EPUBJS.Pagination.prototype.process = function(pageList){
-	pageList.forEach(function(item){
-		this.pages.push(item.page);
-		this.locations.push(item.cfi);
-	}, this);
-
-	this.pageList = pageList;
-	this.firstPage = parseInt(this.pages[0]);
-	this.lastPage = parseInt(this.pages[this.pages.length-1]);
-	this.totalPages = this.lastPage - this.firstPage;
-};
-
-EPUBJS.Pagination.prototype.pageFromCfi = function(cfi){
-	var pg = -1;
-
-	// Check if the pageList has not been set yet
-	if(this.locations.length === 0) {
-		return -1;
-	}
-
-	// TODO: check if CFI is valid?
-
-	// check if the cfi is in the location list
-	// var index = this.locations.indexOf(cfi);
-	var index = EPUBJS.core.indexOfSorted(cfi, this.locations, this.epubcfi.compare);
-	if(index != -1) {
-		pg = this.pages[index];
-	} else {
-		// Otherwise add it to the list of locations
-		// Insert it in the correct position in the locations page
-		//index = EPUBJS.core.insert(cfi, this.locations, this.epubcfi.compare);
-		index = EPUBJS.core.locationOf(cfi, this.locations, this.epubcfi.compare);
-		// Get the page at the location just before the new one, or return the first
-		pg = index-1 >= 0 ? this.pages[index-1] : this.pages[0];
-		if(pg !== undefined) {
-			// Add the new page in so that the locations and page array match up
-			//this.pages.splice(index, 0, pg);
+// Adds a function to be run before a hook completes
+Hook.prototype.register = function(){
+	for(var i = 0; i < arguments.length; ++i) {
+		if (typeof arguments[i]  === "function") {
+			this.hooks.push(arguments[i]);
 		} else {
-			pg = -1;
+			// unpack array
+			for(var j = 0; j < arguments[i].length; ++j) {
+				this.hooks.push(arguments[i][j]);
+			}
+		}
+	}
+};
+
+// Triggers a hook to run all functions
+Hook.prototype.trigger = function(){
+	var args = arguments;
+	var context = this.context;
+	var promises = [];
+
+	this.hooks.forEach(function(task, i) {
+		var executing = task.apply(context, args);
+
+		if(executing && typeof executing["then"] === "function") {
+			// Task is a function that returns a promise
+			promises.push(executing);
+		}
+		// Otherwise Task resolves immediately, continue
+	});
+
+
+	return Promise.all(promises);
+};
+
+// Adds a function to be run before a hook completes
+Hook.prototype.list = function(){
+	return this.hooks;
+};
+
+Hook.prototype.clear = function(){
+	return this.hooks = [];
+};
+
+module.exports = Hook;
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+var EpubCFI = __webpack_require__(1);
+
+function Mapping(layout){
+	this.layout = layout;
+};
+
+Mapping.prototype.section = function(view) {
+	var ranges = this.findRanges(view);
+	var map = this.rangeListToCfiList(view.section.cfiBase, ranges);
+
+	return map;
+};
+
+Mapping.prototype.page = function(contents, cfiBase, start, end) {
+	var root = contents && contents.document ? contents.document.body : false;
+
+	if (!root) {
+		return;
+	}
+
+	return this.rangePairToCfiPair(cfiBase, {
+		start: this.findStart(root, start, end),
+		end: this.findEnd(root, start, end)
+	});
+};
+
+Mapping.prototype.walk = function(root, func) {
+	//var treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT + NodeFilter.SHOW_TEXT, null, false);
+	var treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+			acceptNode: function (node) {
+					if ( node.data.trim().length > 0 ) {
+						return NodeFilter.FILTER_ACCEPT;
+					} else {
+						return NodeFilter.FILTER_REJECT;
+					}
+			}
+	}, false);
+	var node;
+	var result;
+	while ((node = treeWalker.nextNode())) {
+		result = func(node);
+		if(result) break;
+	}
+
+	return result;
+};
+
+Mapping.prototype.findRanges = function(view){
+	var columns = [];
+	var scrollWidth = view.contents.scrollWidth();
+	var count = this.layout.count(scrollWidth);
+	var column = this.layout.column;
+	var gap = this.layout.gap;
+	var start, end;
+
+	for (var i = 0; i < count.pages; i++) {
+		start = (column + gap) * i;
+		end = (column * (i+1)) + (gap * i);
+		columns.push({
+			start: this.findStart(view.document.body, start, end),
+			end: this.findEnd(view.document.body, start, end)
+		});
+	}
+
+	return columns;
+};
+
+Mapping.prototype.findStart = function(root, start, end){
+	var stack = [root];
+	var $el;
+	var found;
+	var $prev = root;
+	while (stack.length) {
+
+		$el = stack.shift();
+
+		found = this.walk($el, function(node){
+			var left, right;
+			var elPos;
+			var elRange;
+
+
+			if(node.nodeType == Node.TEXT_NODE){
+				elRange = document.createRange();
+				elRange.selectNodeContents(node);
+				elPos = elRange.getBoundingClientRect();
+			} else {
+				elPos = node.getBoundingClientRect();
+			}
+
+			left = elPos.left;
+			right = elPos.right;
+
+			if( left >= start && left <= end ) {
+				return node;
+			} else if (right > start) {
+				return node;
+			} else {
+				$prev = node;
+				stack.push(node);
+			}
+
+		});
+
+		if(found) {
+			return this.findTextStartRange(found, start, end);
 		}
 
 	}
-	return pg;
+
+	// Return last element
+	return this.findTextStartRange($prev, start, end);
 };
 
-EPUBJS.Pagination.prototype.cfiFromPage = function(pg){
-	var cfi = -1;
-	// check that pg is an int
-	if(typeof pg != "number"){
-		pg = parseInt(pg);
+Mapping.prototype.findEnd = function(root, start, end){
+	var stack = [root];
+	var $el;
+	var $prev = root;
+	var found;
+
+	while (stack.length) {
+
+		$el = stack.shift();
+
+		found = this.walk($el, function(node){
+
+			var left, right;
+			var elPos;
+			var elRange;
+
+
+			if(node.nodeType == Node.TEXT_NODE){
+				elRange = document.createRange();
+				elRange.selectNodeContents(node);
+				elPos = elRange.getBoundingClientRect();
+			} else {
+				elPos = node.getBoundingClientRect();
+			}
+
+			left = elPos.left;
+			right = elPos.right;
+
+			if(left > end && $prev) {
+				return $prev;
+			} else if(right > end) {
+				return node;
+			} else {
+				$prev = node;
+				stack.push(node);
+			}
+
+		});
+
+
+		if(found){
+			return this.findTextEndRange(found, start, end);
+		}
+
 	}
 
-	// check if the cfi is in the page list
-	// Pages could be unsorted.
-	var index = this.pages.indexOf(pg);
-	if(index != -1) {
-		cfi = this.locations[index];
+	// end of chapter
+	return this.findTextEndRange($prev, start, end);
+};
+
+
+Mapping.prototype.findTextStartRange = function(node, start, end){
+	var ranges = this.splitTextNodeIntoRanges(node);
+	var prev;
+	var range;
+	var pos;
+
+	for (var i = 0; i < ranges.length; i++) {
+		range = ranges[i];
+
+		pos = range.getBoundingClientRect();
+
+		if( pos.left >= start ) {
+			return range;
+		}
+
+		prev = range;
+
 	}
-	// TODO: handle pages not in the list
-	return cfi;
+
+	return ranges[0];
 };
 
-EPUBJS.Pagination.prototype.pageFromPercentage = function(percent){
-	var pg = Math.round(this.totalPages * percent);
-	return pg;
+Mapping.prototype.findTextEndRange = function(node, start, end){
+	var ranges = this.splitTextNodeIntoRanges(node);
+	var prev;
+	var range;
+	var pos;
+
+	for (var i = 0; i < ranges.length; i++) {
+		range = ranges[i];
+
+		pos = range.getBoundingClientRect();
+
+		if(pos.left > end && prev) {
+			return prev;
+		} else if(pos.right > end) {
+			return range;
+		}
+
+		prev = range;
+
+	}
+
+	// Ends before limit
+	return ranges[ranges.length-1];
+
 };
 
-// Returns a value between 0 - 1 corresponding to the location of a page
-EPUBJS.Pagination.prototype.percentageFromPage = function(pg){
-	var percentage = (pg - this.firstPage) / this.totalPages;
-	return Math.round(percentage * 1000) / 1000;
+Mapping.prototype.splitTextNodeIntoRanges = function(node, _splitter){
+	var ranges = [];
+	var textContent = node.textContent || "";
+	var text = textContent.trim();
+	var range;
+	var rect;
+	var list;
+	var doc = node.ownerDocument;
+	var splitter = _splitter || " ";
+
+	pos = text.indexOf(splitter);
+
+	if(pos === -1 || node.nodeType != Node.TEXT_NODE) {
+		range = doc.createRange();
+		range.selectNodeContents(node);
+		return [range];
+	}
+
+	range = doc.createRange();
+	range.setStart(node, 0);
+	range.setEnd(node, pos);
+	ranges.push(range);
+	range = false;
+
+	while ( pos != -1 ) {
+
+		pos = text.indexOf(splitter, pos + 1);
+		if(pos > 0) {
+
+			if(range) {
+				range.setEnd(node, pos);
+				ranges.push(range);
+			}
+
+			range = doc.createRange();
+			range.setStart(node, pos+1);
+		}
+	}
+
+	if(range) {
+		range.setEnd(node, text.length);
+		ranges.push(range);
+	}
+
+	return ranges;
 };
 
-// Returns a value between 0 - 1 corresponding to the location of a cfi
-EPUBJS.Pagination.prototype.percentageFromCfi = function(cfi){
-	var pg = this.pageFromCfi(cfi);
-	var percentage = this.percentageFromPage(pg);
-	return percentage;
-};
-EPUBJS.Parser = function(baseUrl){
-	this.baseUrl = baseUrl || '';
+
+
+Mapping.prototype.rangePairToCfiPair = function(cfiBase, rangePair){
+
+	var startRange = rangePair.start;
+	var endRange = rangePair.end;
+
+	startRange.collapse(true);
+	endRange.collapse(true);
+
+	// startCfi = section.cfiFromRange(startRange);
+	// endCfi = section.cfiFromRange(endRange);
+	startCfi = new EpubCFI(startRange, cfiBase).toString();
+	endCfi = new EpubCFI(endRange, cfiBase).toString();
+
+	return {
+		start: startCfi,
+		end: endCfi
+	};
+
 };
 
-EPUBJS.Parser.prototype.container = function(containerXml){
+Mapping.prototype.rangeListToCfiList = function(cfiBase, columns){
+	var map = [];
+	var rangePair, cifPair;
+
+	for (var i = 0; i < columns.length; i++) {
+		cifPair = this.rangePairToCfiPair(cfiBase, columns[i]);
+
+		map.push(cifPair);
+
+	}
+
+	return map;
+};
+
+module.exports = Mapping;
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+var core = __webpack_require__(0);
+
+function Queue(_context){
+	this._q = [];
+	this.context = _context;
+	this.tick = core.requestAnimationFrame;
+	this.running = false;
+	this.paused = false;
+};
+
+// Add an item to the queue
+Queue.prototype.enqueue = function() {
+	var deferred, promise;
+	var queued;
+	var task = [].shift.call(arguments);
+	var args = arguments;
+
+	// Handle single args without context
+	// if(args && !Array.isArray(args)) {
+	//   args = [args];
+	// }
+	if(!task) {
+		return console.error("No Task Provided");
+	}
+
+	if(typeof task === "function"){
+
+		deferred = new core.defer();
+		promise = deferred.promise;
+
+		queued = {
+			"task" : task,
+			"args"     : args,
+			//"context"  : context,
+			"deferred" : deferred,
+			"promise" : promise
+		};
+
+	} else {
+		// Task is a promise
+		queued = {
+			"promise" : task
+		};
+
+	}
+
+	this._q.push(queued);
+
+	// Wait to start queue flush
+	if (this.paused == false && !this.running) {
+		// setTimeout(this.flush.bind(this), 0);
+		// this.tick.call(window, this.run.bind(this));
+		this.run();
+	}
+
+	return queued.promise;
+};
+
+// Run one item
+Queue.prototype.dequeue = function(){
+	var inwait, task, result;
+
+	if(this._q.length) {
+		inwait = this._q.shift();
+		task = inwait.task;
+		if(task){
+			// console.log(task)
+
+			result = task.apply(this.context, inwait.args);
+
+			if(result && typeof result["then"] === "function") {
+				// Task is a function that returns a promise
+				return result.then(function(){
+					inwait.deferred.resolve.apply(this.context, arguments);
+				}.bind(this));
+			} else {
+				// Task resolves immediately
+				inwait.deferred.resolve.apply(this.context, result);
+				return inwait.promise;
+			}
+
+
+
+		} else if(inwait.promise) {
+			// Task is a promise
+			return inwait.promise;
+		}
+
+	} else {
+		inwait = new core.defer();
+		inwait.deferred.resolve();
+		return inwait.promise;
+	}
+
+};
+
+// Run All Immediately
+Queue.prototype.dump = function(){
+	while(this._q.length) {
+		this.dequeue();
+	}
+};
+
+// Run all sequentially, at convince
+
+Queue.prototype.run = function(){
+
+	if(!this.running){
+		this.running = true;
+		this.defered = new core.defer();
+	}
+
+	this.tick.call(window, function() {
+
+		if(this._q.length) {
+
+			this.dequeue()
+				.then(function(){
+					this.run();
+				}.bind(this));
+
+		} else {
+			this.defered.resolve();
+			this.running = undefined;
+		}
+
+	}.bind(this));
+
+	// Unpause
+	if(this.paused == true) {
+		this.paused = false;
+	}
+
+	return this.defered.promise;
+};
+
+// Flush all, as quickly as possible
+Queue.prototype.flush = function(){
+
+	if(this.running){
+		return this.running;
+	}
+
+	if(this._q.length) {
+		this.running = this.dequeue()
+			.then(function(){
+				this.running = undefined;
+				return this.flush();
+			}.bind(this));
+
+		return this.running;
+	}
+
+};
+
+// Clear all items in wait
+Queue.prototype.clear = function(){
+	this._q = [];
+	this.running = false;
+};
+
+Queue.prototype.length = function(){
+	return this._q.length;
+};
+
+Queue.prototype.pause = function(){
+	this.paused = true;
+};
+
+// Create a new task from a callback
+function Task(task, args, context){
+
+	return function(){
+		var toApply = arguments || [];
+
+		return new Promise(function(resolve, reject) {
+			var callback = function(value){
+				resolve(value);
+			};
+			// Add the callback to the arguments list
+			toApply.push(callback);
+
+			// Apply all arguments to the functions
+			task.apply(this, toApply);
+
+	}.bind(this));
+
+	};
+
+};
+
+module.exports = Queue;
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+var EventEmitter = __webpack_require__(2);
+var core = __webpack_require__(0);
+var EpubCFI = __webpack_require__(1);
+var Mapping = __webpack_require__(7);
+
+
+function Contents(doc, content, cfiBase) {
+	// Blank Cfi for Parsing
+	this.epubcfi = new EpubCFI();
+
+	this.document = doc;
+	this.documentElement =  this.document.documentElement;
+	this.content = content || this.document.body;
+	this.window = this.document.defaultView;
+	// Dom events to listen for
+	this.listenedEvents = ["keydown", "keyup", "keypressed", "mouseup", "mousedown", "click", "touchend", "touchstart"];
+
+	this._size = {
+		width: 0,
+		height: 0
+	}
+
+	this.cfiBase = cfiBase || "";
+
+	this.listeners();
+};
+
+Contents.prototype.width = function(w) {
+	// var frame = this.documentElement;
+	var frame = this.content;
+
+	if (w && core.isNumber(w)) {
+		w = w + "px";
+	}
+
+	if (w) {
+		frame.style.width = w;
+		// this.content.style.width = w;
+	}
+
+	return this.window.getComputedStyle(frame)['width'];
+
+
+};
+
+Contents.prototype.height = function(h) {
+	// var frame = this.documentElement;
+	var frame = this.content;
+
+	if (h && core.isNumber(h)) {
+		h = h + "px";
+	}
+
+	if (h) {
+		frame.style.height = h;
+		// this.content.style.height = h;
+	}
+
+	return this.window.getComputedStyle(frame)['height'];
+
+};
+
+Contents.prototype.contentWidth = function(w) {
+
+	var content = this.content || this.document.body;
+
+	if (w && core.isNumber(w)) {
+		w = w + "px";
+	}
+
+	if (w) {
+		content.style.width = w;
+	}
+
+	return this.window.getComputedStyle(content)['width'];
+
+
+};
+
+Contents.prototype.contentHeight = function(h) {
+
+	var content = this.content || this.document.body;
+
+	if (h && core.isNumber(h)) {
+		h = h + "px";
+	}
+
+	if (h) {
+		content.style.height = h;
+	}
+
+	return this.window.getComputedStyle(content)['height'];
+
+};
+
+Contents.prototype.textWidth = function() {
+	var width;
+	var range = this.document.createRange();
+	var content = this.content || this.document.body;
+
+	// Select the contents of frame
+	range.selectNodeContents(content);
+
+	// get the width of the text content
+	width = range.getBoundingClientRect().width;
+
+	return width;
+
+};
+
+Contents.prototype.textHeight = function() {
+	var height;
+	var range = this.document.createRange();
+	var content = this.content || this.document.body;
+
+	range.selectNodeContents(content);
+
+	height = range.getBoundingClientRect().height;
+
+	return height;
+};
+
+Contents.prototype.scrollWidth = function() {
+	var width = this.documentElement.scrollWidth;
+
+	return width;
+};
+
+Contents.prototype.scrollHeight = function() {
+	var height = this.documentElement.scrollHeight;
+
+	return height;
+};
+
+Contents.prototype.overflow = function(overflow) {
+
+	if (overflow) {
+		this.documentElement.style.overflow = overflow;
+	}
+
+	return this.window.getComputedStyle(this.documentElement)['overflow'];
+};
+
+Contents.prototype.overflowX = function(overflow) {
+
+	if (overflow) {
+		this.documentElement.style.overflowX = overflow;
+	}
+
+	return this.window.getComputedStyle(this.documentElement)['overflowX'];
+};
+
+Contents.prototype.overflowY = function(overflow) {
+
+	if (overflow) {
+		this.documentElement.style.overflowY = overflow;
+	}
+
+	return this.window.getComputedStyle(this.documentElement)['overflowY'];
+};
+
+Contents.prototype.css = function(property, value) {
+	var content = this.content || this.document.body;
+
+	if (value) {
+		content.style[property] = value;
+	}
+
+	return this.window.getComputedStyle(content)[property];
+};
+
+Contents.prototype.viewport = function(options) {
+	var width, height, scale, scalable;
+	var $viewport = this.document.querySelector("meta[name='viewport']");
+	var newContent = '';
+
+	/*
+	* check for the viewport size
+	* <meta name="viewport" content="width=1024,height=697" />
+	*/
+	if($viewport && $viewport.hasAttribute("content")) {
+		content = $viewport.getAttribute("content");
+		contents = content.split(/\s*,\s*/);
+		if(contents[0]){
+			width = contents[0].replace("width=", '').trim();
+		}
+		if(contents[1]){
+			height = contents[1].replace("height=", '').trim();
+		}
+		if(contents[2]){
+			scale = contents[2].replace("initial-scale=", '').trim();
+		}
+		if(contents[3]){
+			scalable = contents[3].replace("user-scalable=", '').trim();
+		}
+	}
+
+	if (options) {
+
+		newContent += "width=" + (options.width || width);
+		newContent += ", height=" + (options.height || height);
+		if (options.scale || scale) {
+			newContent += ", initial-scale=" + (options.scale || scale);
+		}
+		if (options.scalable || scalable) {
+			newContent += ", user-scalable=" + (options.scalable || scalable);
+		}
+
+		if (!$viewport) {
+			$viewport = this.document.createElement("meta");
+			$viewport.setAttribute("name", "viewport");
+			this.document.querySelector('head').appendChild($viewport);
+		}
+
+		$viewport.setAttribute("content", newContent);
+	}
+
+
+	return {
+		width: parseInt(width),
+		height: parseInt(height)
+	};
+};
+
+
+// Contents.prototype.layout = function(layoutFunc) {
+//
+//   this.iframe.style.display = "inline-block";
+//
+//   // Reset Body Styles
+//   this.content.style.margin = "0";
+//   //this.document.body.style.display = "inline-block";
+//   //this.document.documentElement.style.width = "auto";
+//
+//   if(layoutFunc){
+//     layoutFunc(this);
+//   }
+//
+//   this.onLayout(this);
+//
+// };
+//
+// Contents.prototype.onLayout = function(view) {
+//   // stub
+// };
+
+Contents.prototype.expand = function() {
+	this.emit("expand");
+};
+
+Contents.prototype.listeners = function() {
+
+	this.imageLoadListeners();
+
+	this.mediaQueryListeners();
+
+	// this.fontLoadListeners();
+
+	this.addEventListeners();
+
+	this.addSelectionListeners();
+
+	this.resizeListeners();
+
+};
+
+Contents.prototype.removeListeners = function() {
+
+	this.removeEventListeners();
+
+	this.removeSelectionListeners();
+};
+
+Contents.prototype.resizeListeners = function() {
+	var width, height;
+	// Test size again
+	clearTimeout(this.expanding);
+
+	width = this.scrollWidth();
+	height = this.scrollHeight();
+
+	if (width != this._size.width || height != this._size.height) {
+
+		this._size = {
+			width: width,
+			height: height
+		}
+
+		this.emit("resize", this._size);
+	}
+
+	this.expanding = setTimeout(this.resizeListeners.bind(this), 350);
+};
+
+//https://github.com/tylergaw/media-query-events/blob/master/js/mq-events.js
+Contents.prototype.mediaQueryListeners = function() {
+		var sheets = this.document.styleSheets;
+		var mediaChangeHandler = function(m){
+			if(m.matches && !this._expanding) {
+				setTimeout(this.expand.bind(this), 1);
+				// this.expand();
+			}
+		}.bind(this);
+
+		for (var i = 0; i < sheets.length; i += 1) {
+				var rules;
+				// Firefox errors if we access cssRules cross-domain
+				try {
+					rules = sheets[i].cssRules;
+				} catch (e) {
+					return;
+				}
+				if(!rules) return; // Stylesheets changed
+				for (var j = 0; j < rules.length; j += 1) {
+						//if (rules[j].constructor === CSSMediaRule) {
+						if(rules[j].media){
+								var mql = this.window.matchMedia(rules[j].media.mediaText);
+								mql.addListener(mediaChangeHandler);
+								//mql.onchange = mediaChangeHandler;
+						}
+				}
+		}
+};
+
+Contents.prototype.observe = function(target) {
+	var renderer = this;
+
+	// create an observer instance
+	var observer = new MutationObserver(function(mutations) {
+		if(renderer._expanding) {
+			renderer.expand();
+		}
+		// mutations.forEach(function(mutation) {
+		//   console.log(mutation);
+		// });
+	});
+
+	// configuration of the observer:
+	var config = { attributes: true, childList: true, characterData: true, subtree: true };
+
+	// pass in the target node, as well as the observer options
+	observer.observe(target, config);
+
+	return observer;
+};
+
+Contents.prototype.imageLoadListeners = function(target) {
+	var images = this.document.querySelectorAll("img");
+	var img;
+	for (var i = 0; i < images.length; i++) {
+		img = images[i];
+
+		if (typeof img.naturalWidth !== "undefined" &&
+				img.naturalWidth === 0) {
+			img.onload = this.expand.bind(this);
+		}
+	}
+};
+
+Contents.prototype.fontLoadListeners = function(target) {
+	if (!this.document || !this.document.fonts) {
+		return;
+	}
+
+	this.document.fonts.ready.then(function () {
+		this.expand();
+	}.bind(this));
+
+};
+
+Contents.prototype.root = function() {
+	if(!this.document) return null;
+	return this.document.documentElement;
+};
+
+Contents.prototype.locationOf = function(target, ignoreClass) {
+	var position;
+	var targetPos = {"left": 0, "top": 0};
+
+	if(!this.document) return;
+
+	if(this.epubcfi.isCfiString(target)) {
+		range = new EpubCFI(target).toRange(this.document, ignoreClass);
+
+		if(range) {
+			if (range.startContainer.nodeType === Node.ELEMENT_NODE) {
+				position = range.startContainer.getBoundingClientRect();
+				targetPos.left = position.left;
+				targetPos.top = position.top;
+			} else {
+				position = range.getBoundingClientRect();
+				targetPos.left = position.left;
+				targetPos.top = position.top;
+			}
+		}
+
+	} else if(typeof target === "string" &&
+		target.indexOf("#") > -1) {
+
+		id = target.substring(target.indexOf("#")+1);
+		el = this.document.getElementById(id);
+
+		if(el) {
+			position = el.getBoundingClientRect();
+			targetPos.left = position.left;
+			targetPos.top = position.top;
+		}
+	}
+
+	return targetPos;
+};
+
+Contents.prototype.addStylesheet = function(src) {
+	return new Promise(function(resolve, reject){
+		var $stylesheet;
+		var ready = false;
+
+		if(!this.document) {
+			resolve(false);
+			return;
+		}
+
+		$stylesheet = this.document.createElement('link');
+		$stylesheet.type = 'text/css';
+		$stylesheet.rel = "stylesheet";
+		$stylesheet.href = src;
+		$stylesheet.onload = $stylesheet.onreadystatechange = function() {
+			if ( !ready && (!this.readyState || this.readyState == 'complete') ) {
+				ready = true;
+				// Let apply
+				setTimeout(function(){
+					resolve(true);
+				}, 1);
+			}
+		};
+
+		this.document.head.appendChild($stylesheet);
+
+	}.bind(this));
+};
+
+// https://developer.mozilla.org/en-US/docs/Web/API/CSSStyleSheet/insertRule
+Contents.prototype.addStylesheetRules = function(rules) {
+	var styleEl;
+	var styleSheet;
+
+	if(!this.document) return;
+
+	styleEl = this.document.createElement('style');
+
+	// Append style element to head
+	this.document.head.appendChild(styleEl);
+
+	// Grab style sheet
+	styleSheet = styleEl.sheet;
+
+	for (var i = 0, rl = rules.length; i < rl; i++) {
+		var j = 1, rule = rules[i], selector = rules[i][0], propStr = '';
+		// If the second argument of a rule is an array of arrays, correct our variables.
+		if (Object.prototype.toString.call(rule[1][0]) === '[object Array]') {
+			rule = rule[1];
+			j = 0;
+		}
+
+		for (var pl = rule.length; j < pl; j++) {
+			var prop = rule[j];
+			propStr += prop[0] + ':' + prop[1] + (prop[2] ? ' !important' : '') + ';\n';
+		}
+
+		// Insert CSS Rule
+		styleSheet.insertRule(selector + '{' + propStr + '}', styleSheet.cssRules.length);
+	}
+};
+
+Contents.prototype.addScript = function(src) {
+
+	return new Promise(function(resolve, reject){
+		var $script;
+		var ready = false;
+
+		if(!this.document) {
+			resolve(false);
+			return;
+		}
+
+		$script = this.document.createElement('script');
+		$script.type = 'text/javascript';
+		$script.async = true;
+		$script.src = src;
+		$script.onload = $script.onreadystatechange = function() {
+			if ( !ready && (!this.readyState || this.readyState == 'complete') ) {
+				ready = true;
+				setTimeout(function(){
+					resolve(true);
+				}, 1);
+			}
+		};
+
+		this.document.head.appendChild($script);
+
+	}.bind(this));
+};
+
+Contents.prototype.addEventListeners = function(){
+	if(!this.document) {
+		return;
+	}
+	this.listenedEvents.forEach(function(eventName){
+		this.document.addEventListener(eventName, this.triggerEvent.bind(this), false);
+	}, this);
+
+};
+
+Contents.prototype.removeEventListeners = function(){
+	if(!this.document) {
+		return;
+	}
+	this.listenedEvents.forEach(function(eventName){
+		this.document.removeEventListener(eventName, this.triggerEvent, false);
+	}, this);
+
+};
+
+// Pass browser events
+Contents.prototype.triggerEvent = function(e){
+	this.emit(e.type, e);
+};
+
+Contents.prototype.addSelectionListeners = function(){
+	if(!this.document) {
+		return;
+	}
+	this.document.addEventListener("selectionchange", this.onSelectionChange.bind(this), false);
+};
+
+Contents.prototype.removeSelectionListeners = function(){
+	if(!this.document) {
+		return;
+	}
+	this.document.removeEventListener("selectionchange", this.onSelectionChange, false);
+};
+
+Contents.prototype.onSelectionChange = function(e){
+	if (this.selectionEndTimeout) {
+		clearTimeout(this.selectionEndTimeout);
+	}
+	this.selectionEndTimeout = setTimeout(function() {
+		var selection = this.window.getSelection();
+		this.triggerSelectedEvent(selection);
+	}.bind(this), 500);
+};
+
+Contents.prototype.triggerSelectedEvent = function(selection){
+	var range, cfirange;
+
+	if (selection && selection.rangeCount > 0) {
+		range = selection.getRangeAt(0);
+		if(!range.collapsed) {
+			// cfirange = this.section.cfiFromRange(range);
+			cfirange = new EpubCFI(range, this.cfiBase).toString();
+			this.emit("selected", cfirange);
+			this.emit("selectedRange", range);
+		}
+	}
+};
+
+Contents.prototype.range = function(_cfi, ignoreClass){
+	var cfi = new EpubCFI(_cfi);
+	return cfi.toRange(this.document, ignoreClass);
+};
+
+Contents.prototype.map = function(layout){
+	var map = new Mapping(layout);
+	return map.section();
+};
+
+Contents.prototype.size = function(width, height){
+
+	if (width >= 0) {
+		this.width(width);
+	}
+
+	if (height >= 0) {
+		this.height(height);
+	}
+
+	this.css("margin", "0");
+	this.css("boxSizing", "border-box");
+
+};
+
+Contents.prototype.columns = function(width, height, columnWidth, gap){
+	var COLUMN_AXIS = core.prefixed('columnAxis');
+	var COLUMN_GAP = core.prefixed('columnGap');
+	var COLUMN_WIDTH = core.prefixed('columnWidth');
+	var COLUMN_FILL = core.prefixed('columnFill');
+	var textWidth;
+
+	this.width(width);
+	this.height(height);
+
+	// Deal with Mobile trying to scale to viewport
+	this.viewport({ width: width, height: height, scale: 1.0 });
+
+	// this.overflowY("hidden");
+	this.css("overflowY", "hidden");
+	this.css("margin", "0");
+	this.css("boxSizing", "border-box");
+	this.css("maxWidth", "inherit");
+
+	this.css(COLUMN_AXIS, "horizontal");
+	this.css(COLUMN_FILL, "auto");
+
+	this.css(COLUMN_GAP, gap+"px");
+	this.css(COLUMN_WIDTH, columnWidth+"px");
+};
+
+Contents.prototype.scale = function(scale, offsetX, offsetY){
+	var scale = "scale(" + scale + ")";
+	var translate = '';
+	// this.css("position", "absolute"));
+	this.css("transformOrigin", "top left");
+
+	if (offsetX >= 0 || offsetY >= 0) {
+		translate = " translate(" + (offsetX || 0 )+ "px, " + (offsetY || 0 )+ "px )";
+	}
+
+	this.css("transform", scale + translate);
+};
+
+Contents.prototype.fit = function(width, height){
+	var viewport = this.viewport();
+	var widthScale = width / viewport.width;
+	var heightScale = height / viewport.height;
+	var scale = widthScale < heightScale ? widthScale : heightScale;
+
+	var offsetY = (height - (viewport.height * scale)) / 2;
+
+	this.width(width);
+	this.height(height);
+	this.overflow("hidden");
+
+	// Deal with Mobile trying to scale to viewport
+	this.viewport({ scale: 1.0 });
+
+	// Scale to the correct size
+	this.scale(scale, 0, offsetY);
+
+	this.css("backgroundColor", "transparent");
+};
+
+Contents.prototype.mapPage = function(cfiBase, start, end) {
+	var mapping = new Mapping();
+
+	return mapping.page(this, cfiBase, start, end);
+};
+
+Contents.prototype.destroy = function() {
+	// Stop observing
+	if(this.observer) {
+		this.observer.disconnect();
+	}
+
+	this.removeListeners();
+
+};
+
+EventEmitter(Contents.prototype);
+
+module.exports = Contents;
+
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+var EventEmitter = __webpack_require__(2);
+var core = __webpack_require__(0);
+var EpubCFI = __webpack_require__(1);
+var Mapping = __webpack_require__(7);
+var Queue = __webpack_require__(8);
+var Stage = __webpack_require__(39);
+var Views = __webpack_require__(40);
+
+function DefaultViewManager(options) {
+
+	this.name = "default";
+	this.View = options.view;
+	this.request = options.request;
+	this.renditionQueue = options.queue;
+	this.q = new Queue(this);
+
+	this.settings = core.extend(this.settings || {}, {
+		infinite: true,
+		hidden: false,
+		width: undefined,
+		height: undefined,
+		// globalLayoutProperties : { layout: 'reflowable', spread: 'auto', orientation: 'auto'},
+		// layout: null,
+		axis: "vertical",
+		ignoreClass: ''
+	});
+
+	core.extend(this.settings, options.settings || {});
+
+	this.viewSettings = {
+		ignoreClass: this.settings.ignoreClass,
+		axis: this.settings.axis,
+		layout: this.layout,
+		width: 0,
+		height: 0
+	};
+
+}
+
+DefaultViewManager.prototype.render = function(element, size){
+
+	// Save the stage
+	this.stage = new Stage({
+		width: size.width,
+		height: size.height,
+		overflow: this.settings.overflow,
+		hidden: this.settings.hidden,
+		axis: this.settings.axis
+	});
+
+	this.stage.attachTo(element);
+
+	// Get this stage container div
+	this.container = this.stage.getContainer();
+
+	// Views array methods
+	this.views = new Views(this.container);
+
+	// Calculate Stage Size
+	this._bounds = this.bounds();
+	this._stageSize = this.stage.size();
+
+	// Set the dimensions for views
+	this.viewSettings.width = this._stageSize.width;
+	this.viewSettings.height = this._stageSize.height;
+
+	// Function to handle a resize event.
+	// Will only attach if width and height are both fixed.
+	this.stage.onResize(this.onResized.bind(this));
+
+	// Add Event Listeners
+	this.addEventListeners();
+
+	// Add Layout method
+	// this.applyLayoutMethod();
+	if (this.layout) {
+		this.updateLayout();
+	}
+};
+
+DefaultViewManager.prototype.addEventListeners = function(){
+	window.addEventListener('unload', function(e){
+		this.destroy();
+	}.bind(this));
+};
+
+DefaultViewManager.prototype.destroy = function(){
+	// this.views.each(function(view){
+	// 	view.destroy();
+	// });
+
+	/*
+
+		clearTimeout(this.trimTimeout);
+		if(this.settings.hidden) {
+			this.element.removeChild(this.wrapper);
+		} else {
+			this.element.removeChild(this.container);
+		}
+	*/
+};
+
+DefaultViewManager.prototype.onResized = function(e) {
+	clearTimeout(this.resizeTimeout);
+	this.resizeTimeout = setTimeout(function(){
+		this.resize();
+	}.bind(this), 150);
+};
+
+DefaultViewManager.prototype.resize = function(width, height){
+
+	// Clear the queue
+	this.q.clear();
+
+	this._stageSize = this.stage.size(width, height);
+	this._bounds = this.bounds();
+
+	// Update for new views
+	this.viewSettings.width = this._stageSize.width;
+	this.viewSettings.height = this._stageSize.height;
+
+	// Update for existing views
+	this.views.each(function(view) {
+		view.size(this._stageSize.width, this._stageSize.height);
+	}.bind(this));
+
+	this.updateLayout();
+
+	this.emit("resized", {
+		width: this.stage.width,
+		height: this.stage.height
+	});
+
+};
+
+DefaultViewManager.prototype.createView = function(section) {
+	return new this.View(section, this.viewSettings);
+};
+
+DefaultViewManager.prototype.display = function(section, target){
+
+	var displaying = new core.defer();
+	var displayed = displaying.promise;
+
+	// Check to make sure the section we want isn't already shown
+	var visible = this.views.find(section);
+
+	// View is already shown, just move to correct location
+	if(visible && target) {
+		offset = visible.locationOf(target);
+		this.moveTo(offset);
+		displaying.resolve();
+		return displayed;
+	}
+
+	// Hide all current views
+	this.views.hide();
+
+	this.views.clear();
+
+	this.add(section)
+		.then(function(){
+			var next;
+			if (this.layout.name === "pre-paginated" &&
+					this.layout.divisor > 1) {
+				next = section.next();
+				if (next) {
+					return this.add(next);
+				}
+			}
+		}.bind(this))
+		.then(function(view){
+
+			// Move to correct place within the section, if needed
+			if(target) {
+				offset = view.locationOf(target);
+				this.moveTo(offset);
+			}
+
+			this.views.show();
+
+			displaying.resolve();
+
+		}.bind(this))
+		// .then(function(){
+		// 	return this.hooks.display.trigger(view);
+		// }.bind(this))
+		// .then(function(){
+		// 	this.views.show();
+		// }.bind(this));
+		return displayed;
+};
+
+DefaultViewManager.prototype.afterDisplayed = function(view){
+	this.emit("added", view);
+};
+
+DefaultViewManager.prototype.afterResized = function(view){
+	this.emit("resize", view.section);
+};
+
+// DefaultViewManager.prototype.moveTo = function(offset){
+// 	this.scrollTo(offset.left, offset.top);
+// };
+
+DefaultViewManager.prototype.moveTo = function(offset){
+	var distX = 0,
+			distY = 0;
+
+	if(this.settings.axis === "vertical") {
+		distY = offset.top;
+	} else {
+		distX = Math.floor(offset.left / this.layout.delta) * this.layout.delta;
+
+		if (distX + this.layout.delta > this.container.scrollWidth) {
+			distX = this.container.scrollWidth - this.layout.delta;
+		}
+	}
+
+	this.scrollTo(distX, distY);
+};
+
+DefaultViewManager.prototype.add = function(section){
+	var view = this.createView(section);
+
+	this.views.append(view);
+
+	// view.on("shown", this.afterDisplayed.bind(this));
+	view.onDisplayed = this.afterDisplayed.bind(this);
+	view.onResize = this.afterResized.bind(this);
+
+	return view.display(this.request);
+
+};
+
+DefaultViewManager.prototype.append = function(section){
+	var view = this.createView(section);
+	this.views.append(view);
+	return view.display(this.request);
+};
+
+DefaultViewManager.prototype.prepend = function(section){
+	var view = this.createView(section);
+
+	this.views.prepend(view);
+	return view.display(this.request);
+};
+// DefaultViewManager.prototype.resizeView = function(view) {
+//
+// 	if(this.settings.globalLayoutProperties.layout === "pre-paginated") {
+// 		view.lock("both", this.bounds.width, this.bounds.height);
+// 	} else {
+// 		view.lock("width", this.bounds.width, this.bounds.height);
+// 	}
+//
+// };
+
+DefaultViewManager.prototype.next = function(){
+	var next;
+	var view;
+	var left;
+
+	if(!this.views.length) return;
+
+	if(this.settings.axis === "horizontal") {
+
+		this.scrollLeft = this.container.scrollLeft;
+
+		left = this.container.scrollLeft + this.container.offsetWidth + this.layout.delta;
+
+		if(left < this.container.scrollWidth) {
+			this.scrollBy(this.layout.delta, 0);
+		} else if (left - this.layout.columnWidth === this.container.scrollWidth) {
+			this.scrollTo(this.container.scrollWidth - this.layout.delta, 0);
+		} else {
+			next = this.views.last().section.next();
+		}
+
+
+	} else {
+
+		next = this.views.last().section.next();
+
+	}
+
+	if(next) {
+		this.views.clear();
+
+		return this.append(next)
+			.then(function(){
+				var right;
+				if (this.layout.name && this.layout.divisor > 1) {
+					right = next.next();
+					if (right) {
+						return this.append(right);
+					}
+				}
+			}.bind(this))
+			.then(function(){
+				this.views.show();
+			}.bind(this));
+	}
+
+
+};
+
+DefaultViewManager.prototype.prev = function(){
+	var prev;
+	var view;
+	var left;
+
+	if(!this.views.length) return;
+
+	if(this.settings.axis === "horizontal") {
+
+		this.scrollLeft = this.container.scrollLeft;
+
+		left = this.container.scrollLeft;
+
+		if(left > 0) {
+			this.scrollBy(-this.layout.delta, 0);
+		} else {
+			prev = this.views.first().section.prev();
+		}
+
+
+	} else {
+
+		prev = this.views.first().section.prev();
+
+	}
+
+	if(prev) {
+		this.views.clear();
+
+		return this.prepend(prev)
+			.then(function(){
+				var left;
+				if (this.layout.name && this.layout.divisor > 1) {
+					left = prev.prev();
+					if (left) {
+						return this.prepend(left);
+					}
+				}
+			}.bind(this))
+			.then(function(){
+				if(this.settings.axis === "horizontal") {
+					this.scrollTo(this.container.scrollWidth - this.layout.delta, 0);
+				}
+				this.views.show();
+			}.bind(this));
+	}
+};
+
+DefaultViewManager.prototype.current = function(){
+	var visible = this.visible();
+	if(visible.length){
+		// Current is the last visible view
+		return visible[visible.length-1];
+	}
+	return null;
+};
+
+DefaultViewManager.prototype.currentLocation = function(){
+	var view;
+	var start, end;
+
+	if(this.views.length) {
+		view = this.views.first();
+		start = container.left - view.position().left;
+		end = start + this.layout.spread;
+
+		return this.mapping.page(view, view.section.cfiBase);
+	}
+
+};
+
+DefaultViewManager.prototype.isVisible = function(view, offsetPrev, offsetNext, _container){
+	var position = view.position();
+	var container = _container || this.bounds();
+
+	if(this.settings.axis === "horizontal" &&
+		position.right > container.left - offsetPrev &&
+		position.left < container.right + offsetNext) {
+
+		return true;
+
+	} else if(this.settings.axis === "vertical" &&
+		position.bottom > container.top - offsetPrev &&
+		position.top < container.bottom + offsetNext) {
+
+		return true;
+	}
+
+	return false;
+
+};
+
+DefaultViewManager.prototype.visible = function(){
+	// return this.views.displayed();
+	var container = this.bounds();
+	var views = this.views.displayed();
+	var viewsLength = views.length;
+	var visible = [];
+	var isVisible;
+	var view;
+
+	for (var i = 0; i < viewsLength; i++) {
+		view = views[i];
+		isVisible = this.isVisible(view, 0, 0, container);
+
+		if(isVisible === true) {
+			visible.push(view);
+		}
+
+	}
+	return visible;
+};
+
+DefaultViewManager.prototype.scrollBy = function(x, y, silent){
+	if(silent) {
+		this.ignore = true;
+	}
+
+	if(this.settings.height) {
+
+		if(x) this.container.scrollLeft += x;
+		if(y) this.container.scrollTop += y;
+
+	} else {
+		window.scrollBy(x,y);
+	}
+	// console.log("scrollBy", x, y);
+	this.scrolled = true;
+	this.onScroll();
+};
+
+DefaultViewManager.prototype.scrollTo = function(x, y, silent){
+	if(silent) {
+		this.ignore = true;
+	}
+
+	if(this.settings.height) {
+		this.container.scrollLeft = x;
+		this.container.scrollTop = y;
+	} else {
+		window.scrollTo(x,y);
+	}
+	// console.log("scrollTo", x, y);
+	this.scrolled = true;
+	this.onScroll();
+	// if(this.container.scrollLeft != x){
+	//   setTimeout(function() {
+	//     this.scrollTo(x, y, silent);
+	//   }.bind(this), 10);
+	//   return;
+	// };
+ };
+
+DefaultViewManager.prototype.onScroll = function(){
+
+};
+
+DefaultViewManager.prototype.bounds = function() {
+	var bounds;
+
+	bounds = this.stage.bounds();
+
+	return bounds;
+};
+
+DefaultViewManager.prototype.applyLayout = function(layout) {
+
+	this.layout = layout;
+	this.updateLayout();
+
+	this.mapping = new Mapping(this.layout);
+	 // this.manager.layout(this.layout.format);
+};
+
+DefaultViewManager.prototype.updateLayout = function() {
+	if (!this.stage) {
+		return;
+	}
+
+	this._stageSize = this.stage.size();
+
+	if(this.settings.axis === "vertical") {
+		this.layout.calculate(this._stageSize.width, this._stageSize.height);
+	} else {
+		this.layout.calculate(
+			this._stageSize.width,
+			this._stageSize.height,
+			this.settings.gap
+		);
+
+		// Set the look ahead offset for what is visible
+		this.settings.offset = this.layout.delta;
+
+		this.stage.addStyleRules("iframe", [{"margin-right" : this.layout.gap + "px"}]);
+
+	}
+
+	// Set the dimensions for views
+	this.viewSettings.width = this.layout.width;
+	this.viewSettings.height = this.layout.height;
+
+	this.setLayout(this.layout);
+
+};
+
+DefaultViewManager.prototype.setLayout = function(layout){
+
+	this.viewSettings.layout = layout;
+
+	if(this.views) {
+
+		this.views.each(function(view){
+			view.setLayout(layout);
+		});
+
+	}
+
+};
+
+DefaultViewManager.prototype.updateFlow = function(flow){
+	var axis = (flow === "paginated") ? "horizontal" : "vertical";
+
+	this.settings.axis = axis;
+
+	this.viewSettings.axis = axis;
+
+	this.settings.overflow = (flow === "paginated") ? "hidden" : "auto";
+	// this.views.each(function(view){
+	// 	view.setAxis(axis);
+	// });
+
+};
+
+ //-- Enable binding events to Manager
+ EventEmitter(DefaultViewManager.prototype);
+
+ module.exports = DefaultViewManager;
+
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+var EventEmitter = __webpack_require__(2);
+var path = __webpack_require__(3);
+var core = __webpack_require__(0);
+var replace = __webpack_require__(13);
+var Hook = __webpack_require__(6);
+var EpubCFI = __webpack_require__(1);
+var Queue = __webpack_require__(8);
+var Layout = __webpack_require__(37);
+var Mapping = __webpack_require__(7);
+
+function Rendition(book, options) {
+
+	this.settings = core.extend(this.settings || {}, {
+		width: null,
+		height: null,
+		ignoreClass: '',
+		manager: "default",
+		view: "iframe",
+		flow: null,
+		layout: null,
+		spread: null,
+		minSpreadWidth: 800, //-- overridden by spread: none (never) / both (always),
+		useBase64: true
+	});
+
+	core.extend(this.settings, options);
+
+	this.viewSettings = {
+		ignoreClass: this.settings.ignoreClass
+	};
+
+	this.book = book;
+
+	this.views = null;
+
+	//-- Adds Hook methods to the Rendition prototype
+	this.hooks = {};
+	this.hooks.display = new Hook(this);
+	this.hooks.serialize = new Hook(this);
+	this.hooks.content = new Hook(this);
+	this.hooks.layout = new Hook(this);
+	this.hooks.render = new Hook(this);
+	this.hooks.show = new Hook(this);
+
+	this.hooks.content.register(replace.links.bind(this));
+	this.hooks.content.register(this.passViewEvents.bind(this));
+
+	// this.hooks.display.register(this.afterDisplay.bind(this));
+
+	this.epubcfi = new EpubCFI();
+
+	this.q = new Queue(this);
+
+	this.q.enqueue(this.book.opened);
+
+	// Block the queue until rendering is started
+	// this.starting = new core.defer();
+	// this.started = this.starting.promise;
+	this.q.enqueue(this.start);
+
+	if(this.book.unarchived) {
+		this.q.enqueue(this.replacements.bind(this));
+	}
+
+};
+
+Rendition.prototype.setManager = function(manager) {
+	this.manager = manager;
+};
+
+Rendition.prototype.requireManager = function(manager) {
+	var viewManager;
+
+	// If manager is a string, try to load from register managers,
+	// or require included managers directly
+	if (typeof manager === "string") {
+		// Use global or require
+		viewManager = typeof ePub != "undefined" ? ePub.ViewManagers[manager] : undefined; //require('./managers/'+manager);
+	} else {
+		// otherwise, assume we were passed a function
+		viewManager = manager
+	}
+
+	return viewManager;
+};
+
+Rendition.prototype.requireView = function(view) {
+	var View;
+
+	if (typeof view == "string") {
+		View = typeof ePub != "undefined" ? ePub.Views[view] : undefined; //require('./views/'+view);
+	} else {
+		// otherwise, assume we were passed a function
+		View = view
+	}
+
+	return View;
+};
+
+Rendition.prototype.start = function(){
+
+	if(!this.manager) {
+		this.ViewManager = this.requireManager(this.settings.manager);
+		this.View = this.requireView(this.settings.view);
+
+		this.manager = new this.ViewManager({
+			view: this.View,
+			queue: this.q,
+			request: this.book.request,
+			settings: this.settings
+		});
+	}
+
+	// Parse metadata to get layout props
+	this.settings.globalLayoutProperties = this.determineLayoutProperties(this.book.package.metadata);
+
+	this.flow(this.settings.globalLayoutProperties.flow);
+
+	this.layout(this.settings.globalLayoutProperties);
+
+	// Listen for displayed views
+	this.manager.on("added", this.afterDisplayed.bind(this));
+
+	// Listen for resizing
+	this.manager.on("resized", this.onResized.bind(this));
+
+	// Listen for scroll changes
+	this.manager.on("scroll", this.reportLocation.bind(this));
+
+
+	this.on('displayed', this.reportLocation.bind(this));
+
+	// Trigger that rendering has started
+	this.emit("started");
+
+	// Start processing queue
+	// this.starting.resolve();
+};
+
+// Call to attach the container to an element in the dom
+// Container must be attached before rendering can begin
+Rendition.prototype.attachTo = function(element){
+
+	return this.q.enqueue(function () {
+
+		// Start rendering
+		this.manager.render(element, {
+			"width"  : this.settings.width,
+			"height" : this.settings.height
+		});
+
+		// Trigger Attached
+		this.emit("attached");
+
+	}.bind(this));
+
+};
+
+Rendition.prototype.display = function(target){
+
+	// if (!this.book.spine.spineItems.length > 0) {
+		// Book isn't open yet
+		// return this.q.enqueue(this.display, target);
+	// }
+
+	return this.q.enqueue(this._display, target);
+
+};
+
+Rendition.prototype._display = function(target){
+	var isCfiString = this.epubcfi.isCfiString(target);
+	var displaying = new core.defer();
+	var displayed = displaying.promise;
+	var section;
+	var moveTo;
+
+	section = this.book.spine.get(target);
+
+	if(!section){
+		displaying.reject(new Error("No Section Found"));
+		return displayed;
+	}
+
+	// Trim the target fragment
+	// removing the chapter
+	if(!isCfiString && typeof target === "string" &&
+		target.indexOf("#") > -1) {
+			moveTo = target.substring(target.indexOf("#")+1);
+	}
+
+	if (isCfiString) {
+		moveTo = target;
+	}
+
+	return this.manager.display(section, moveTo)
+		.then(function(){
+			this.emit("displayed", section);
+		}.bind(this));
+
+};
+
+/*
+Rendition.prototype.render = function(view, show) {
+
+	// view.onLayout = this.layout.format.bind(this.layout);
+	view.create();
+
+	// Fit to size of the container, apply padding
+	this.manager.resizeView(view);
+
+	// Render Chain
+	return view.section.render(this.book.request)
+		.then(function(contents){
+			return view.load(contents);
+		}.bind(this))
+		.then(function(doc){
+			return this.hooks.content.trigger(view, this);
+		}.bind(this))
+		.then(function(){
+			this.layout.format(view.contents);
+			return this.hooks.layout.trigger(view, this);
+		}.bind(this))
+		.then(function(){
+			return view.display();
+		}.bind(this))
+		.then(function(){
+			return this.hooks.render.trigger(view, this);
+		}.bind(this))
+		.then(function(){
+			if(show !== false) {
+				this.q.enqueue(function(view){
+					view.show();
+				}, view);
+			}
+			// this.map = new Map(view, this.layout);
+			this.hooks.show.trigger(view, this);
+			this.trigger("rendered", view.section);
+
+		}.bind(this))
+		.catch(function(e){
+			this.trigger("loaderror", e);
+		}.bind(this));
+
+};
+*/
+
+Rendition.prototype.afterDisplayed = function(view){
+	this.hooks.content.trigger(view, this);
+	this.emit("rendered", view.section);
+	this.reportLocation();
+};
+
+Rendition.prototype.onResized = function(size){
+
+	if(this.location) {
+		this.display(this.location.start);
+	}
+
+	this.emit("resized", {
+		width: size.width,
+		height: size.height
+	});
+
+};
+
+Rendition.prototype.moveTo = function(offset){
+	this.manager.moveTo(offset);
+};
+
+Rendition.prototype.next = function(){
+	return this.q.enqueue(this.manager.next.bind(this.manager))
+		.then(this.reportLocation.bind(this));
+};
+
+Rendition.prototype.prev = function(){
+	return this.q.enqueue(this.manager.prev.bind(this.manager))
+		.then(this.reportLocation.bind(this));
+};
+
+//-- http://www.idpf.org/epub/301/spec/epub-publications.html#meta-properties-rendering
+Rendition.prototype.determineLayoutProperties = function(metadata){
+	var settings;
+	var layout = this.settings.layout || metadata.layout || "reflowable";
+	var spread = this.settings.spread || metadata.spread || "auto";
+	var orientation = this.settings.orientation || metadata.orientation || "auto";
+	var flow = this.settings.flow || metadata.flow || "auto";
+	var viewport = metadata.viewport || "";
+	var minSpreadWidth = this.settings.minSpreadWidth || metadata.minSpreadWidth || 800;
+
+	if (this.settings.width >= 0 && this.settings.height >= 0) {
+		viewport = "width="+this.settings.width+", height="+this.settings.height+"";
+	}
+
+	settings = {
+		layout : layout,
+		spread : spread,
+		orientation : orientation,
+		flow : flow,
+		viewport : viewport,
+		minSpreadWidth : minSpreadWidth
+	};
+
+	return settings;
+};
+
+// Rendition.prototype.applyLayoutProperties = function(){
+// 	var settings = this.determineLayoutProperties(this.book.package.metadata);
+//
+// 	this.flow(settings.flow);
+//
+// 	this.layout(settings);
+// };
+
+// paginated | scrolled
+// (scrolled-continuous vs scrolled-doc are handled by different view managers)
+Rendition.prototype.flow = function(_flow){
+	var flow;
+	if (_flow === "scrolled-doc" || _flow === "scrolled-continuous") {
+		flow = "scrolled";
+	}
+
+	if (_flow === "auto" || _flow === "paginated") {
+		flow = "paginated";
+	}
+
+	if (this._layout) {
+		this._layout.flow(flow);
+	}
+
+	if (this.manager) {
+		this.manager.updateFlow(flow);
+	}
+};
+
+// reflowable | pre-paginated
+Rendition.prototype.layout = function(settings){
+	if (settings) {
+		this._layout = new Layout(settings);
+		this._layout.spread(settings.spread, this.settings.minSpreadWidth);
+
+		this.mapping = new Mapping(this._layout);
+	}
+
+	if (this.manager && this._layout) {
+		this.manager.applyLayout(this._layout);
+	}
+
+	return this._layout;
+};
+
+// none | auto (TODO: implement landscape, portrait, both)
+Rendition.prototype.spread = function(spread, min){
+
+	this._layout.spread(spread, min);
+
+	if (this.manager.isRendered()) {
+		this.manager.updateLayout();
+	}
+};
+
+
+Rendition.prototype.reportLocation = function(){
+	return this.q.enqueue(function(){
+		var location = this.manager.currentLocation();
+		if (location && location.then && typeof location.then === 'function') {
+			location.then(function(result) {
+				this.location = result;
+				this.emit("locationChanged", this.location);
+			}.bind(this));
+		} else if (location) {
+			this.location = location;
+			this.emit("locationChanged", this.location);
+		}
+
+	}.bind(this));
+};
+
+
+Rendition.prototype.destroy = function(){
+	// Clear the queue
+	this.q.clear();
+
+	this.manager.destroy();
+};
+
+Rendition.prototype.passViewEvents = function(view){
+	view.contents.listenedEvents.forEach(function(e){
+		view.on(e, this.triggerViewEvent.bind(this));
+	}.bind(this));
+
+	view.on("selected", this.triggerSelectedEvent.bind(this));
+};
+
+Rendition.prototype.triggerViewEvent = function(e){
+	this.emit(e.type, e);
+};
+
+Rendition.prototype.triggerSelectedEvent = function(cfirange){
+	this.emit("selected", cfirange);
+};
+
+Rendition.prototype.replacements = function(){
+	// Wait for loading
+	// return this.q.enqueue(function () {
+		// Get thes books manifest
+		var manifest = this.book.package.manifest;
+		var manifestArray = Object.keys(manifest).
+			map(function (key){
+				return manifest[key];
+			});
+
+		// Exclude HTML
+		var items = manifestArray.
+			filter(function (item){
+				if (item.type != "application/xhtml+xml" &&
+						item.type != "text/html") {
+					return true;
+				}
+			});
+
+		// Only CSS
+		var css = items.
+			filter(function (item){
+				if (item.type === "text/css") {
+					return true;
+				}
+			});
+
+		// Css Urls
+		var cssUrls = css.map(function(item) {
+			return item.href;
+		});
+
+		// All Assets Urls
+		var urls = items.
+			map(function(item) {
+				return item.href;
+			}.bind(this));
+
+		// Create blob urls for all the assets
+		var processing = urls.
+			map(function(url) {
+				// var absolute = new URL(url, this.book.baseUrl).toString();
+				var absolute = path.resolve(this.book.basePath, url);
+				// Full url from archive base
+				return this.book.unarchived.createUrl(absolute, {"base64": this.settings.useBase64});
+			}.bind(this));
+
+		var replacementUrls;
+
+		// After all the urls are created
+		return Promise.all(processing)
+			.then(function(_replacementUrls) {
+				var replaced = [];
+
+				replacementUrls = _replacementUrls;
+
+				// Replace Asset Urls in the text of all css files
+				cssUrls.forEach(function(href) {
+					replaced.push(this.replaceCss(href, urls, replacementUrls));
+				}.bind(this));
+
+				return Promise.all(replaced);
+
+			}.bind(this))
+			.then(function () {
+				// Replace Asset Urls in chapters
+				// by registering a hook after the sections contents has been serialized
+				this.book.spine.hooks.serialize.register(function(output, section) {
+
+					this.replaceAssets(section, urls, replacementUrls);
+
+				}.bind(this));
+
+			}.bind(this))
+			.catch(function(reason){
+				console.error(reason);
+			});
+	// }.bind(this));
+};
+
+Rendition.prototype.replaceCss = function(href, urls, replacementUrls){
+		var newUrl;
+		var indexInUrls;
+
+		// Find the absolute url of the css file
+		// var fileUri = URI(href);
+		// var absolute = fileUri.absoluteTo(this.book.baseUrl).toString();
+
+		if (path.isAbsolute(href)) {
+			return new Promise(function(resolve, reject){
+				resolve(urls, replacementUrls);
+			});
+		}
+
+		var fileUri;
+		var absolute;
+		if (this.book.baseUrl) {
+			fileUri = new URL(href, this.book.baseUrl);
+			absolute = fileUri.toString();
+		} else {
+			absolute = path.resolve(this.book.basePath, href);
+		}
+
+
+		// Get the text of the css file from the archive
+		var textResponse = this.book.unarchived.getText(absolute);
+		// Get asset links relative to css file
+		var relUrls = urls.
+			map(function(assetHref) {
+				// var assetUri = URI(assetHref).absoluteTo(this.book.baseUrl);
+				// var relative = assetUri.relativeTo(absolute).toString();
+
+				var assetUrl;
+				var relativeUrl;
+				if (this.book.baseUrl) {
+					assetUrl = new URL(assetHref, this.book.baseUrl);
+					relative = path.relative(path.dirname(fileUri.pathname), assetUrl.pathname);
+				} else {
+					assetUrl = path.resolve(this.book.basePath, assetHref);
+					relative = path.relative(path.dirname(absolute), assetUrl);
+				}
+
+				return relative;
+			}.bind(this));
+
+		return textResponse.then(function (text) {
+			// Replacements in the css text
+			text = replace.substitute(text, relUrls, replacementUrls);
+
+			// Get the new url
+			if (this.settings.useBase64) {
+				newUrl = core.createBase64Url(text, 'text/css');
+			} else {
+				newUrl = core.createBlobUrl(text, 'text/css');
+			}
+
+			// switch the url in the replacementUrls
+			indexInUrls = urls.indexOf(href);
+			if (indexInUrls > -1) {
+				replacementUrls[indexInUrls] = newUrl;
+			}
+
+			return new Promise(function(resolve, reject){
+				resolve(urls, replacementUrls);
+			});
+
+		}.bind(this));
+
+};
+
+Rendition.prototype.replaceAssets = function(section, urls, replacementUrls){
+	// var fileUri = URI(section.url);
+	var fileUri;
+	var absolute;
+	if (this.book.baseUrl) {
+		fileUri = new URL(section.url, this.book.baseUrl);
+		absolute = fileUri.toString();
+	} else {
+		absolute = path.resolve(this.book.basePath, section.url);
+	}
+
+	// Get Urls relative to current sections
+	var relUrls = urls.
+		map(function(href) {
+			// var assetUri = URI(href).absoluteTo(this.book.baseUrl);
+			// var relative = assetUri.relativeTo(fileUri).toString();
+
+			var assetUrl;
+			var relativeUrl;
+			if (this.book.baseUrl) {
+				assetUrl = new URL(href, this.book.baseUrl);
+				relative = path.relative(path.dirname(fileUri.pathname), assetUrl.pathname);
+			} else {
+				assetUrl = path.resolve(this.book.basePath, href);
+				relative = path.relative(path.dirname(absolute), assetUrl);
+			}
+
+			return relative;
+		}.bind(this));
+
+
+	section.output = replace.substitute(section.output, relUrls, replacementUrls);
+};
+
+Rendition.prototype.range = function(_cfi, ignoreClass){
+	var cfi = new EpubCFI(_cfi);
+	var found = this.visible().filter(function (view) {
+		if(cfi.spinePos === view.index) return true;
+	});
+
+	// Should only every return 1 item
+	if (found.length) {
+		return found[0].range(cfi, ignoreClass);
+	}
+};
+
+Rendition.prototype.adjustImages = function(view) {
+
+	view.addStylesheetRules([
+			["img",
+				["max-width", (view.layout.spreadWidth) + "px"],
+				["max-height", (view.layout.height) + "px"]
+			]
+	]);
+	return new Promise(function(resolve, reject){
+		// Wait to apply
+		setTimeout(function() {
+			resolve();
+		}, 1);
+	});
+};
+
+//-- Enable binding events to Renderer
+EventEmitter(Rendition.prototype);
+
+module.exports = Rendition;
+
+
+/***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+var path = __webpack_require__(3);
+var core = __webpack_require__(0);
+var EpubCFI = __webpack_require__(1);
+
+
+function Parser(){};
+
+Parser.prototype.container = function(containerXml){
 		//-- <rootfile full-path="OPS/package.opf" media-type="application/oebps-package+xml"/>
 		var rootfile, fullpath, folder, encoding;
 
@@ -6345,7 +5129,7 @@ EPUBJS.Parser.prototype.container = function(containerXml){
 			return;
 		}
 
-		rootfile = containerXml.querySelector("rootfile");
+		rootfile = core.qs(containerXml, "rootfile");
 
 		if(!rootfile) {
 			console.error("No RootFile Found");
@@ -6353,7 +5137,7 @@ EPUBJS.Parser.prototype.container = function(containerXml){
 		}
 
 		fullpath = rootfile.getAttribute('full-path');
-		folder = EPUBJS.core.uri(fullpath).directory;
+		folder = path.dirname(fullpath);
 		encoding = containerXml.xmlEncoding;
 
 		//-- Now that we have the path we can parse the contents
@@ -6364,7 +5148,7 @@ EPUBJS.Parser.prototype.container = function(containerXml){
 		};
 };
 
-EPUBJS.Parser.prototype.identifier = function(packageXml){
+Parser.prototype.identifier = function(packageXml){
 	var metadataNode;
 
 	if(!packageXml) {
@@ -6372,7 +5156,7 @@ EPUBJS.Parser.prototype.identifier = function(packageXml){
 		return;
 	}
 
-	metadataNode = packageXml.querySelector("metadata");
+	metadataNode = core.qs(packageXml, "metadata");
 
 	if(!metadataNode) {
 		console.error("No Metadata Found");
@@ -6382,35 +5166,33 @@ EPUBJS.Parser.prototype.identifier = function(packageXml){
 	return this.getElementText(metadataNode, "identifier");
 };
 
-EPUBJS.Parser.prototype.packageContents = function(packageXml, baseUrl){
+Parser.prototype.packageContents = function(packageXml){
 	var parse = this;
 	var metadataNode, manifestNode, spineNode;
-	var manifest, navPath, tocPath, coverPath;
+	var manifest, navPath, ncxPath, coverPath;
 	var spineNodeIndex;
 	var spine;
 	var spineIndexByURL;
 	var metadata;
-
-	if(baseUrl) this.baseUrl = baseUrl;
 
 	if(!packageXml) {
 		console.error("Package File Not Found");
 		return;
 	}
 
-	metadataNode = packageXml.querySelector("metadata");
+	metadataNode = core.qs(packageXml, "metadata");
 	if(!metadataNode) {
 		console.error("No Metadata Found");
 		return;
 	}
 
-	manifestNode = packageXml.querySelector("manifest");
+	manifestNode = core.qs(packageXml, "manifest");
 	if(!manifestNode) {
 		console.error("No Manifest Found");
 		return;
 	}
 
-	spineNode = packageXml.querySelector("spine");
+	spineNode = core.qs(packageXml, "spine");
 	if(!spineNode) {
 		console.error("No Spine Found");
 		return;
@@ -6418,17 +5200,12 @@ EPUBJS.Parser.prototype.packageContents = function(packageXml, baseUrl){
 
 	manifest = parse.manifest(manifestNode);
 	navPath = parse.findNavPath(manifestNode);
-	tocPath = parse.findTocPath(manifestNode, spineNode);
+	ncxPath = parse.findNcxPath(manifestNode, spineNode);
 	coverPath = parse.findCoverPath(packageXml);
 
 	spineNodeIndex = Array.prototype.indexOf.call(spineNode.parentNode.childNodes, spineNode);
 
 	spine = parse.spine(spineNode, manifest);
-
-	spineIndexByURL = {};
-	spine.forEach(function(item){
-		spineIndexByURL[item.href] = item.index;
-	});
 
 	metadata = parse.metadata(metadataNode);
 
@@ -6439,24 +5216,25 @@ EPUBJS.Parser.prototype.packageContents = function(packageXml, baseUrl){
 		'spine'    : spine,
 		'manifest' : manifest,
 		'navPath'  : navPath,
-		'tocPath'  : tocPath,
+		'ncxPath'  : ncxPath,
 		'coverPath': coverPath,
-		'spineNodeIndex' : spineNodeIndex,
-		'spineIndexByURL' : spineIndexByURL
+		'spineNodeIndex' : spineNodeIndex
 	};
 };
 
 //-- Find TOC NAV
-EPUBJS.Parser.prototype.findNavPath = function(manifestNode){
+Parser.prototype.findNavPath = function(manifestNode){
 	// Find item with property 'nav'
 	// Should catch nav irregardless of order
-  var node = manifestNode.querySelector("item[properties$='nav'], item[properties^='nav '], item[properties*=' nav ']");
-  return node ? node.getAttribute('href') : false;
+	// var node = manifestNode.querySelector("item[properties$='nav'], item[properties^='nav '], item[properties*=' nav ']");
+	var node = core.qsp(manifestNode, "item", {"properties":"nav"});
+	return node ? node.getAttribute('href') : false;
 };
 
 //-- Find TOC NCX: media-type="application/x-dtbncx+xml" href="toc.ncx"
-EPUBJS.Parser.prototype.findTocPath = function(manifestNode, spineNode){
-	var node = manifestNode.querySelector("item[media-type='application/x-dtbncx+xml']");
+Parser.prototype.findNcxPath = function(manifestNode, spineNode){
+	// var node = manifestNode.querySelector("item[media-type='application/x-dtbncx+xml']");
+	var node = core.qsp(manifestNode, "item", {"media-type":"application/x-dtbncx+xml"});
 	var tocId;
 
 	// If we can't find the toc by media-type then try to look for id of the item in the spine attributes as
@@ -6465,7 +5243,8 @@ EPUBJS.Parser.prototype.findTocPath = function(manifestNode, spineNode){
 	if (!node) {
 		tocId = spineNode.getAttribute("toc");
 		if(tocId) {
-			node = manifestNode.querySelector("item[id='" + tocId + "']");
+			// node = manifestNode.querySelector("item[id='" + tocId + "']");
+			node = manifestNode.getElementById(tocId);
 		}
 	}
 
@@ -6473,11 +5252,11 @@ EPUBJS.Parser.prototype.findTocPath = function(manifestNode, spineNode){
 };
 
 //-- Expanded to match Readium web components
-EPUBJS.Parser.prototype.metadata = function(xml){
+Parser.prototype.metadata = function(xml){
 	var metadata = {},
 			p = this;
 
-	metadata.bookTitle = p.getElementText(xml, 'title');
+	metadata.title = p.getElementText(xml, 'title');
 	metadata.creator = p.getElementText(xml, 'creator');
 	metadata.description = p.getElementText(xml, 'description');
 
@@ -6489,24 +5268,29 @@ EPUBJS.Parser.prototype.metadata = function(xml){
 	metadata.language = p.getElementText(xml, "language");
 	metadata.rights = p.getElementText(xml, "rights");
 
-	metadata.modified_date = p.querySelectorText(xml, "meta[property='dcterms:modified']");
-	metadata.layout = p.querySelectorText(xml, "meta[property='rendition:layout']");
-	metadata.orientation = p.querySelectorText(xml, "meta[property='rendition:orientation']");
-	metadata.spread = p.querySelectorText(xml, "meta[property='rendition:spread']");
+	metadata.modified_date = p.getPropertyText(xml, 'dcterms:modified');
+
+	metadata.layout = p.getPropertyText(xml, "rendition:layout");
+	metadata.orientation = p.getPropertyText(xml, 'rendition:orientation');
+	metadata.flow = p.getPropertyText(xml, 'rendition:flow');
+	metadata.viewport = p.getPropertyText(xml, 'rendition:viewport');
+	// metadata.page_prog_dir = packageXml.querySelector("spine").getAttribute("page-progression-direction");
 
 	return metadata;
 };
 
 //-- Find Cover: <item properties="cover-image" id="ci" href="cover.svg" media-type="image/svg+xml" />
 //-- Fallback for Epub 2.0
-EPUBJS.Parser.prototype.findCoverPath = function(packageXml){
+Parser.prototype.findCoverPath = function(packageXml){
+	var pkg = core.qs(packageXml, "package");
+	var epubVersion = pkg.getAttribute('version');
 
-	var epubVersion = packageXml.querySelector('package').getAttribute('version');
 	if (epubVersion === '2.0') {
-		var metaCover = packageXml.querySelector('meta[name="cover"]');
+		var metaCover = core.qsp(packageXml, 'meta', {'name':'cover'});
 		if (metaCover) {
 			var coverId = metaCover.getAttribute('content');
-			var cover = packageXml.querySelector("item[id='" + coverId + "']");
+			// var cover = packageXml.querySelector("item[id='" + coverId + "']");
+			var cover = packageXml.getElementById(coverId);
 			return cover ? cover.getAttribute('href') : false;
 		}
 		else {
@@ -6514,12 +5298,13 @@ EPUBJS.Parser.prototype.findCoverPath = function(packageXml){
 		}
 	}
 	else {
-		var node = packageXml.querySelector("item[properties='cover-image']");
+		// var node = packageXml.querySelector("item[properties='cover-image']");
+		var node = core.qsp(packageXml, 'item', {'properties':'cover-image'});
 		return node ? node.getAttribute('href') : false;
 	}
 };
 
-EPUBJS.Parser.prototype.getElementText = function(xml, tag){
+Parser.prototype.getElementText = function(xml, tag){
 	var found = xml.getElementsByTagNameNS("http://purl.org/dc/elements/1.1/", tag),
 		el;
 
@@ -6535,7 +5320,17 @@ EPUBJS.Parser.prototype.getElementText = function(xml, tag){
 
 };
 
-EPUBJS.Parser.prototype.querySelectorText = function(xml, q){
+Parser.prototype.getPropertyText = function(xml, property){
+	var el = core.qsp(xml, "meta", {"property":property});
+
+	if(el && el.childNodes.length){
+		return el.childNodes[0].nodeValue;
+	}
+
+	return '';
+};
+
+Parser.prototype.querySelectorText = function(xml, q){
 	var el = xml.querySelector(q);
 
 	if(el && el.childNodes.length){
@@ -6545,13 +5340,13 @@ EPUBJS.Parser.prototype.querySelectorText = function(xml, q){
 	return '';
 };
 
-EPUBJS.Parser.prototype.manifest = function(manifestXml){
-	var baseUrl = this.baseUrl,
-			manifest = {};
+Parser.prototype.manifest = function(manifestXml){
+	var manifest = {};
 
 	//-- Turn items into an array
-	var selected = manifestXml.querySelectorAll("item"),
-		items = Array.prototype.slice.call(selected);
+	// var selected = manifestXml.querySelectorAll("item");
+	var selected = core.qsa(manifestXml, "item");
+	var items = Array.prototype.slice.call(selected);
 
 	//-- Create an object with the id as key
 	items.forEach(function(item){
@@ -6562,9 +5357,9 @@ EPUBJS.Parser.prototype.manifest = function(manifestXml){
 
 		manifest[id] = {
 			'href' : href,
-			'url' : baseUrl + href, //-- Absolute URL for loading with a web worker
+			// 'url' : href,
 			'type' : type,
-      'properties' : properties
+			'properties' : properties.length ? properties.split(' ') : []
 		};
 
 	});
@@ -6573,42 +5368,46 @@ EPUBJS.Parser.prototype.manifest = function(manifestXml){
 
 };
 
-EPUBJS.Parser.prototype.spine = function(spineXml, manifest){
+Parser.prototype.spine = function(spineXml, manifest){
+	var spine = [];
+
 	var selected = spineXml.getElementsByTagName("itemref"),
 			items = Array.prototype.slice.call(selected);
 
-	// var spineNodeIndex = Array.prototype.indexOf.call(spineXml.parentNode.childNodes, spineXml);
-	var spineNodeIndex = EPUBJS.core.indexOfElementNode(spineXml);
-
-	var epubcfi = new EPUBJS.EpubCFI();
+	var epubcfi = new EpubCFI();
 
 	//-- Add to array to mantain ordering and cross reference with manifest
-	return items.map(function(item, index) {
-		var Id = item.getAttribute('idref');
-		var cfiBase = epubcfi.generateChapterComponent(spineNodeIndex, index, Id);
+	items.forEach(function(item, index){
+		var idref = item.getAttribute('idref');
+		// var cfiBase = epubcfi.generateChapterComponent(spineNodeIndex, index, Id);
 		var props = item.getAttribute('properties') || '';
 		var propArray = props.length ? props.split(' ') : [];
-		var manifestProps = manifest[Id].properties;
-		var manifestPropArray = manifestProps.length ? manifestProps.split(' ') : [];
-		return {
-			'id' : Id,
+		// var manifestProps = manifest[Id].properties;
+		// var manifestPropArray = manifestProps.length ? manifestProps.split(' ') : [];
+
+		var itemref = {
+			'idref' : idref,
 			'linear' : item.getAttribute('linear') || '',
 			'properties' : propArray,
-			'manifestProperties' : manifestPropArray,
-			'href' : manifest[Id].href,
-			'url' :  manifest[Id].url,
-			'index' : index,
-			'cfiBase' : cfiBase,
-			'cfi' : "epubcfi(" + cfiBase + ")"
+			// 'href' : manifest[Id].href,
+			// 'url' :  manifest[Id].url,
+			'index' : index
+			// 'cfiBase' : cfiBase
 		};
+		spine.push(itemref);
 	});
+
+	return spine;
 };
 
-EPUBJS.Parser.prototype.querySelectorByType = function(html, element, type){
-	var query = html.querySelector(element+'[*|type="'+type+'"]');
+Parser.prototype.querySelectorByType = function(html, element, type){
+	var query;
+	if (typeof html.querySelector != "undefined") {
+		query = html.querySelector(element+'[*|type="'+type+'"]');
+	}
 	// Handle IE not supporting namespaced epub:type in querySelector
-	if(query === null || query.length === 0) {
-		query = html.querySelectorAll(element);
+	if(!query || query.length === 0) {
+		query = core.qsa(html, element);
 		for (var i = 0; i < query.length; i++) {
 			if(query[i].getAttributeNS("http://www.idpf.org/2007/ops", "type") === type) {
 				return query[i];
@@ -6619,57 +5418,20 @@ EPUBJS.Parser.prototype.querySelectorByType = function(html, element, type){
 	}
 };
 
-EPUBJS.Parser.prototype.nav = function (navHtml, spineIndexByURL, bookSpine) {
-	var toc = this.querySelectorByType(navHtml, 'nav', 'toc');
-	return this.navItems(toc, spineIndexByURL, bookSpine);
-};
-
-EPUBJS.Parser.prototype.navItems = function (navNode, spineIndexByURL, bookSpine) {
-	if (!navNode) return [];
-
-	var list = navNode.querySelector('ol');
-	if (!list) return [];
-
-	var items = list.childNodes,
-			result = [];
-
-	Array.prototype.forEach.call(items, function (item) {
-		if (item.tagName !== 'li') return;
-
-		var content = item.querySelector('a, span'),
-				href = content.getAttribute('href') || '',
-				label = content.textContent || '',
-				split = href.split('#'),
-				baseUrl = split[0],
-				spinePos = spineIndexByURL[baseUrl],
-				spineItem = bookSpine[spinePos],
-				cfi = spineItem ? spineItem.cfi : '',
-				subitems = this.navItems(item, spineIndexByURL, bookSpine);
-
-		result.push({
-			href: href,
-			label: label,
-			spinePos: spinePos,
-			subitems: subitems,
-			cfi: cfi
-		});
-	}.bind(this));
-
-	return result;
-};
-
-EPUBJS.Parser.prototype.toc = function(tocXml, spineIndexByURL, bookSpine){
-	var navPoints = tocXml.querySelectorAll("navMap navPoint");
-	var length = navPoints.length;
+Parser.prototype.nav = function(navHtml, spineIndexByURL, bookSpine){
+	var navElement = this.querySelectorByType(navHtml, "nav", "toc");
+	// var navItems = navElement ? navElement.querySelectorAll("ol li") : [];
+	var navItems = navElement ? core.qsa(navElement, "li") : [];
+	var length = navItems.length;
 	var i;
 	var toc = {};
 	var list = [];
 	var item, parent;
 
-	if(!navPoints || length === 0) return list;
+	if(!navItems || length === 0) return list;
 
 	for (i = 0; i < length; ++i) {
-		item = this.tocItem(navPoints[i], spineIndexByURL, bookSpine);
+		item = this.navItem(navItems[i], spineIndexByURL, bookSpine);
 		toc[item.id] = item;
 		if(!item.parent) {
 			list.push(item);
@@ -6682,25 +5444,26 @@ EPUBJS.Parser.prototype.toc = function(tocXml, spineIndexByURL, bookSpine){
 	return list;
 };
 
-EPUBJS.Parser.prototype.tocItem = function(item, spineIndexByURL, bookSpine){
+Parser.prototype.navItem = function(item, spineIndexByURL, bookSpine){
 	var id = item.getAttribute('id') || false,
-			content = item.querySelector("content"),
-			src = content.getAttribute('src'),
-			navLabel = item.querySelector("navLabel"),
-			text = navLabel.textContent ? navLabel.textContent : "",
-			split = src.split("#"),
-			baseUrl = split[0],
-			spinePos = spineIndexByURL[baseUrl],
-			spineItem = bookSpine[spinePos],
+			// content = item.querySelector("a, span"),
+			content = core.qs(item, "a"),
+			src = content.getAttribute('href') || '',
+			text = content.textContent || "",
+			// split = src.split("#"),
+			// baseUrl = split[0],
+			// spinePos = spineIndexByURL[baseUrl],
+			// spineItem = bookSpine[spinePos],
 			subitems = [],
 			parentNode = item.parentNode,
-			parent,
-			cfi = spineItem ? spineItem.cfi : '';
+			parent;
+			// cfi = spineItem ? spineItem.cfi : '';
 
 	if(parentNode && parentNode.nodeName === "navPoint") {
 		parent = parentNode.getAttribute('id');
 	}
 
+	/*
 	if(!id) {
 		if(spinePos) {
 			spineItem = bookSpine[spinePos];
@@ -6711,22 +5474,89 @@ EPUBJS.Parser.prototype.tocItem = function(item, spineIndexByURL, bookSpine){
 			item.setAttribute('id', id);
 		}
 	}
+	*/
 
 	return {
 		"id": id,
 		"href": src,
 		"label": text,
-		"spinePos": spinePos,
 		"subitems" : subitems,
-		"parent" : parent,
-		"cfi" : cfi
+		"parent" : parent
 	};
 };
 
+Parser.prototype.ncx = function(tocXml, spineIndexByURL, bookSpine){
+	// var navPoints = tocXml.querySelectorAll("navMap navPoint");
+	var navPoints = core.qsa(tocXml, "navPoint");
+	var length = navPoints.length;
+	var i;
+	var toc = {};
+	var list = [];
+	var item, parent;
 
-EPUBJS.Parser.prototype.pageList = function(navHtml, spineIndexByURL, bookSpine){
+	if(!navPoints || length === 0) return list;
+
+	for (i = 0; i < length; ++i) {
+		item = this.ncxItem(navPoints[i], spineIndexByURL, bookSpine);
+		toc[item.id] = item;
+		if(!item.parent) {
+			list.push(item);
+		} else {
+			parent = toc[item.parent];
+			parent.subitems.push(item);
+		}
+	}
+
+	return list;
+};
+
+Parser.prototype.ncxItem = function(item, spineIndexByURL, bookSpine){
+	var id = item.getAttribute('id') || false,
+			// content = item.querySelector("content"),
+			content = core.qs(item, "content"),
+			src = content.getAttribute('src'),
+			// navLabel = item.querySelector("navLabel"),
+			navLabel = core.qs(item, "navLabel"),
+			text = navLabel.textContent ? navLabel.textContent : "",
+			// split = src.split("#"),
+			// baseUrl = split[0],
+			// spinePos = spineIndexByURL[baseUrl],
+			// spineItem = bookSpine[spinePos],
+			subitems = [],
+			parentNode = item.parentNode,
+			parent;
+			// cfi = spineItem ? spineItem.cfi : '';
+
+	if(parentNode && parentNode.nodeName === "navPoint") {
+		parent = parentNode.getAttribute('id');
+	}
+
+	/*
+	if(!id) {
+		if(spinePos) {
+			spineItem = bookSpine[spinePos];
+			id = spineItem.id;
+			cfi = spineItem.cfi;
+		} else {
+			id = 'epubjs-autogen-toc-id-' + EPUBJS.core.uuid();
+			item.setAttribute('id', id);
+		}
+	}
+	*/
+
+	return {
+		"id": id,
+		"href": src,
+		"label": text,
+		"subitems" : subitems,
+		"parent" : parent
+	};
+};
+
+Parser.prototype.pageList = function(navHtml, spineIndexByURL, bookSpine){
 	var navElement = this.querySelectorByType(navHtml, "nav", "page-list");
-	var navItems = navElement ? navElement.querySelectorAll("ol li") : [];
+	// var navItems = navElement ? navElement.querySelectorAll("ol li") : [];
+	var navItems = navElement ? core.qsa(navElement, "li") : [];
 	var length = navItems.length;
 	var i;
 	var toc = {};
@@ -6743,9 +5573,10 @@ EPUBJS.Parser.prototype.pageList = function(navHtml, spineIndexByURL, bookSpine)
 	return list;
 };
 
-EPUBJS.Parser.prototype.pageListItem = function(item, spineIndexByURL, bookSpine){
+Parser.prototype.pageListItem = function(item, spineIndexByURL, bookSpine){
 	var id = item.getAttribute('id') || false,
-		content = item.querySelector("a"),
+		// content = item.querySelector("a"),
+		content = core.qs(item, "a"),
 		href = content.getAttribute('href') || '',
 		text = content.textContent || "",
 		page = parseInt(text),
@@ -6772,602 +5603,3422 @@ EPUBJS.Parser.prototype.pageListItem = function(item, spineIndexByURL, bookSpine
 	}
 };
 
-EPUBJS.Render.Iframe = function() {
-	this.iframe = null;
-	this.document = null;
-	this.window = null;
-	this.docEl = null;
-	this.bodyEl = null;
+module.exports = Parser;
 
-	this.leftPos = 0;
-	this.pageWidth = 0;
-	this.id = EPUBJS.core.uuid();
-};
 
-//-- Build up any html needed
-EPUBJS.Render.Iframe.prototype.create = function(){
-	this.element = document.createElement('div');
-	this.element.id = "epubjs-view:" + this.id;
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
 
-	this.isMobile = navigator.userAgent.match(/(iPad|iPhone|iPod|Mobile|Android)/g);
-	this.transform = EPUBJS.core.prefixed('transform');
+// var URI = require('urijs');
+var core = __webpack_require__(0);
 
-	return this.element;
-};
+function base(doc, section){
+	var base;
+	var head;
 
-EPUBJS.Render.Iframe.prototype.addIframe = function(){
-	this.iframe = document.createElement('iframe');
-	this.iframe.id = "epubjs-iframe:" + this.id;
-	this.iframe.scrolling = this.scrolling || "no";
-	this.iframe.seamless = "seamless";
-	// Back up if seamless isn't supported
-	this.iframe.style.border = "none";
-
-	this.iframe.addEventListener("load", this.loaded.bind(this), false);
-
-	if (this._width || this._height) {
-		this.iframe.height = this._height;
-		this.iframe.width = this._width;
+	if(!doc){
+		return;
 	}
-	return this.iframe;
+
+	// head = doc.querySelector("head");
+	// base = head.querySelector("base");
+	head = core.qs(doc, "head");
+	base = core.qs(head, "base");
+
+	if(!base) {
+		base = doc.createElement("base");
+		head.insertBefore(base, head.firstChild);
+	}
+
+	base.setAttribute("href", section.url);
+}
+
+function canonical(doc, section){
+	var head;
+	var link;
+	var url = section.url; // window.location.origin +  window.location.pathname + "?loc=" + encodeURIComponent(section.url);
+
+	if(!doc){
+		return;
+	}
+
+	head = core.qs(doc, "head");
+	link = core.qs(head, "link[rel='canonical']");
+
+	if (link) {
+		link.setAttribute("href", url);
+	} else {
+		link = doc.createElement("link");
+		link.setAttribute("rel", "canonical");
+		link.setAttribute("href", url);
+		head.appendChild(link);
+	}
+}
+
+function links(view, renderer) {
+
+	var links = view.document.querySelectorAll("a[href]");
+	var replaceLinks = function(link){
+		var href = link.getAttribute("href");
+
+		if(href.indexOf("mailto:") === 0){
+			return;
+		}
+
+		// var linkUri = URI(href);
+		// var absolute = linkUri.absoluteTo(view.section.url);
+		// var relative = absolute.relativeTo(this.book.baseUrl).toString();
+		var linkUrl;
+		var linkPath;
+		var relative;
+
+		if (this.book.baseUrl) {
+			linkUrl = new URL(href, this.book.baseUrl);
+			relative = path.relative(path.dirname(linkUrl.pathname), this.book.packagePath);
+		} else {
+			linkPath = path.resolve(this.book.basePath, href);
+			relative = path.relative(this.book.packagePath, linkPath);
+		}
+
+		if(linkUrl && linkUrl.protocol){
+
+			link.setAttribute("target", "_blank");
+
+		}else{
+			/*
+			if(baseDirectory) {
+				// We must ensure that the file:// protocol is preserved for
+				// local file links, as in certain contexts (such as under
+				// Titanium), file links without the file:// protocol will not
+				// work
+				if (baseUri.protocol === "file") {
+					relative = core.resolveUrl(baseUri.base, href);
+				} else {
+					relative = core.resolveUrl(baseDirectory, href);
+				}
+			} else {
+				relative = href;
+			}
+			*/
+
+			// if(linkUri.fragment()) {
+				// do nothing with fragment yet
+			// } else {
+				link.onclick = function(){
+					renderer.display(relative);
+					return false;
+				};
+			// }
+
+		}
+	}.bind(this);
+
+	for (var i = 0; i < links.length; i++) {
+		replaceLinks(links[i]);
+	}
+
+
+};
+
+function substitute(content, urls, replacements) {
+	urls.forEach(function(url, i){
+		if (url && replacements[i]) {
+			content = content.replace(new RegExp(url, 'g'), replacements[i]);
+		}
+	});
+	return content;
+}
+module.exports = {
+	'base': base,
+	'canonical' : canonical,
+	'links': links,
+	'substitute': substitute
+};
+
+
+/***/ },
+/* 14 */
+/***/ function(module, exports) {
+
+module.exports = __WEBPACK_EXTERNAL_MODULE_14__;
+
+/***/ },
+/* 15 */,
+/* 16 */,
+/* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
+var EventEmitter = __webpack_require__(2);
+var path = __webpack_require__(3);
+var core = __webpack_require__(0);
+var Spine = __webpack_require__(43);
+var Locations = __webpack_require__(38);
+var Parser = __webpack_require__(12);
+var Navigation = __webpack_require__(41);
+var Rendition = __webpack_require__(11);
+var Unarchive = __webpack_require__(44);
+var request = __webpack_require__(4);
+var EpubCFI = __webpack_require__(1);
+
+/**
+ * Creates a new Book
+ * @class
+ * @param {string} _url
+ * @param {object} options
+ * @param {method} options.requestMethod a request function to use instead of the default
+ * @returns {Book}
+ * @example new Book("/path/to/book.epub", {})
+ */
+function Book(url, options){
+
+	this.settings = core.extend(this.settings || {}, {
+		requestMethod: this.requestMethod
+	});
+
+	core.extend(this.settings, options);
+
+
+	// Promises
+	this.opening = new core.defer();
+	/**
+	 * @property {promise} opened returns after the book is loaded
+	 */
+	this.opened = this.opening.promise;
+	this.isOpen = false;
+
+	this.loading = {
+		manifest: new core.defer(),
+		spine: new core.defer(),
+		metadata: new core.defer(),
+		cover: new core.defer(),
+		navigation: new core.defer(),
+		pageList: new core.defer()
+	};
+
+	this.loaded = {
+		manifest: this.loading.manifest.promise,
+		spine: this.loading.spine.promise,
+		metadata: this.loading.metadata.promise,
+		cover: this.loading.cover.promise,
+		navigation: this.loading.navigation.promise,
+		pageList: this.loading.pageList.promise
+	};
+
+	// this.ready = RSVP.hash(this.loaded);
+	/**
+	 * @property {promise} ready returns after the book is loaded and parsed
+	 */
+	this.ready = Promise.all([this.loaded.manifest,
+														this.loaded.spine,
+														this.loaded.metadata,
+														this.loaded.cover,
+														this.loaded.navigation,
+														this.loaded.pageList ]);
+
+
+	// Queue for methods used before opening
+	this.isRendered = false;
+	// this._q = core.queue(this);
+
+	/**
+	 * @property {method} request
+	 */
+	this.request = this.settings.requestMethod.bind(this);
+
+	/**
+	 * @property {Spine} spine
+	 */
+	this.spine = new Spine(this.request);
+
+	/**
+	 * @property {Locations} locations
+	 */
+	this.locations = new Locations(this.spine, this.request);
+
+	/**
+	 * @property {Navigation} navigation
+	 */
+	this.navigation = undefined;
+
+	/**
+	 * @member {string} url the book url
+	 */
+	this.url = undefined;
+
+	if(url) {
+		this.open(url).catch(function (error) {
+			var err = new Error("Cannot load book at "+ url );
+			console.error(err);
+
+			this.emit("loadFailed", error);
+		}.bind(this));
+	}
 };
 
 /**
-* Sets the source of the iframe with the given URL string
-* Takes:  Document Contents String
-* Returns: promise with document element
-*/
-EPUBJS.Render.Iframe.prototype.load = function(contents, url){
-	var render = this,
-			deferred = new RSVP.defer();
+ * open a url
+ * @param {string} _url URL, Path or ArrayBuffer
+ * @param {object} [options] to force opening
+ * @returns {Promise} of when the book has been loaded
+ * @example book.open("/path/to/book.epub", { base64: false })
+ */
+Book.prototype.open = function(_url, options){
+	var url;
+	var pathname;
+	var parse = new Parser();
+	var epubPackage;
+	var epubContainer;
+	var book = this;
+	var containerPath = "META-INF/container.xml";
+	var location;
+	var isArrayBuffer = false;
+	var isBase64 = options && options.base64;
 
-	if(this.window) {
-		this.unload();
+	if(!_url) {
+		this.opening.resolve(this);
+		return this.opened;
 	}
 
-	if (this.iframe) {
-		this.element.removeChild(this.iframe);
+	// Reuse parsed url or create a new uri object
+	// if(typeof(_url) === "object") {
+	//   uri = _url;
+	// } else {
+	//   uri = core.uri(_url);
+	// }
+	if (_url instanceof ArrayBuffer || isBase64) {
+		isArrayBuffer = true;
+		this.url = '/';
 	}
 
-	this.iframe = this.addIframe();
-	this.element.appendChild(this.iframe);
-
-
-	this.iframe.onload = function(e) {
-		var title;
-
-		render.document = render.iframe.contentDocument;
-		render.docEl = render.document.documentElement;
-		render.headEl = render.document.head;
-		render.bodyEl = render.document.body || render.document.querySelector("body");
-		render.window = render.iframe.contentWindow;
-
-		render.window.addEventListener("resize", render.resized.bind(render), false);
-
-		// Reset the scroll position
-		render.leftPos = 0;
-		render.setLeft(0);
-
-		//-- Clear Margins
-		if(render.bodyEl) {
-			render.bodyEl.style.margin = "0";
-		}
-
-		deferred.resolve(render.docEl);
-	};
-
-	this.iframe.onerror = function(e) {
-		//console.error("Error Loading Contents", e);
-		deferred.reject({
-				message : "Error Loading Contents: " + e,
-				stack : new Error().stack
-			});
-	};
-
-	// this.iframe.contentWindow.location.replace(url);
-	this.document = this.iframe.contentDocument;
-
-  if(!this.document) {
-    deferred.reject(new Error("No Document Available"));
-    return deferred.promise;
-  }
-
-  this.iframe.contentDocument.open();
-  this.iframe.contentDocument.write(contents);
-  this.iframe.contentDocument.close();
-
-  return deferred.promise;
-};
-
-
-EPUBJS.Render.Iframe.prototype.loaded = function(v){
-	var url = this.iframe.contentWindow.location.href;
-	var baseEl, base;
-
-	this.document = this.iframe.contentDocument;
-	this.docEl = this.document.documentElement;
-	this.headEl = this.document.head;
-	this.bodyEl = this.document.body || this.document.querySelector("body");
-	this.window = this.iframe.contentWindow;
-	this.window.focus();
-
-	if(url != "about:blank"){
-		baseEl = this.iframe.contentDocument.querySelector("base");
-		base = baseEl.getAttribute('href');
-		this.trigger("render:loaded", base);
-	}
-
-};
-
-// Resize the iframe to the given width and height
-EPUBJS.Render.Iframe.prototype.resize = function(width, height){
-	var iframeBox;
-
-	if(!this.element) return;
-
-	this.element.style.height = height;
-
-
-	if(!isNaN(width) && width % 2 !== 0){
-		width += 1; //-- Prevent cutting off edges of text in columns
-	}
-
-	this.element.style.width = width;
-
-	if (this.iframe) {
-		this.iframe.height = height;
-		this.iframe.width = width;
-	}
-
-	// Set the width for the iframe
-	this._height = height;
-	this._width = width;
-
-	// Get the fractional height and width of the iframe
-	// Default to orginal if bounding rect is 0
-	this.width = this.element.getBoundingClientRect().width || width;
-	this.height = this.element.getBoundingClientRect().height || height;
-
-};
-
-
-EPUBJS.Render.Iframe.prototype.resized = function(e){
-	// Get the fractional height and width of the iframe
-	this.width = this.iframe.getBoundingClientRect().width;
-	this.height = this.iframe.getBoundingClientRect().height;
-};
-
-EPUBJS.Render.Iframe.prototype.totalWidth = function(){
-	return this.docEl.scrollWidth;
-};
-
-EPUBJS.Render.Iframe.prototype.totalHeight = function(){
-	return this.docEl.scrollHeight;
-};
-
-EPUBJS.Render.Iframe.prototype.setPageDimensions = function(pageWidth, pageHeight){
-	this.pageWidth = pageWidth;
-	this.pageHeight = pageHeight;
-	//-- Add a page to the width of the document to account an for odd number of pages
-	// this.docEl.style.width = this.docEl.scrollWidth + pageWidth + "px";
-};
-
-EPUBJS.Render.Iframe.prototype.setDirection = function(direction){
-
-	this.direction = direction;
-
-	// Undo previous changes if needed
-	if(this.docEl && this.docEl.dir == "rtl"){
-		this.docEl.dir = "rtl";
-		if (this.layout !== "pre-paginated") {
-			this.docEl.style.position = "static";
-			this.docEl.style.right = "auto";
-		}
-	}
-
-};
-
-EPUBJS.Render.Iframe.prototype.setLeft = function(leftPos){
-	// this.bodyEl.style.marginLeft = -leftPos + "px";
-	// this.docEl.style.marginLeft = -leftPos + "px";
-	// this.docEl.style[EPUBJS.Render.Iframe.transform] = 'translate('+ (-leftPos) + 'px, 0)';
-
-	if (this.isMobile) {
-		this.docEl.style[this.transform] = 'translate('+ (-leftPos) + 'px, 0)';
+	if (window && window.location && !isArrayBuffer) {
+		// absoluteUri = uri.absoluteTo(window.location.href);
+		url = new URL(_url, window.location.href);
+		pathname = url.pathname;
+		// this.url = absoluteUri.toString();
+		this.url = url.toString();
+	} else if (window && window.location) {
+		this.url = window.location.href;
 	} else {
-		this.document.defaultView.scrollTo(leftPos, 0);
+		this.url = _url;
 	}
 
-};
+	// Find path to the Container
+	// if(uri && uri.suffix() === "opf") {
+	if(url && core.extension(pathname) === "opf") {
+		// Direct link to package, no container
+		this.packageUrl = _url;
+		this.containerUrl = '';
 
-EPUBJS.Render.Iframe.prototype.setLayout = function (layout) {
-	this.layout = layout;
-};
-
-EPUBJS.Render.Iframe.prototype.setStyle = function(style, val, prefixed){
-	if(prefixed) {
-		style = EPUBJS.core.prefixed(style);
-	}
-
-	if(this.bodyEl) this.bodyEl.style[style] = val;
-};
-
-EPUBJS.Render.Iframe.prototype.removeStyle = function(style){
-
-	if(this.bodyEl) this.bodyEl.style[style] = '';
-
-};
-
-EPUBJS.Render.Iframe.prototype.setClasses = function(classes){
-	if(this.bodyEl) this.bodyEl.className = classes.join(" ");
-};
-
-EPUBJS.Render.Iframe.prototype.addHeadTag = function(tag, attrs, _doc) {
-	var doc = _doc || this.document;
-	var tagEl = doc.createElement(tag);
-	var headEl = doc.head;
-
-	for(var attr in attrs) {
-		tagEl.setAttribute(attr, attrs[attr]);
-	}
-
-	if(headEl) headEl.insertBefore(tagEl, headEl.firstChild);
-};
-
-EPUBJS.Render.Iframe.prototype.page = function(pg){
-	this.leftPos = this.pageWidth * (pg-1); //-- pages start at 1
-
-	// Reverse for rtl langs
-	if(this.direction === "rtl"){
-		this.leftPos = this.leftPos * -1;
-	}
-
-	this.setLeft(this.leftPos);
-};
-
-//-- Show the page containing an Element
-EPUBJS.Render.Iframe.prototype.getPageNumberByElement = function(el){
-	var left, pg;
-	if(!el) return;
-
-	left = this.leftPos + el.getBoundingClientRect().left; //-- Calculate left offset compaired to scrolled position
-
-	pg = Math.floor(left / this.pageWidth) + 1; //-- pages start at 1
-
-	return pg;
-};
-
-//-- Show the page containing an Element
-EPUBJS.Render.Iframe.prototype.getPageNumberByRect = function(boundingClientRect){
-	var left, pg;
-
-	left = this.leftPos + boundingClientRect.left; //-- Calculate left offset compaired to scrolled position
-	pg = Math.floor(left / this.pageWidth) + 1; //-- pages start at 1
-
-	return pg;
-};
-
-// Return the root element of the content
-EPUBJS.Render.Iframe.prototype.getBaseElement = function(){
-	return this.bodyEl;
-};
-
-// Return the document element
-EPUBJS.Render.Iframe.prototype.getDocumentElement = function(){
-	return this.docEl;
-};
-
-// Checks if an element is on the screen
-EPUBJS.Render.Iframe.prototype.isElementVisible = function(el){
-	var rect;
-	var left;
-
-	if(el && typeof el.getBoundingClientRect === 'function'){
-		rect = el.getBoundingClientRect();
-		left = rect.left; //+ rect.width;
-		if( rect.width !== 0 &&
-				rect.height !== 0 && // Element not visible
-				left >= 0 &&
-				left < this.pageWidth ) {
-			return true;
+		if(url.origin) {
+			// this.baseUrl = uri.origin() + uri.directory() + "/";
+			this.baseUrl = url.origin + path.dirname(pathname) + "/";
+		// } else if(absoluteUri){
+		// 	this.baseUrl = absoluteUri.origin();
+		// 	this.baseUrl += absoluteUri.directory() + "/";
+		} else {
+			this.baseUrl = path.dirname(pathname) + "/";
 		}
+
+		epubPackage = this.request(this.packageUrl)
+			.catch(function(error) {
+				book.opening.reject(error);
+			});
+
+	} else if(isArrayBuffer || isBase64 || this.isArchivedUrl(_url)) {
+		// Book is archived
+		this.url = '';
+		// this.containerUrl = URI(containerPath).absoluteTo(this.url).toString();
+		this.containerUrl = path.resolve("", containerPath);
+
+		epubContainer = this.unarchive(_url, isBase64).
+			then(function() {
+				return this.request(this.containerUrl);
+			}.bind(this))
+			.catch(function(error) {
+				book.opening.reject(error);
+			});
+	}
+	// Find the path to the Package from the container
+	else if (!core.extension(pathname)) {
+
+		this.containerUrl = this.url + containerPath;
+
+		epubContainer = this.request(this.containerUrl)
+			.catch(function(error) {
+				// handle errors in loading container
+				book.opening.reject(error);
+			});
+	}
+
+	if (epubContainer) {
+		epubPackage = epubContainer.
+			then(function(containerXml){
+				return parse.container(containerXml); // Container has path to content
+			}).
+			then(function(paths){
+				// var packageUri = URI(paths.packagePath);
+				// var absPackageUri = packageUri.absoluteTo(book.url);
+				var packageUrl;
+
+				if (book.url) {
+					packageUrl = new URL(paths.packagePath, book.url);
+					book.packageUrl = packageUrl.toString();
+				} else {
+					book.packageUrl = "/" + paths.packagePath;
+				}
+
+				book.packagePath = paths.packagePath;
+				book.encoding = paths.encoding;
+
+				// Set Url relative to the content
+				if(packageUrl && packageUrl.origin) {
+					book.baseUrl = book.url + path.dirname(paths.packagePath) + "/";
+				} else {
+					if(path.dirname(paths.packagePath)) {
+						book.baseUrl = ""
+						book.basePath = "/" + path.dirname(paths.packagePath) + "/";
+					} else {
+						book.basePath = "/"
+					}
+				}
+
+				return book.request(book.packageUrl);
+			}).catch(function(error) {
+				// handle errors in either of the two requests
+				book.opening.reject(error);
+			});
+	}
+
+	epubPackage.then(function(packageXml) {
+
+		if (!packageXml) {
+			return;
+		}
+
+		// Get package information from epub opf
+		book.unpack(packageXml);
+
+		// Resolve promises
+		book.loading.manifest.resolve(book.package.manifest);
+		book.loading.metadata.resolve(book.package.metadata);
+		book.loading.spine.resolve(book.spine);
+		book.loading.cover.resolve(book.cover);
+
+		book.isOpen = true;
+
+		// Clear queue of any waiting book request
+
+		// Resolve book opened promise
+		book.opening.resolve(book);
+
+	}).catch(function(error) {
+		// handle errors in parsing the book
+		// console.error(error.message, error.stack);
+		book.opening.reject(error);
+	});
+
+	return this.opened;
+};
+
+/**
+ * unpack the contents of the Books packageXml
+ * @param {document} packageXml XML Document
+ */
+Book.prototype.unpack = function(packageXml){
+	var book = this,
+			parse = new Parser();
+
+	book.package = parse.packageContents(packageXml); // Extract info from contents
+	if(!book.package) {
+		return;
+	}
+
+	book.package.baseUrl = book.baseUrl; // Provides a url base for resolving paths
+	book.package.basePath = book.basePath; // Provides a url base for resolving paths
+
+	this.spine.load(book.package);
+
+	book.navigation = new Navigation(book.package, this.request);
+	book.navigation.load().then(function(toc){
+		book.toc = toc;
+		book.loading.navigation.resolve(book.toc);
+	});
+
+	// //-- Set Global Layout setting based on metadata
+	// MOVE TO RENDER
+	// book.globalLayoutProperties = book.parseLayoutProperties(book.package.metadata);
+	if (book.baseUrl) {
+		book.cover = new URL(book.package.coverPath, book.baseUrl).toString();
+	} else {
+		book.cover = path.resolve(book.baseUrl, book.package.coverPath);
+	}
+};
+
+/**
+ * Alias for book.spine.get
+ * @param {string} target
+ */
+Book.prototype.section = function(target) {
+	return this.spine.get(target);
+};
+
+/**
+ * Sugar to render a book
+ */
+Book.prototype.renderTo = function(element, options) {
+	// var renderMethod = (options && options.method) ?
+	//     options.method :
+	//     "single";
+
+	this.rendition = new Rendition(this, options);
+	this.rendition.attachTo(element);
+
+	return this.rendition;
+};
+
+/**
+ * Switch request methods depending on if book is archived or not
+ */
+Book.prototype.requestMethod = function(_url) {
+	// Switch request methods
+	if(this.unarchived) {
+		return this.unarchived.request(_url);
+	} else {
+		return request(_url, null, this.requestCredentials, this.requestHeaders);
+	}
+
+};
+
+Book.prototype.setRequestCredentials = function(_credentials) {
+	this.requestCredentials = _credentials;
+};
+
+Book.prototype.setRequestHeaders = function(_headers) {
+	this.requestHeaders = _headers;
+};
+
+/**
+ * Unarchive a zipped epub
+ */
+Book.prototype.unarchive = function(bookUrl, isBase64){
+	this.unarchived = new Unarchive();
+	return this.unarchived.open(bookUrl, isBase64);
+};
+
+/**
+ * Checks if url has a .epub or .zip extension, or is ArrayBuffer (of zip/epub)
+ */
+Book.prototype.isArchivedUrl = function(bookUrl){
+	var extension;
+
+	if (bookUrl instanceof ArrayBuffer) {
+		return true;
+	}
+
+	// Reuse parsed url or create a new uri object
+	// if(typeof(bookUrl) === "object") {
+	//   uri = bookUrl;
+	// } else {
+	//   uri = core.uri(bookUrl);
+	// }
+	// uri = URI(bookUrl);
+	extension = core.extension(bookUrl);
+
+	if(extension && (extension == "epub" || extension == "zip")){
+		return true;
 	}
 
 	return false;
 };
 
-
-EPUBJS.Render.Iframe.prototype.scroll = function(bool){
-	if(bool) {
-		// this.iframe.scrolling = "yes";
-		this.scrolling = "yes";
-	} else {
-		this.scrolling = "no";
-		// this.iframe.scrolling = "no";
-	}
-};
-
-// Cleanup event listeners
-EPUBJS.Render.Iframe.prototype.unload = function(){
-	this.window.removeEventListener("resize", this.resized);
-	this.iframe.removeEventListener("load", this.loaded);
-};
-
-//-- Enable binding events to Render
-RSVP.EventTarget.mixin(EPUBJS.Render.Iframe.prototype);
-
-EPUBJS.Renderer = function(renderMethod, hidden) {
-	// Dom events to listen for
-	this.listenedEvents = ["keydown", "keyup", "keypressed", "mouseup", "mousedown", "click"];
-	this.upEvent = "mouseup";
-	this.downEvent = "mousedown";
-	if('ontouchstart' in document.documentElement) {
-		this.listenedEvents.push("touchstart", "touchend");
-		this.upEvent = "touchend";
-		this.downEvent = "touchstart";
-	}
-	/**
-	* Setup a render method.
-	* Options are: Iframe
-	*/
-	if(renderMethod && typeof(EPUBJS.Render[renderMethod]) != "undefined"){
-		this.render = new EPUBJS.Render[renderMethod]();
-	} else {
-		console.error("Not a Valid Rendering Method");
-	}
-
-	// Listen for load events
-	this.render.on("render:loaded", this.loaded.bind(this));
-
-	// Cached for replacement urls from storage
-	this.caches = {};
-
-	// Blank Cfi for Parsing
-	this.epubcfi = new EPUBJS.EpubCFI();
-
-	this.spreads = true;
-	this.isForcedSingle = false;
-	this.resized = this.onResized.bind(this);
-
-	this.layoutSettings = {};
-
-	this.hidden = hidden || false;
-	//-- Adds Hook methods to the Book prototype
-	//   Hooks will all return before triggering the callback.
-	EPUBJS.Hooks.mixin(this);
-	//-- Get pre-registered hooks for events
-	this.getHooks("beforeChapterDisplay");
-
-	//-- Queue up page changes if page map isn't ready
-	this._q = EPUBJS.core.queue(this);
-
-	this._moving = false;
-
-};
-
-//-- Renderer events for listening
-EPUBJS.Renderer.prototype.Events = [
-	"renderer:keydown",
-	"renderer:keyup",
-	"renderer:keypressed",
-	"renderer:mouseup",
-	"renderer:mousedown",
-	"renderer:click",
-	"renderer:touchstart",
-	"renderer:touchend",
-	"renderer:selected",
-	"renderer:chapterUnload",
-	"renderer:chapterUnloaded",
-	"renderer:chapterDisplayed",
-	"renderer:locationChanged",
-	"renderer:visibleLocationChanged",
-	"renderer:visibleRangeChanged",
-	"renderer:resized",
-	"renderer:spreads",
-	"renderer:beforeResize"
-];
-
 /**
-* Creates an element to render to.
-* Resizes to passed width and height or to the elements size
-*/
-EPUBJS.Renderer.prototype.initialize = function(element, width, height){
-	this.container = element;
-	this.element = this.render.create();
+ * Get the cover url
+ */
+Book.prototype.coverUrl = function(){
+	var retrieved = this.loaded.cover.
+		then(function(url) {
+			if(this.unarchived) {
+				return this.unarchived.createUrl(this.cover);
+			}else{
+				return this.cover;
+			}
+		}.bind(this));
 
-	this.initWidth = width;
-	this.initHeight = height;
 
-	this.width = width || this.container.clientWidth;
-	this.height = height || this.container.clientHeight;
 
-	this.container.appendChild(this.element);
-
-	if(width && height){
-		this.render.resize(this.width, this.height);
-	} else {
-		this.render.resize('100%', '100%');
-	}
-
-	document.addEventListener("orientationchange", this.onResized.bind(this));
+	return retrieved;
 };
 
 /**
-* Display a chapter
-* Takes: chapter object, global layout settings
-* Returns: Promise with passed Renderer after pages has loaded
-*/
-EPUBJS.Renderer.prototype.displayChapter = function(chapter, globalLayout){
-	var store = false;
-	if(this._moving) {
-		console.warning("Rendering In Progress");
-        var deferred = new RSVP.defer();
-        deferred.reject({
-            message : "Rendering In Progress",
-            stack : new Error().stack
-        });
-		return deferred.promise;
+ * Find a DOM Range for a given CFI Range
+ */
+Book.prototype.range = function(cfiRange) {
+	var cfi = new EpubCFI(cfiRange);
+	var item = this.spine.get(cfi.spinePos);
+
+	return item.load().then(function (contents) {
+		var range = cfi.toRange(item.document);
+		return range;
+	})
+};
+
+module.exports = Book;
+
+//-- Enable binding events to book
+EventEmitter(Book.prototype);
+
+
+/***/ },
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+var core = __webpack_require__(0);
+var DefaultViewManager = __webpack_require__(10);
+
+function ContinuousViewManager(options) {
+
+	DefaultViewManager.apply(this, arguments); // call super constructor.
+
+	this.name = "continuous";
+
+	this.settings = core.extend(this.settings || {}, {
+		infinite: true,
+		overflow: "auto",
+		axis: "vertical",
+		offset: 500,
+		offsetDelta: 250,
+		width: undefined,
+		height: undefined
+	});
+
+	core.extend(this.settings, options.settings || {});
+
+	// Gap can be 0, byt defaults doesn't handle that
+	if (options.settings.gap != "undefined" && options.settings.gap === 0) {
+		this.settings.gap = options.settings.gap;
 	}
-	this._moving = true;
-	// Get the url string from the chapter (may be from storage)
-	return chapter.render().
-		then(function(contents) {
 
-			// Unload the previous chapter listener
-			if(this.currentChapter) {
-				this.trigger("renderer:chapterUnload");
-				this.currentChapter.unload(); // Remove stored blobs
+	// this.viewSettings.axis = this.settings.axis;
+	this.viewSettings = {
+		ignoreClass: this.settings.ignoreClass,
+		axis: this.settings.axis,
+		layout: this.layout,
+		width: 0,
+		height: 0
+	};
 
-				if(this.render.window){
-					this.render.window.removeEventListener("resize", this.resized);
+	this.scrollTop = 0;
+	this.scrollLeft = 0;
+};
+
+// subclass extends superclass
+ContinuousViewManager.prototype = Object.create(DefaultViewManager.prototype);
+ContinuousViewManager.prototype.constructor = ContinuousViewManager;
+
+ContinuousViewManager.prototype.display = function(section, target){
+	return DefaultViewManager.prototype.display.call(this, section, target)
+		.then(function () {
+			return this.fill();
+		}.bind(this));
+};
+
+ContinuousViewManager.prototype.fill = function(_full){
+	var full = _full || new core.defer();
+
+	this.check().then(function(result) {
+		if (result) {
+			this.fill(full);
+		} else {
+			full.resolve();
+		}
+	}.bind(this));
+
+	return full.promise;
+}
+
+ContinuousViewManager.prototype.moveTo = function(offset){
+	// var bounds = this.stage.bounds();
+	// var dist = Math.floor(offset.top / bounds.height) * bounds.height;
+	var distX = 0,
+			distY = 0;
+
+	var offsetX = 0,
+			offsetY = 0;
+
+	if(this.settings.axis === "vertical") {
+		distY = offset.top;
+		offsetY = offset.top+this.settings.offset;
+	} else {
+		distX = Math.floor(offset.left / this.layout.delta) * this.layout.delta;
+		offsetX = distX+this.settings.offset;
+	}
+
+	return this.check(offsetX, offsetY)
+		.then(function(){
+			this.scrollBy(distX, distY);
+		}.bind(this));
+};
+
+/*
+ContinuousViewManager.prototype.afterDisplayed = function(currView){
+	var next = currView.section.next();
+	var prev = currView.section.prev();
+	var index = this.views.indexOf(currView);
+	var prevView, nextView;
+
+	if(index + 1 === this.views.length && next) {
+		nextView = this.createView(next);
+		this.q.enqueue(this.append.bind(this), nextView);
+	}
+
+	if(index === 0 && prev) {
+		prevView = this.createView(prev, this.viewSettings);
+		this.q.enqueue(this.prepend.bind(this), prevView);
+	}
+
+	// this.removeShownListeners(currView);
+	// currView.onShown = this.afterDisplayed.bind(this);
+	this.emit("added", currView.section);
+
+};
+*/
+
+ContinuousViewManager.prototype.resize = function(width, height){
+
+	// Clear the queue
+	this.q.clear();
+
+	this._stageSize = this.stage.size(width, height);
+	this._bounds = this.bounds();
+
+	// Update for new views
+	this.viewSettings.width = this._stageSize.width;
+	this.viewSettings.height = this._stageSize.height;
+
+	// Update for existing views
+	this.views.each(function(view) {
+		view.size(this._stageSize.width, this._stageSize.height);
+	}.bind(this));
+
+	this.updateLayout();
+
+	// if(this.location) {
+	//   this.rendition.display(this.location.start);
+	// }
+
+	this.emit("resized", {
+		width: this.stage.width,
+		height: this.stage.height
+	});
+
+};
+
+ContinuousViewManager.prototype.onResized = function(e) {
+
+	// this.views.clear();
+
+	clearTimeout(this.resizeTimeout);
+	this.resizeTimeout = setTimeout(function(){
+		this.resize();
+	}.bind(this), 150);
+};
+
+ContinuousViewManager.prototype.afterResized = function(view){
+	this.emit("resize", view.section);
+};
+
+// Remove Previous Listeners if present
+ContinuousViewManager.prototype.removeShownListeners = function(view){
+
+	// view.off("shown", this.afterDisplayed);
+	// view.off("shown", this.afterDisplayedAbove);
+	view.onDisplayed = function(){};
+
+};
+
+
+// ContinuousViewManager.prototype.append = function(section){
+// 	return this.q.enqueue(function() {
+//
+// 		this._append(section);
+//
+//
+// 	}.bind(this));
+// };
+//
+// ContinuousViewManager.prototype.prepend = function(section){
+// 	return this.q.enqueue(function() {
+//
+// 		this._prepend(section);
+//
+// 	}.bind(this));
+//
+// };
+
+ContinuousViewManager.prototype.append = function(section){
+	var view = this.createView(section);
+	this.views.append(view);
+	return view;
+};
+
+ContinuousViewManager.prototype.prepend = function(section){
+	var view = this.createView(section);
+
+	view.on("resized", this.counter.bind(this));
+
+	this.views.prepend(view);
+	return view;
+};
+
+ContinuousViewManager.prototype.counter = function(bounds){
+
+	if(this.settings.axis === "vertical") {
+		this.scrollBy(0, bounds.heightDelta, true);
+	} else {
+		this.scrollBy(bounds.widthDelta, 0, true);
+	}
+
+};
+
+ContinuousViewManager.prototype.update = function(_offset){
+	var container = this.bounds();
+	var views = this.views.all();
+	var viewsLength = views.length;
+	var visible = [];
+	var offset = typeof _offset != "undefined" ? _offset : (this.settings.offset || 0);
+	var isVisible;
+	var view;
+
+	var updating = new core.defer();
+	var promises = [];
+
+	for (var i = 0; i < viewsLength; i++) {
+		view = views[i];
+
+		isVisible = this.isVisible(view, offset, offset, container);
+
+		if(isVisible === true) {
+			if (!view.displayed) {
+				promises.push(view.display(this.request).then(function (view) {
+					view.show();
+				}));
+			}
+			visible.push(view);
+		} else {
+			this.q.enqueue(view.destroy.bind(view));
+
+			clearTimeout(this.trimTimeout);
+			this.trimTimeout = setTimeout(function(){
+				this.q.enqueue(this.trim.bind(this));
+			}.bind(this), 250);
+		}
+
+	}
+
+	if(promises.length){
+		return Promise.all(promises);
+	} else {
+		updating.resolve();
+		return updating.promise;
+	}
+
+};
+
+ContinuousViewManager.prototype.check = function(_offsetLeft, _offsetTop){
+	var last, first, next, prev;
+
+	var checking = new core.defer();
+	var newViews = [];
+
+	var horizontal = (this.settings.axis === "horizontal");
+	var delta = this.settings.offset || 0;
+
+	if (_offsetLeft && horizontal) {
+		delta = _offsetLeft;
+	}
+
+	if (_offsetTop && !horizontal) {
+		delta = _offsetTop;
+	}
+
+	var bounds = this._bounds; // bounds saved this until resize
+
+	var offset = horizontal ? this.scrollLeft : this.scrollTop;
+	var visibleLength = horizontal ? bounds.width : bounds.height;
+	var contentLength = horizontal ? this.container.scrollWidth : this.container.scrollHeight;
+
+	if (offset + visibleLength + delta >= contentLength) {
+		last = this.views.last();
+		next = last && last.section.next();
+		if(next) {
+			newViews.push(this.append(next));
+		}
+	}
+
+	if (offset - delta < 0 ) {
+		first = this.views.first();
+		prev = first && first.section.prev();
+		if(prev) {
+			newViews.push(this.prepend(prev));
+		}
+	}
+
+	if(newViews.length){
+		// Promise.all(promises)
+			// .then(function() {
+				// Check to see if anything new is on screen after rendering
+				return this.q.enqueue(function(){
+					return this.update(delta);
+				}.bind(this));
+
+
+			// }.bind(this));
+
+	} else {
+		checking.resolve(false);
+		return checking.promise;
+	}
+
+
+};
+
+ContinuousViewManager.prototype.trim = function(){
+	var task = new core.defer();
+	var displayed = this.views.displayed();
+	var first = displayed[0];
+	var last = displayed[displayed.length-1];
+	var firstIndex = this.views.indexOf(first);
+	var lastIndex = this.views.indexOf(last);
+	var above = this.views.slice(0, firstIndex);
+	var below = this.views.slice(lastIndex+1);
+
+	// Erase all but last above
+	for (var i = 0; i < above.length-1; i++) {
+		this.erase(above[i], above);
+	}
+
+	// Erase all except first below
+	for (var j = 1; j < below.length; j++) {
+		this.erase(below[j]);
+	}
+
+	task.resolve();
+	return task.promise;
+};
+
+ContinuousViewManager.prototype.erase = function(view, above){ //Trim
+
+	var prevTop;
+	var prevLeft;
+
+	if(this.settings.height) {
+		prevTop = this.container.scrollTop;
+		prevLeft = this.container.scrollLeft;
+	} else {
+		prevTop = window.scrollY;
+		prevLeft = window.scrollX;
+	}
+
+	var bounds = view.bounds();
+
+	this.views.remove(view);
+
+	if(above) {
+
+		if(this.settings.axis === "vertical") {
+			this.scrollTo(0, prevTop - bounds.height, true);
+		} else {
+			this.scrollTo(prevLeft - bounds.width, 0, true);
+		}
+	}
+
+};
+
+ContinuousViewManager.prototype.addEventListeners = function(stage){
+
+	window.addEventListener('unload', function(e){
+		this.ignore = true;
+		// this.scrollTo(0,0);
+		this.destroy();
+	}.bind(this));
+
+	this.addScrollListeners();
+};
+
+ContinuousViewManager.prototype.addScrollListeners = function() {
+	var scroller;
+
+	this.tick = core.requestAnimationFrame;
+
+	if(this.settings.height) {
+		this.prevScrollTop = this.container.scrollTop;
+		this.prevScrollLeft = this.container.scrollLeft;
+	} else {
+		this.prevScrollTop = window.scrollY;
+		this.prevScrollLeft = window.scrollX;
+	}
+
+	this.scrollDeltaVert = 0;
+	this.scrollDeltaHorz = 0;
+
+	if(this.settings.height) {
+		scroller = this.container;
+		this.scrollTop = this.container.scrollTop;
+		this.scrollLeft = this.container.scrollLeft;
+	} else {
+		scroller = window;
+		this.scrollTop = window.scrollY;
+		this.scrollLeft = window.scrollX;
+	}
+
+	scroller.addEventListener("scroll", this.onScroll.bind(this));
+
+	// this.tick.call(window, this.onScroll.bind(this));
+
+	this.scrolled = false;
+
+};
+
+ContinuousViewManager.prototype.onScroll = function(){
+
+	// if(!this.ignore) {
+
+		if(this.settings.height) {
+			scrollTop = this.container.scrollTop;
+			scrollLeft = this.container.scrollLeft;
+		} else {
+			scrollTop = window.scrollY;
+			scrollLeft = window.scrollX;
+		}
+
+		this.scrollTop = scrollTop;
+		this.scrollLeft = scrollLeft;
+
+		if(!this.ignore) {
+
+			if((this.scrollDeltaVert === 0 &&
+				 this.scrollDeltaHorz === 0) ||
+				 this.scrollDeltaVert > this.settings.offsetDelta ||
+				 this.scrollDeltaHorz > this.settings.offsetDelta) {
+
+				this.q.enqueue(function() {
+					this.check();
+				}.bind(this));
+				// this.check();
+
+				this.scrollDeltaVert = 0;
+				this.scrollDeltaHorz = 0;
+
+				this.emit("scroll", {
+					top: scrollTop,
+					left: scrollLeft
+				});
+
+				clearTimeout(this.afterScrolled);
+				this.afterScrolled = setTimeout(function () {
+					this.emit("scrolled", {
+						top: this.scrollTop,
+						left: this.scrollLeft
+					});
+				}.bind(this));
+
+			}
+
+		} else {
+			this.ignore = false;
+		}
+
+		this.scrollDeltaVert += Math.abs(scrollTop-this.prevScrollTop);
+		this.scrollDeltaHorz += Math.abs(scrollLeft-this.prevScrollLeft);
+
+		this.prevScrollTop = scrollTop;
+		this.prevScrollLeft = scrollLeft;
+
+		clearTimeout(this.scrollTimeout);
+		this.scrollTimeout = setTimeout(function(){
+			this.scrollDeltaVert = 0;
+			this.scrollDeltaHorz = 0;
+		}.bind(this), 150);
+
+
+		this.scrolled = false;
+	// }
+
+	// this.tick.call(window, this.onScroll.bind(this));
+
+};
+
+
+//  ContinuousViewManager.prototype.resizeView = function(view) {
+//
+// 	if(this.settings.axis === "horizontal") {
+// 		view.lock("height", this.stage.width, this.stage.height);
+// 	} else {
+// 		view.lock("width", this.stage.width, this.stage.height);
+// 	}
+//
+// };
+
+ContinuousViewManager.prototype.currentLocation = function(){
+
+	if (this.settings.axis === "vertical") {
+		this.location = this.scrolledLocation();
+	} else {
+		this.location = this.paginatedLocation();
+	}
+
+	return this.location;
+};
+
+ContinuousViewManager.prototype.scrolledLocation = function(){
+
+	var visible = this.visible();
+	var startPage, endPage;
+
+	var container = this.container.getBoundingClientRect();
+
+	if(visible.length === 1) {
+		return this.mapping.page(visible[0].contents, visible[0].section.cfiBase);
+	}
+
+	if(visible.length > 1) {
+
+		startPage = this.mapping.page(visible[0].contents, visible[0].section.cfiBase);
+		endPage = this.mapping.page(visible[visible.length-1].contents, visible[visible.length-1].section.cfiBase);
+
+		return {
+			start: startPage.start,
+			end: endPage.end
+		};
+	}
+
+};
+
+ContinuousViewManager.prototype.paginatedLocation = function(){
+	var visible = this.visible();
+	var startA, startB, endA, endB;
+	var pageLeft, pageRight;
+	var container = this.container.getBoundingClientRect();
+
+	if(visible.length === 1) {
+		startA = container.left - visible[0].position().left;
+		endA = startA + this.layout.spreadWidth;
+
+		return this.mapping.page(visible[0].contents, visible[0].section.cfiBase, startA, endA);
+	}
+
+	if(visible.length > 1) {
+
+		// Left Col
+		startA = container.left - visible[0].position().left;
+		endA = startA + this.layout.columnWidth;
+
+		// Right Col
+		startB = container.left + this.layout.spreadWidth - visible[visible.length-1].position().left;
+		endB = startB + this.layout.columnWidth;
+
+		pageLeft = this.mapping.page(visible[0].contents, visible[0].section.cfiBase, startA, endA);
+		pageRight = this.mapping.page(visible[visible.length-1].contents, visible[visible.length-1].section.cfiBase, startB, endB);
+
+		return {
+			start: pageLeft.start,
+			end: pageRight.end
+		};
+	}
+};
+
+/*
+Continuous.prototype.current = function(what){
+	var view, top;
+	var container = this.container.getBoundingClientRect();
+	var length = this.views.length - 1;
+
+	if(this.settings.axis === "horizontal") {
+
+		for (var i = length; i >= 0; i--) {
+			view = this.views[i];
+			left = view.position().left;
+
+			if(left < container.right) {
+
+				if(this._current == view) {
+					break;
 				}
 
-				this.removeEventListeners();
-				this.removeSelectionListeners();
-				this.trigger("renderer:chapterUnloaded");
-				this.contents = null;
-				this.doc = null;
-				this.pageMap = null;
+				this._current = view;
+				break;
 			}
+		}
 
-			this.currentChapter = chapter;
+	} else {
 
-			this.chapterPos = 1;
+		for (var i = length; i >= 0; i--) {
+			view = this.views[i];
+			top = view.bounds().top;
+			if(top < container.bottom) {
 
-			this.currentChapterCfiBase = chapter.cfiBase;
+				if(this._current == view) {
+					break;
+				}
 
-			this.layoutSettings = this.reconcileLayoutSettings(globalLayout, chapter.properties);
+				this._current = view;
 
-			return this.load(contents, chapter.href);
+				break;
+			}
+		}
 
-		}.bind(this), function() {
-            this._moving = false;
-        }.bind(this));
+	}
+
+	return this._current;
+};
+*/
+
+ContinuousViewManager.prototype.updateLayout = function() {
+
+	if (!this.stage) {
+		return;
+	}
+
+	if(this.settings.axis === "vertical") {
+		this.layout.calculate(this._stageSize.width, this._stageSize.height);
+	} else {
+		this.layout.calculate(
+			this._stageSize.width,
+			this._stageSize.height,
+			this.settings.gap
+		);
+
+		// Set the look ahead offset for what is visible
+		this.settings.offset = this.layout.delta;
+
+		this.stage.addStyleRules("iframe", [{"margin-right" : this.layout.gap + "px"}]);
+
+	}
+
+	// Set the dimensions for views
+	this.viewSettings.width = this.layout.width;
+	this.viewSettings.height = this.layout.height;
+
+	this.setLayout(this.layout);
 
 };
 
-/**
-* Loads a url (string) and renders it,
-* attaching event listeners and triggering hooks.
-* Returns: Promise with the rendered contents.
-*/
+ContinuousViewManager.prototype.next = function(){
 
-EPUBJS.Renderer.prototype.load = function(contents, url){
-	var deferred = new RSVP.defer();
-	var loaded;
+	if(this.settings.axis === "horizontal") {
 
-	// Switch to the required layout method for the settings
-	this.layoutMethod = this.determineLayout(this.layoutSettings);
-	this.layout = new EPUBJS.Layout[this.layoutMethod]();
+		this.scrollLeft = this.container.scrollLeft;
 
-	this.visible(false);
-
-	this.render.load(contents, url).then(function(contents) {
-
-		// Duck-type fixed layout books.
-		if (EPUBJS.Layout.isFixedLayout(contents)) {
-			this.layoutSettings.layout = "pre-paginated";
-			this.layoutMethod = this.determineLayout(this.layoutSettings);
-			this.layout = new EPUBJS.Layout[this.layoutMethod]();
+		if(this.container.scrollLeft +
+			 this.container.offsetWidth +
+			 this.layout.delta < this.container.scrollWidth) {
+			this.scrollBy(this.layout.delta, 0);
+		} else {
+			this.scrollTo(this.container.scrollWidth - this.layout.delta, 0);
 		}
-		this.render.setLayout(this.layoutSettings.layout);
 
-		// HTML element must have direction set if RTL or columnns will
-		// not be in the correct direction in Firefox
-		// Firefox also need the html element to be position right
-		if(this.render.direction == "rtl" && this.render.docEl.dir != "rtl"){
-			this.render.docEl.dir = "rtl";
-			if (this.render.layout !== "pre-paginated") {
-				this.render.docEl.style.position = "absolute";
-				this.render.docEl.style.right = "0";
+	} else {
+		this.scrollBy(0, this.layout.height);
+	}
+};
+
+ContinuousViewManager.prototype.prev = function(){
+	if(this.settings.axis === "horizontal") {
+		this.scrollBy(-this.layout.delta, 0);
+	} else {
+		this.scrollBy(0, -this.layout.height);
+	}
+};
+
+ContinuousViewManager.prototype.updateFlow = function(flow){
+	var axis = (flow === "paginated") ? "horizontal" : "vertical";
+
+	this.settings.axis = axis;
+
+	this.viewSettings.axis = axis;
+
+	this.settings.overflow = (flow === "paginated") ? "hidden" : "auto";
+
+	// this.views.each(function(view){
+	// 	view.setAxis(axis);
+	// });
+
+	if (this.settings.axis === "vertical") {
+		this.settings.infinite = true;
+	} else {
+		this.settings.infinite = false;
+	}
+
+};
+module.exports = ContinuousViewManager;
+
+
+/***/ },
+/* 19 */
+/***/ function(module, exports, __webpack_require__) {
+
+var EventEmitter = __webpack_require__(2);
+var core = __webpack_require__(0);
+var EpubCFI = __webpack_require__(1);
+var Contents = __webpack_require__(9);
+
+function IframeView(section, options) {
+	this.settings = core.extend({
+		ignoreClass : '',
+		axis: 'vertical',
+		width: 0,
+		height: 0,
+		layout: undefined,
+		globalLayoutProperties: {},
+	}, options || {});
+
+	this.id = "epubjs-view-" + core.uuid();
+	this.section = section;
+	this.index = section.index;
+
+	this.element = this.container(this.settings.axis);
+
+	this.added = false;
+	this.displayed = false;
+	this.rendered = false;
+
+	this.width  = this.settings.width;
+	this.height = this.settings.height;
+
+	this.fixedWidth  = 0;
+	this.fixedHeight = 0;
+
+	// Blank Cfi for Parsing
+	this.epubcfi = new EpubCFI();
+
+	this.layout = this.settings.layout;
+	// Dom events to listen for
+	// this.listenedEvents = ["keydown", "keyup", "keypressed", "mouseup", "mousedown", "click", "touchend", "touchstart"];
+};
+
+IframeView.prototype.container = function(axis) {
+	var element = document.createElement('div');
+
+	element.classList.add("epub-view");
+
+	// this.element.style.minHeight = "100px";
+	element.style.height = "0px";
+	element.style.width = "0px";
+	element.style.overflow = "hidden";
+
+	if(axis && axis == "horizontal"){
+		element.style.display = "inline-block";
+	} else {
+		element.style.display = "block";
+	}
+
+	return element;
+};
+
+IframeView.prototype.create = function() {
+
+	if(this.iframe) {
+		return this.iframe;
+	}
+
+	if(!this.element) {
+		this.element = this.createContainer();
+	}
+
+	this.iframe = document.createElement('iframe');
+	this.iframe.id = this.id;
+	this.iframe.scrolling = "no"; // Might need to be removed: breaks ios width calculations
+	this.iframe.style.overflow = "hidden";
+	this.iframe.seamless = "seamless";
+	// Back up if seamless isn't supported
+	this.iframe.style.border = "none";
+
+	this.resizing = true;
+
+	// this.iframe.style.display = "none";
+	this.element.style.visibility = "hidden";
+	this.iframe.style.visibility = "hidden";
+
+	this.iframe.style.width = "0";
+	this.iframe.style.height = "0";
+	this._width = 0;
+	this._height = 0;
+
+	this.element.appendChild(this.iframe);
+	this.added = true;
+
+	this.elementBounds = core.bounds(this.element);
+
+	// if(width || height){
+	//   this.resize(width, height);
+	// } else if(this.width && this.height){
+	//   this.resize(this.width, this.height);
+	// } else {
+	//   this.iframeBounds = core.bounds(this.iframe);
+	// }
+
+	// Firefox has trouble with baseURI and srcdoc
+	// TODO: Disable for now in firefox
+
+	if(!!("srcdoc" in this.iframe)) {
+		this.supportsSrcdoc = true;
+	} else {
+		this.supportsSrcdoc = false;
+	}
+
+	return this.iframe;
+};
+
+IframeView.prototype.render = function(request, show) {
+
+	// view.onLayout = this.layout.format.bind(this.layout);
+	this.create();
+
+	// Fit to size of the container, apply padding
+	this.size();
+
+	if(!this.sectionRender) {
+		this.sectionRender = this.section.render(request);
+	}
+
+	// Render Chain
+	return this.sectionRender
+		.then(function(contents){
+			return this.load(contents);
+		}.bind(this))
+		// .then(function(doc){
+		// 	return this.hooks.content.trigger(view, this);
+		// }.bind(this))
+		.then(function(){
+			// this.settings.layout.format(view.contents);
+			// return this.hooks.layout.trigger(view, this);
+		}.bind(this))
+		// .then(function(){
+		// 	return this.display();
+		// }.bind(this))
+		// .then(function(){
+		// 	return this.hooks.render.trigger(view, this);
+		// }.bind(this))
+		.then(function(){
+
+			// apply the layout function to the contents
+			this.settings.layout.format(this.contents);
+
+			// Expand the iframe to the full size of the content
+			this.expand();
+
+			// Listen for events that require an expansion of the iframe
+			this.addListeners();
+
+			if(show !== false) {
+				//this.q.enqueue(function(view){
+					// this.show();
+				//}, view);
 			}
+			// this.map = new Map(view, this.layout);
+			//this.hooks.show.trigger(view, this);
+			this.emit("rendered", this.section);
+
+		}.bind(this))
+		.catch(function(e){
+			console.error(e);
+			this.emit("loaderror", e);
+		}.bind(this));
+
+};
+
+// Determine locks base on settings
+IframeView.prototype.size = function(_width, _height) {
+	var width = _width || this.settings.width;
+	var height = _height || this.settings.height;
+
+	if(this.layout.name === "pre-paginated") {
+		this.lock("both", width, height);
+	} else if(this.settings.axis === "horizontal") {
+		this.lock("height", width, height);
+	} else {
+		this.lock("width", width, height);
+	}
+
+};
+
+// Lock an axis to element dimensions, taking borders into account
+IframeView.prototype.lock = function(what, width, height) {
+	var elBorders = core.borders(this.element);
+	var iframeBorders;
+
+	if(this.iframe) {
+		iframeBorders = core.borders(this.iframe);
+	} else {
+		iframeBorders = {width: 0, height: 0};
+	}
+
+	if(what == "width" && core.isNumber(width)){
+		this.lockedWidth = width - elBorders.width - iframeBorders.width;
+		this.resize(this.lockedWidth, width); //  width keeps ratio correct
+	}
+
+	if(what == "height" && core.isNumber(height)){
+		this.lockedHeight = height - elBorders.height - iframeBorders.height;
+		this.resize(width, this.lockedHeight);
+	}
+
+	if(what === "both" &&
+		 core.isNumber(width) &&
+		 core.isNumber(height)){
+
+		this.lockedWidth = width - elBorders.width - iframeBorders.width;
+		this.lockedHeight = height - elBorders.height - iframeBorders.height;
+
+		this.resize(this.lockedWidth, this.lockedHeight);
+	}
+
+	if(this.displayed && this.iframe) {
+
+			// this.contents.layout();
+			this.expand();
+
+	}
+
+
+
+};
+
+// Resize a single axis based on content dimensions
+IframeView.prototype.expand = function(force) {
+	var width = this.lockedWidth;
+	var height = this.lockedHeight;
+	var columns;
+
+	var textWidth, textHeight;
+
+	if(!this.iframe || this._expanding) return;
+
+	this._expanding = true;
+
+	// Expand Horizontally
+	// if(height && !width) {
+	if(this.settings.axis === "horizontal") {
+		// Get the width of the text
+		textWidth = this.contents.textWidth();
+		// Check if the textWidth has changed
+		if(textWidth != this._textWidth){
+			// Get the contentWidth by resizing the iframe
+			// Check with a min reset of the textWidth
+			width = this.contentWidth(textWidth);
+
+			columns = Math.ceil(width / (this.settings.layout.columnWidth + this.settings.layout.gap));
+
+			if ( this.settings.layout.divisor > 1 &&
+					 this.settings.layout.name === "reflowable" &&
+					(columns % 2 > 0)) {
+					// add a blank page
+					width += this.settings.layout.gap + this.settings.layout.columnWidth;
+			}
+
+			// Save the textWdith
+			this._textWidth = textWidth;
+			// Save the contentWidth
+			this._contentWidth = width;
+		} else {
+			// Otherwise assume content height hasn't changed
+			width = this._contentWidth;
+		}
+	} // Expand Vertically
+	else if(this.settings.axis === "vertical") {
+		textHeight = this.contents.textHeight();
+		if(textHeight != this._textHeight){
+			height = this.contentHeight(textHeight);
+			this._textHeight = textHeight;
+			this._contentHeight = height;
+		} else {
+			height = this._contentHeight;
 		}
 
-		this.afterLoad(contents);
+	}
 
-		//-- Trigger registered hooks before displaying
-		this.beforeDisplay(function(){
+	// Only Resize if dimensions have changed or
+	// if Frame is still hidden, so needs reframing
+	if(this._needsReframe || width != this._width || height != this._height){
+		this.resize(width, height);
+	}
 
-			this.afterDisplay();
+	this._expanding = false;
+};
 
-			this.visible(true);
+IframeView.prototype.contentWidth = function(min) {
+	var prev;
+	var width;
+
+	// Save previous width
+	prev = this.iframe.style.width;
+	// Set the iframe size to min, width will only ever be greater
+	// Will preserve the aspect ratio
+	this.iframe.style.width = (min || 0) + "px";
+	// Get the scroll overflow width
+	width = this.contents.scrollWidth();
+	// Reset iframe size back
+	this.iframe.style.width = prev;
+	return width;
+};
+
+IframeView.prototype.contentHeight = function(min) {
+	var prev;
+	var height;
+
+	prev = this.iframe.style.height;
+	this.iframe.style.height = (min || 0) + "px";
+	height = this.contents.scrollHeight();
+
+	this.iframe.style.height = prev;
+	return height;
+};
 
 
-			deferred.resolve(this); //-- why does this return the renderer?
+IframeView.prototype.resize = function(width, height) {
+
+	if(!this.iframe) return;
+
+	if(core.isNumber(width)){
+		this.iframe.style.width = width + "px";
+		this._width = width;
+	}
+
+	if(core.isNumber(height)){
+		this.iframe.style.height = height + "px";
+		this._height = height;
+	}
+
+	this.iframeBounds = core.bounds(this.iframe);
+
+	this.reframe(this.iframeBounds.width, this.iframeBounds.height);
+
+};
+
+IframeView.prototype.reframe = function(width, height) {
+	var size;
+
+	// if(!this.displayed) {
+	//   this._needsReframe = true;
+	//   return;
+	// }
+	if(core.isNumber(width)){
+		this.element.style.width = width + "px";
+	}
+
+	if(core.isNumber(height)){
+		this.element.style.height = height + "px";
+	}
+
+	this.prevBounds = this.elementBounds;
+
+	this.elementBounds = core.bounds(this.element);
+
+	size = {
+		width: this.elementBounds.width,
+		height: this.elementBounds.height,
+		widthDelta: this.elementBounds.width - this.prevBounds.width,
+		heightDelta: this.elementBounds.height - this.prevBounds.height,
+	};
+
+	this.onResize(this, size);
+
+	this.emit("resized", size);
+
+};
+
+
+IframeView.prototype.load = function(contents) {
+	var loading = new core.defer();
+	var loaded = loading.promise;
+
+	if(!this.iframe) {
+		loading.reject(new Error("No Iframe Available"));
+		return loaded;
+	}
+
+	this.iframe.onload = function(event) {
+
+		this.onLoad(event, loading);
+
+	}.bind(this);
+
+	if(this.supportsSrcdoc){
+		this.iframe.srcdoc = contents;
+	} else {
+
+		this.document = this.iframe.contentDocument;
+
+		if(!this.document) {
+			loading.reject(new Error("No Document Available"));
+			return loaded;
+		}
+
+		this.iframe.contentDocument.open();
+		this.iframe.contentDocument.write(contents);
+		this.iframe.contentDocument.close();
+
+	}
+
+	return loaded;
+};
+
+IframeView.prototype.onLoad = function(event, promise) {
+
+		this.window = this.iframe.contentWindow;
+		this.document = this.iframe.contentDocument;
+
+		this.contents = new Contents(this.document, this.document.body, this.section.cfiBase);
+
+		this.rendering = false;
+
+		var link = this.document.querySelector("link[rel='canonical']");
+		if (link) {
+			link.setAttribute("href", this.section.url);
+		} else {
+			link = this.document.createElement("link");
+			link.setAttribute("rel", "canonical");
+			link.setAttribute("href", this.section.url);
+			this.document.querySelector("head").appendChild(link);
+		}
+
+		this.contents.on("expand", function () {
+			if(this.displayed && this.iframe) {
+					this.expand();
+			}
+		});
+
+		promise.resolve(this.contents);
+};
+
+
+
+// IframeView.prototype.layout = function(layoutFunc) {
+//
+//   this.iframe.style.display = "inline-block";
+//
+//   // Reset Body Styles
+//   // this.document.body.style.margin = "0";
+//   //this.document.body.style.display = "inline-block";
+//   //this.document.documentElement.style.width = "auto";
+//
+//   if(layoutFunc){
+//     this.layoutFunc = layoutFunc;
+//   }
+//
+//   this.contents.layout(this.layoutFunc);
+//
+// };
+//
+// IframeView.prototype.onLayout = function(view) {
+//   // stub
+// };
+
+IframeView.prototype.setLayout = function(layout) {
+	this.layout = layout;
+};
+
+IframeView.prototype.setAxis = function(axis) {
+	this.settings.axis = axis;
+};
+
+IframeView.prototype.resizeListenters = function() {
+	// Test size again
+	clearTimeout(this.expanding);
+	this.expanding = setTimeout(this.expand.bind(this), 350);
+};
+
+IframeView.prototype.addListeners = function() {
+	//TODO: Add content listeners for expanding
+};
+
+IframeView.prototype.removeListeners = function(layoutFunc) {
+	//TODO: remove content listeners for expanding
+};
+
+IframeView.prototype.display = function(request) {
+	var displayed = new core.defer();
+
+	if (!this.displayed) {
+
+		this.render(request).then(function () {
+
+			this.emit("displayed", this);
+			this.onDisplayed(this);
+
+			this.displayed = true;
+			displayed.resolve(this);
 
 		}.bind(this));
 
+	} else {
+		displayed.resolve(this);
+	}
+
+
+	return displayed.promise;
+};
+
+IframeView.prototype.show = function() {
+
+	this.element.style.visibility = "visible";
+
+	if(this.iframe){
+		this.iframe.style.visibility = "visible";
+	}
+
+	this.emit("shown", this);
+};
+
+IframeView.prototype.hide = function() {
+	// this.iframe.style.display = "none";
+	this.element.style.visibility = "hidden";
+	this.iframe.style.visibility = "hidden";
+
+	this.stopExpanding = true;
+	this.emit("hidden", this);
+};
+
+IframeView.prototype.position = function() {
+	return this.element.getBoundingClientRect();
+};
+
+IframeView.prototype.locationOf = function(target) {
+	var parentPos = this.iframe.getBoundingClientRect();
+	var targetPos = this.contents.locationOf(target, this.settings.ignoreClass);
+
+	return {
+		"left": window.scrollX + parentPos.left + targetPos.left,
+		"top": window.scrollY + parentPos.top + targetPos.top
+	};
+};
+
+IframeView.prototype.onDisplayed = function(view) {
+	// Stub, override with a custom functions
+};
+
+IframeView.prototype.onResize = function(view, e) {
+	// Stub, override with a custom functions
+};
+
+IframeView.prototype.bounds = function() {
+	if(!this.elementBounds) {
+		this.elementBounds = core.bounds(this.element);
+	}
+	return this.elementBounds;
+};
+
+IframeView.prototype.destroy = function() {
+
+	if(this.displayed){
+		this.displayed = false;
+
+		this.removeListeners();
+
+		this.stopExpanding = true;
+		this.element.removeChild(this.iframe);
+		this.displayed = false;
+		this.iframe = null;
+
+		this._textWidth = null;
+		this._textHeight = null;
+		this._width = null;
+		this._height = null;
+	}
+	// this.element.style.height = "0px";
+	// this.element.style.width = "0px";
+};
+
+EventEmitter(IframeView.prototype);
+
+module.exports = IframeView;
+
+
+/***/ },
+/* 20 */
+/***/ function(module, exports) {
+
+/*
+ From Zip.js, by Gildas Lormeau
+edited down
+ */
+
+var table = {
+	"application" : {
+		"ecmascript" : [ "es", "ecma" ],
+		"javascript" : "js",
+		"ogg" : "ogx",
+		"pdf" : "pdf",
+		"postscript" : [ "ps", "ai", "eps", "epsi", "epsf", "eps2", "eps3" ],
+		"rdf+xml" : "rdf",
+		"smil" : [ "smi", "smil" ],
+		"xhtml+xml" : [ "xhtml", "xht" ],
+		"xml" : [ "xml", "xsl", "xsd", "opf", "ncx" ],
+		"zip" : "zip",
+		"x-httpd-eruby" : "rhtml",
+		"x-latex" : "latex",
+		"x-maker" : [ "frm", "maker", "frame", "fm", "fb", "book", "fbdoc" ],
+		"x-object" : "o",
+		"x-shockwave-flash" : [ "swf", "swfl" ],
+		"x-silverlight" : "scr",
+		"epub+zip" : "epub",
+		"font-tdpfr" : "pfr",
+		"inkml+xml" : [ "ink", "inkml" ],
+		"json" : "json",
+		"jsonml+json" : "jsonml",
+		"mathml+xml" : "mathml",
+		"metalink+xml" : "metalink",
+		"mp4" : "mp4s",
+		// "oebps-package+xml" : "opf",
+		"omdoc+xml" : "omdoc",
+		"oxps" : "oxps",
+		"vnd.amazon.ebook" : "azw",
+		"widget" : "wgt",
+		// "x-dtbncx+xml" : "ncx",
+		"x-dtbook+xml" : "dtb",
+		"x-dtbresource+xml" : "res",
+		"x-font-bdf" : "bdf",
+		"x-font-ghostscript" : "gsf",
+		"x-font-linux-psf" : "psf",
+		"x-font-otf" : "otf",
+		"x-font-pcf" : "pcf",
+		"x-font-snf" : "snf",
+		"x-font-ttf" : [ "ttf", "ttc" ],
+		"x-font-type1" : [ "pfa", "pfb", "pfm", "afm" ],
+		"x-font-woff" : "woff",
+		"x-mobipocket-ebook" : [ "prc", "mobi" ],
+		"x-mspublisher" : "pub",
+		"x-nzb" : "nzb",
+		"x-tgif" : "obj",
+		"xaml+xml" : "xaml",
+		"xml-dtd" : "dtd",
+		"xproc+xml" : "xpl",
+		"xslt+xml" : "xslt",
+		"internet-property-stream" : "acx",
+		"x-compress" : "z",
+		"x-compressed" : "tgz",
+		"x-gzip" : "gz",
+	},
+	"audio" : {
+		"flac" : "flac",
+		"midi" : [ "mid", "midi", "kar", "rmi" ],
+		"mpeg" : [ "mpga", "mpega", "mp2", "mp3", "m4a", "mp2a", "m2a", "m3a" ],
+		"mpegurl" : "m3u",
+		"ogg" : [ "oga", "ogg", "spx" ],
+		"x-aiff" : [ "aif", "aiff", "aifc" ],
+		"x-ms-wma" : "wma",
+		"x-wav" : "wav",
+		"adpcm" : "adp",
+		"mp4" : "mp4a",
+		"webm" : "weba",
+		"x-aac" : "aac",
+		"x-caf" : "caf",
+		"x-matroska" : "mka",
+		"x-pn-realaudio-plugin" : "rmp",
+		"xm" : "xm",
+		"mid" : [ "mid", "rmi" ]
+	},
+	"image" : {
+		"gif" : "gif",
+		"ief" : "ief",
+		"jpeg" : [ "jpeg", "jpg", "jpe" ],
+		"pcx" : "pcx",
+		"png" : "png",
+		"svg+xml" : [ "svg", "svgz" ],
+		"tiff" : [ "tiff", "tif" ],
+		"x-icon" : "ico",
+		"bmp" : "bmp",
+		"webp" : "webp",
+		"x-pict" : [ "pic", "pct" ],
+		"x-tga" : "tga",
+		"cis-cod" : "cod"
+	},
+	"text" : {
+		"cache-manifest" : [ "manifest", "appcache" ],
+		"css" : "css",
+		"csv" : "csv",
+		"html" : [ "html", "htm", "shtml", "stm" ],
+		"mathml" : "mml",
+		"plain" : [ "txt", "text", "brf", "conf", "def", "list", "log", "in", "bas" ],
+		"richtext" : "rtx",
+		"tab-separated-values" : "tsv",
+		"x-bibtex" : "bib"
+	},
+	"video" : {
+		"mpeg" : [ "mpeg", "mpg", "mpe", "m1v", "m2v", "mp2", "mpa", "mpv2" ],
+		"mp4" : [ "mp4", "mp4v", "mpg4" ],
+		"quicktime" : [ "qt", "mov" ],
+		"ogg" : "ogv",
+		"vnd.mpegurl" : [ "mxu", "m4u" ],
+		"x-flv" : "flv",
+		"x-la-asf" : [ "lsf", "lsx" ],
+		"x-mng" : "mng",
+		"x-ms-asf" : [ "asf", "asx", "asr" ],
+		"x-ms-wm" : "wm",
+		"x-ms-wmv" : "wmv",
+		"x-ms-wmx" : "wmx",
+		"x-ms-wvx" : "wvx",
+		"x-msvideo" : "avi",
+		"x-sgi-movie" : "movie",
+		"x-matroska" : [ "mpv", "mkv", "mk3d", "mks" ],
+		"3gpp2" : "3g2",
+		"h261" : "h261",
+		"h263" : "h263",
+		"h264" : "h264",
+		"jpeg" : "jpgv",
+		"jpm" : [ "jpm", "jpgm" ],
+		"mj2" : [ "mj2", "mjp2" ],
+		"vnd.ms-playready.media.pyv" : "pyv",
+		"vnd.uvvu.mp4" : [ "uvu", "uvvu" ],
+		"vnd.vivo" : "viv",
+		"webm" : "webm",
+		"x-f4v" : "f4v",
+		"x-m4v" : "m4v",
+		"x-ms-vob" : "vob",
+		"x-smv" : "smv"
+	}
+};
+
+var mimeTypes = (function() {
+	var type, subtype, val, index, mimeTypes = {};
+	for (type in table) {
+		if (table.hasOwnProperty(type)) {
+			for (subtype in table[type]) {
+				if (table[type].hasOwnProperty(subtype)) {
+					val = table[type][subtype];
+					if (typeof val == "string") {
+						mimeTypes[val] = type + "/" + subtype;
+					} else {
+						for (index = 0; index < val.length; index++) {
+							mimeTypes[val[index]] = type + "/" + subtype;
+						}
+					}
+				}
+			}
+		}
+	}
+	return mimeTypes;
+})();
+
+var defaultValue = "text/plain";//"application/octet-stream";
+
+function lookup(filename) {
+	return filename && mimeTypes[filename.split(".").pop().toLowerCase()] || defaultValue;
+};
+
+module.exports = {
+	'lookup': lookup
+}
+
+
+/***/ },
+/* 21 */
+/***/ function(module, exports) {
+
+"use strict";
+'use strict'
+
+exports.byteLength = byteLength
+exports.toByteArray = toByteArray
+exports.fromByteArray = fromByteArray
+
+var lookup = []
+var revLookup = []
+var Arr = typeof Uint8Array !== 'undefined' ? Uint8Array : Array
+
+var code = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+for (var i = 0, len = code.length; i < len; ++i) {
+  lookup[i] = code[i]
+  revLookup[code.charCodeAt(i)] = i
+}
+
+revLookup['-'.charCodeAt(0)] = 62
+revLookup['_'.charCodeAt(0)] = 63
+
+function placeHoldersCount (b64) {
+  var len = b64.length
+  if (len % 4 > 0) {
+    throw new Error('Invalid string. Length must be a multiple of 4')
+  }
+
+  // the number of equal signs (place holders)
+  // if there are two placeholders, than the two characters before it
+  // represent one byte
+  // if there is only one, then the three characters before it represent 2 bytes
+  // this is just a cheap hack to not do indexOf twice
+  return b64[len - 2] === '=' ? 2 : b64[len - 1] === '=' ? 1 : 0
+}
+
+function byteLength (b64) {
+  // base64 is 4/3 + up to two characters of the original data
+  return b64.length * 3 / 4 - placeHoldersCount(b64)
+}
+
+function toByteArray (b64) {
+  var i, j, l, tmp, placeHolders, arr
+  var len = b64.length
+  placeHolders = placeHoldersCount(b64)
+
+  arr = new Arr(len * 3 / 4 - placeHolders)
+
+  // if there are placeholders, only get up to the last complete 4 chars
+  l = placeHolders > 0 ? len - 4 : len
+
+  var L = 0
+
+  for (i = 0, j = 0; i < l; i += 4, j += 3) {
+    tmp = (revLookup[b64.charCodeAt(i)] << 18) | (revLookup[b64.charCodeAt(i + 1)] << 12) | (revLookup[b64.charCodeAt(i + 2)] << 6) | revLookup[b64.charCodeAt(i + 3)]
+    arr[L++] = (tmp >> 16) & 0xFF
+    arr[L++] = (tmp >> 8) & 0xFF
+    arr[L++] = tmp & 0xFF
+  }
+
+  if (placeHolders === 2) {
+    tmp = (revLookup[b64.charCodeAt(i)] << 2) | (revLookup[b64.charCodeAt(i + 1)] >> 4)
+    arr[L++] = tmp & 0xFF
+  } else if (placeHolders === 1) {
+    tmp = (revLookup[b64.charCodeAt(i)] << 10) | (revLookup[b64.charCodeAt(i + 1)] << 4) | (revLookup[b64.charCodeAt(i + 2)] >> 2)
+    arr[L++] = (tmp >> 8) & 0xFF
+    arr[L++] = tmp & 0xFF
+  }
+
+  return arr
+}
+
+function tripletToBase64 (num) {
+  return lookup[num >> 18 & 0x3F] + lookup[num >> 12 & 0x3F] + lookup[num >> 6 & 0x3F] + lookup[num & 0x3F]
+}
+
+function encodeChunk (uint8, start, end) {
+  var tmp
+  var output = []
+  for (var i = start; i < end; i += 3) {
+    tmp = (uint8[i] << 16) + (uint8[i + 1] << 8) + (uint8[i + 2])
+    output.push(tripletToBase64(tmp))
+  }
+  return output.join('')
+}
+
+function fromByteArray (uint8) {
+  var tmp
+  var len = uint8.length
+  var extraBytes = len % 3 // if we have 1 byte left, pad 2 bytes
+  var output = ''
+  var parts = []
+  var maxChunkLength = 16383 // must be multiple of 3
+
+  // go through the array every three bytes, we'll deal with trailing stuff later
+  for (var i = 0, len2 = len - extraBytes; i < len2; i += maxChunkLength) {
+    parts.push(encodeChunk(uint8, i, (i + maxChunkLength) > len2 ? len2 : (i + maxChunkLength)))
+  }
+
+  // pad the end with zeros, but make sure to not forget the extra bytes
+  if (extraBytes === 1) {
+    tmp = uint8[len - 1]
+    output += lookup[tmp >> 2]
+    output += lookup[(tmp << 4) & 0x3F]
+    output += '=='
+  } else if (extraBytes === 2) {
+    tmp = (uint8[len - 2] << 8) + (uint8[len - 1])
+    output += lookup[tmp >> 10]
+    output += lookup[(tmp >> 4) & 0x3F]
+    output += lookup[(tmp << 2) & 0x3F]
+    output += '='
+  }
+
+  parts.push(output)
+
+  return parts.join('')
+}
+
+
+/***/ },
+/* 22 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+'use strict';
+
+var assign        = __webpack_require__(23)
+  , normalizeOpts = __webpack_require__(30)
+  , isCallable    = __webpack_require__(26)
+  , contains      = __webpack_require__(33)
+
+  , d;
+
+d = module.exports = function (dscr, value/*, options*/) {
+	var c, e, w, options, desc;
+	if ((arguments.length < 2) || (typeof dscr !== 'string')) {
+		options = value;
+		value = dscr;
+		dscr = null;
+	} else {
+		options = arguments[2];
+	}
+	if (dscr == null) {
+		c = w = true;
+		e = false;
+	} else {
+		c = contains.call(dscr, 'c');
+		e = contains.call(dscr, 'e');
+		w = contains.call(dscr, 'w');
+	}
+
+	desc = { value: value, configurable: c, enumerable: e, writable: w };
+	return !options ? desc : assign(normalizeOpts(options), desc);
+};
+
+d.gs = function (dscr, get, set/*, options*/) {
+	var c, e, options, desc;
+	if (typeof dscr !== 'string') {
+		options = set;
+		set = get;
+		get = dscr;
+		dscr = null;
+	} else {
+		options = arguments[3];
+	}
+	if (get == null) {
+		get = undefined;
+	} else if (!isCallable(get)) {
+		options = get;
+		get = set = undefined;
+	} else if (set == null) {
+		set = undefined;
+	} else if (!isCallable(set)) {
+		options = set;
+		set = undefined;
+	}
+	if (dscr == null) {
+		c = true;
+		e = false;
+	} else {
+		c = contains.call(dscr, 'c');
+		e = contains.call(dscr, 'e');
+	}
+
+	desc = { get: get, set: set, configurable: c, enumerable: e };
+	return !options ? desc : assign(normalizeOpts(options), desc);
+};
+
+
+/***/ },
+/* 23 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+'use strict';
+
+module.exports = __webpack_require__(24)()
+	? Object.assign
+	: __webpack_require__(25);
+
+
+/***/ },
+/* 24 */
+/***/ function(module, exports) {
+
+"use strict";
+'use strict';
+
+module.exports = function () {
+	var assign = Object.assign, obj;
+	if (typeof assign !== 'function') return false;
+	obj = { foo: 'raz' };
+	assign(obj, { bar: 'dwa' }, { trzy: 'trzy' });
+	return (obj.foo + obj.bar + obj.trzy) === 'razdwatrzy';
+};
+
+
+/***/ },
+/* 25 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+'use strict';
+
+var keys  = __webpack_require__(27)
+  , value = __webpack_require__(32)
+
+  , max = Math.max;
+
+module.exports = function (dest, src/*, …srcn*/) {
+	var error, i, l = max(arguments.length, 2), assign;
+	dest = Object(value(dest));
+	assign = function (key) {
+		try { dest[key] = src[key]; } catch (e) {
+			if (!error) error = e;
+		}
+	};
+	for (i = 1; i < l; ++i) {
+		src = arguments[i];
+		keys(src).forEach(assign);
+	}
+	if (error !== undefined) throw error;
+	return dest;
+};
+
+
+/***/ },
+/* 26 */
+/***/ function(module, exports) {
+
+"use strict";
+// Deprecated
+
+'use strict';
+
+module.exports = function (obj) { return typeof obj === 'function'; };
+
+
+/***/ },
+/* 27 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+'use strict';
+
+module.exports = __webpack_require__(28)()
+	? Object.keys
+	: __webpack_require__(29);
+
+
+/***/ },
+/* 28 */
+/***/ function(module, exports) {
+
+"use strict";
+'use strict';
+
+module.exports = function () {
+	try {
+		Object.keys('primitive');
+		return true;
+	} catch (e) { return false; }
+};
+
+
+/***/ },
+/* 29 */
+/***/ function(module, exports) {
+
+"use strict";
+'use strict';
+
+var keys = Object.keys;
+
+module.exports = function (object) {
+	return keys(object == null ? object : Object(object));
+};
+
+
+/***/ },
+/* 30 */
+/***/ function(module, exports) {
+
+"use strict";
+'use strict';
+
+var forEach = Array.prototype.forEach, create = Object.create;
+
+var process = function (src, obj) {
+	var key;
+	for (key in src) obj[key] = src[key];
+};
+
+module.exports = function (options/*, …options*/) {
+	var result = create(null);
+	forEach.call(arguments, function (options) {
+		if (options == null) return;
+		process(Object(options), result);
+	});
+	return result;
+};
+
+
+/***/ },
+/* 31 */
+/***/ function(module, exports) {
+
+"use strict";
+'use strict';
+
+module.exports = function (fn) {
+	if (typeof fn !== 'function') throw new TypeError(fn + " is not a function");
+	return fn;
+};
+
+
+/***/ },
+/* 32 */
+/***/ function(module, exports) {
+
+"use strict";
+'use strict';
+
+module.exports = function (value) {
+	if (value == null) throw new TypeError("Cannot use null or undefined");
+	return value;
+};
+
+
+/***/ },
+/* 33 */
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+'use strict';
+
+module.exports = __webpack_require__(34)()
+	? String.prototype.contains
+	: __webpack_require__(35);
+
+
+/***/ },
+/* 34 */
+/***/ function(module, exports) {
+
+"use strict";
+'use strict';
+
+var str = 'razdwatrzy';
+
+module.exports = function () {
+	if (typeof str.contains !== 'function') return false;
+	return ((str.contains('dwa') === true) && (str.contains('foo') === false));
+};
+
+
+/***/ },
+/* 35 */
+/***/ function(module, exports) {
+
+"use strict";
+'use strict';
+
+var indexOf = String.prototype.indexOf;
+
+module.exports = function (searchString/*, position*/) {
+	return indexOf.call(this, searchString, arguments[1]) > -1;
+};
+
+
+/***/ },
+/* 36 */,
+/* 37 */
+/***/ function(module, exports, __webpack_require__) {
+
+var core = __webpack_require__(0);
+
+function Layout(settings){
+	this.name = settings.layout || "reflowable";
+	this._spread = (settings.spread === "none") ? false : true;
+	this._minSpreadWidth = settings.spread || 800;
+	this._evenSpreads = settings.evenSpreads || false;
+
+	if (settings.flow === "scrolled-continuous" ||
+			settings.flow === "scrolled-doc") {
+		this._flow = "scrolled";
+	} else {
+		this._flow = "paginated";
+	}
+
+
+	this.width = 0;
+	this.height = 0;
+	this.spreadWidth = 0;
+	this.delta = 0;
+
+	this.columnWidth = 0;
+	this.gap = 0;
+	this.divisor = 1;
+};
+
+// paginated | scrolled
+Layout.prototype.flow = function(flow) {
+	this._flow = (flow === "paginated") ? "paginated" : "scrolled";
+}
+
+// true | false
+Layout.prototype.spread = function(spread, min) {
+
+	this._spread = (spread === "none") ? false : true;
+
+	if (min >= 0) {
+		this._minSpreadWidth = min;
+	}
+}
+
+Layout.prototype.calculate = function(_width, _height, _gap){
+
+	var divisor = 1;
+	var gap = _gap || 0;
+
+	//-- Check the width and create even width columns
+	var fullWidth = Math.floor(_width);
+	var width = _width;
+
+	var section = Math.floor(width / 8);
+
+	var colWidth;
+	var spreadWidth;
+	var delta;
+
+	if (this._spread && width >= this._minSpreadWidth) {
+		divisor = 2;
+	} else {
+		divisor = 1;
+	}
+
+	if (this.name === "reflowable" && this._flow === "paginated" && !(_gap >= 0)) {
+		gap = ((section % 2 === 0) ? section : section - 1);
+	}
+
+	if (this.name === "pre-paginated" ) {
+		gap = 0;
+	}
+
+	//-- Double Page
+	if(divisor > 1) {
+		colWidth = Math.floor((width - gap) / divisor);
+	} else {
+		colWidth = width;
+	}
+
+	if (this.name === "pre-paginated" && divisor > 1) {
+		width = colWidth;
+	}
+
+	spreadWidth = colWidth * divisor;
+
+	delta = (colWidth + gap) * divisor;
+
+	this.width = width;
+	this.height = _height;
+	this.spreadWidth = spreadWidth;
+	this.delta = delta;
+
+	this.columnWidth = colWidth;
+	this.gap = gap;
+	this.divisor = divisor;
+};
+
+Layout.prototype.format = function(contents){
+	var formating;
+
+	if (this.name === "pre-paginated") {
+		formating = contents.fit(this.columnWidth, this.height);
+	} else if (this._flow === "paginated") {
+		formating = contents.columns(this.width, this.height, this.columnWidth, this.gap);
+	} else { // scrolled
+		formating = contents.size(this.width, null);
+	}
+
+	return formating; // might be a promise in some View Managers
+};
+
+Layout.prototype.count = function(totalWidth) {
+	// var totalWidth = contents.scrollWidth();
+	var spreads = Math.ceil( totalWidth / this.spreadWidth);
+
+	return {
+		spreads : spreads,
+		pages : spreads * this.divisor
+	};
+};
+
+module.exports = Layout;
+
+
+/***/ },
+/* 38 */
+/***/ function(module, exports, __webpack_require__) {
+
+var core = __webpack_require__(0);
+var Queue = __webpack_require__(8);
+var EpubCFI = __webpack_require__(1);
+var EventEmitter = __webpack_require__(2);
+
+function Locations(spine, request) {
+	this.spine = spine;
+	this.request = request;
+
+	this.q = new Queue(this);
+	this.epubcfi = new EpubCFI();
+
+	this._locations = [];
+	this.total = 0;
+
+	this.break = 150;
+
+	this._current = 0;
+
+};
+
+// Load all of sections in the book
+Locations.prototype.generate = function(chars) {
+
+	if (chars) {
+		this.break = chars;
+	}
+
+	this.q.pause();
+
+	this.spine.each(function(section) {
+
+		this.q.enqueue(this.process, section);
+
 	}.bind(this));
 
-	return deferred.promise;
+	return this.q.run().then(function() {
+		this.total = this._locations.length-1;
+
+		if (this._currentCfi) {
+			this.currentLocation = this._currentCfi;
+		}
+
+		return this._locations;
+		// console.log(this.precentage(this.book.rendition.location.start), this.precentage(this.book.rendition.location.end));
+	}.bind(this));
+
 };
 
-EPUBJS.Renderer.prototype.afterLoad = function(contents) {
-	var formated;
-	// this.currentChapter.setDocument(this.render.document);
-	this.contents = contents;
-	this.doc = this.render.document;
+Locations.prototype.process = function(section) {
 
-	// Format the contents using the current layout method
-	this.formated = this.layout.format(contents, this.render.width, this.render.height, this.gap);
-	this.render.setPageDimensions(this.formated.pageWidth, this.formated.pageHeight);
+	return section.load(this.request)
+		.then(function(contents) {
 
-	// window.addEventListener("orientationchange", this.onResized.bind(this), false);
-	if(!this.initWidth && !this.initHeight){
-		this.render.window.addEventListener("resize", this.resized, false);
+			var range;
+			var doc = contents.ownerDocument;
+			var counter = 0;
+
+			this.sprint(contents, function(node) {
+				var len = node.length;
+				var dist;
+				var pos = 0;
+
+				// Start range
+				if (counter == 0) {
+					range = doc.createRange();
+					range.setStart(node, 0);
+				}
+
+				dist = this.break - counter;
+
+				// Node is smaller than a break
+				if(dist > len){
+					counter += len;
+					pos = len;
+				}
+
+				while (pos < len) {
+					counter = this.break;
+					pos += this.break;
+
+					// Gone over
+					if(pos >= len){
+						// Continue counter for next node
+						counter = len - (pos - this.break);
+
+					// At End
+					} else {
+						// End the previous range
+						range.setEnd(node, pos);
+						cfi = section.cfiFromRange(range);
+						this._locations.push(cfi);
+						counter = 0;
+
+						// Start new range
+						pos += 1;
+						range = doc.createRange();
+						range.setStart(node, pos);
+					}
+				}
+
+
+
+			}.bind(this));
+
+			// Close remaining
+			if (range) {
+				range.setEnd(prev, prev.length);
+				cfi = section.cfiFromRange(range);
+				this._locations.push(cfi)
+				counter = 0;
+			}
+
+		}.bind(this));
+
+};
+
+Locations.prototype.sprint = function(root, func) {
+	var treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null, false);
+
+	while ((node = treeWalker.nextNode())) {
+		func(node);
 	}
 
-	this.addEventListeners();
-	this.addSelectionListeners();
-
 };
 
-EPUBJS.Renderer.prototype.afterDisplay = function(contents) {
-
-	var pages = this.layout.calculatePages();
-	var msg = this.currentChapter;
-	var queued = this._q.length();
-	this._moving = false;
-
-	this.updatePages(pages);
-
-	this.visibleRangeCfi = this.getVisibleRangeCfi();
-	this.currentLocationCfi = this.visibleRangeCfi.start;
-
-	if(queued === 0) {
-		this.trigger("renderer:locationChanged", this.currentLocationCfi);
-		this.trigger("renderer:visibleRangeChanged", this.visibleRangeCfi);
+Locations.prototype.locationFromCfi = function(cfi){
+	// Check if the location has not been set yet
+	if(this._locations.length === 0) {
+		return -1;
 	}
 
-	msg.cfi = this.currentLocationCfi; //TODO: why is this cfi passed to chapterDisplayed
-	this.trigger("renderer:chapterDisplayed", msg);
+	return core.locationOf(cfi, this._locations, this.epubcfi.compare);
+};
+
+Locations.prototype.precentageFromCfi = function(cfi) {
+	// Find closest cfi
+	var loc = this.locationFromCfi(cfi);
+	// Get percentage in total
+	return this.precentageFromLocation(loc);
+};
+
+Locations.prototype.percentageFromLocation = function(loc) {
+	if (!loc || !this.total) {
+		return 0;
+	}
+	return (loc / this.total);
+};
+
+Locations.prototype.cfiFromLocation = function(loc){
+	var cfi = -1;
+	// check that pg is an int
+	if(typeof loc != "number"){
+		loc = parseInt(pg);
+	}
+
+	if(loc >= 0 && loc < this._locations.length) {
+		cfi = this._locations[loc];
+	}
+
+	return cfi;
+};
+
+Locations.prototype.cfiFromPercentage = function(value){
+	var percentage = (value > 1) ? value / 100 : value; // Normalize value to 0-1
+	var loc = Math.ceil(this.total * percentage);
+
+	return this.cfiFromLocation(loc);
+};
+
+Locations.prototype.load = function(locations){
+	this._locations = JSON.parse(locations);
+	this.total = this._locations.length-1;
+	return this._locations;
+};
+
+Locations.prototype.save = function(json){
+	return JSON.stringify(this._locations);
+};
+
+Locations.prototype.getCurrent = function(json){
+	return this._current;
+};
+
+Locations.prototype.setCurrent = function(curr){
+	var loc;
+
+	if(typeof curr == "string"){
+		this._currentCfi = curr;
+	} else if (typeof curr == "number") {
+		this._current = curr;
+	} else {
+		return;
+	}
+
+	if(this._locations.length === 0) {
+		return;
+	}
+
+	if(typeof curr == "string"){
+		loc = this.locationFromCfi(curr);
+		this._current = loc;
+	} else {
+		loc = curr;
+	}
+
+	this.emit("changed", {
+		percentage: this.precentageFromLocation(loc)
+	});
+};
+
+Object.defineProperty(Locations.prototype, 'currentLocation', {
+	get: function () {
+		return this._current;
+	},
+	set: function (curr) {
+		this.setCurrent(curr);
+	}
+});
+
+EventEmitter(Locations.prototype);
+
+module.exports = Locations;
+
+
+/***/ },
+/* 39 */
+/***/ function(module, exports, __webpack_require__) {
+
+var core = __webpack_require__(0);
+
+function Stage(_options) {
+	this.settings = _options || {};
+	this.id = "epubjs-container-" + core.uuid();
+
+	this.container = this.create(this.settings);
+
+	if(this.settings.hidden) {
+		this.wrapper = this.wrap(this.container);
+	}
+
+}
+
+/*
+* Creates an element to render to.
+* Resizes to passed width and height or to the elements size
+*/
+Stage.prototype.create = function(options){
+	var height  = options.height;// !== false ? options.height : "100%";
+	var width   = options.width;// !== false ? options.width : "100%";
+	var overflow  = options.overflow || false;
+	var axis = options.axis || "vertical";
+
+	if(options.height && core.isNumber(options.height)) {
+		height = options.height + "px";
+	}
+
+	if(options.width && core.isNumber(options.width)) {
+		width = options.width + "px";
+	}
+
+	// Create new container element
+	container = document.createElement("div");
+
+	container.id = this.id;
+	container.classList.add("epub-container");
+
+	// Style Element
+	// container.style.fontSize = "0";
+	container.style.wordSpacing = "0";
+	container.style.lineHeight = "0";
+	container.style.verticalAlign = "top";
+
+	if(axis === "horizontal") {
+		container.style.whiteSpace = "nowrap";
+	}
+
+	if(width){
+		container.style.width = width;
+	}
+
+	if(height){
+		container.style.height = height;
+	}
+
+	if (overflow) {
+		container.style.overflow = overflow;
+	}
+
+	return container;
+};
+
+Stage.wrap = function(container) {
+	var wrapper = document.createElement("div");
+
+	wrapper.style.visibility = "hidden";
+	wrapper.style.overflow = "hidden";
+	wrapper.style.width = "0";
+	wrapper.style.height = "0";
+
+	wrapper.appendChild(container);
+	return wrapper;
+};
+
+
+Stage.prototype.getElement = function(_element){
+	var element;
+
+	if(core.isElement(_element)) {
+		element = _element;
+	} else if (typeof _element === "string") {
+		element = document.getElementById(_element);
+	}
+
+	if(!element){
+		console.error("Not an Element");
+		return;
+	}
+
+	return element;
+};
+
+Stage.prototype.attachTo = function(what){
+
+	var element = this.getElement(what);
+	var base;
+
+	if(!element){
+		return;
+	}
+
+	if(this.settings.hidden) {
+		base = this.wrapper;
+	} else {
+		base = this.container;
+	}
+
+	element.appendChild(base);
+
+	this.element = element;
+
+	return element;
 
 };
 
-EPUBJS.Renderer.prototype.loaded = function(url){
-	this.trigger("render:loaded", url);
-	// var uri = EPUBJS.core.uri(url);
-	// var relative = uri.path.replace(book.bookUrl, '');
-	// console.log(url, uri, relative);
+Stage.prototype.getContainer = function() {
+	return this.container;
 };
 
-/**
+Stage.prototype.onResize = function(func){
+	// Only listen to window for resize event if width and height are not fixed.
+	// This applies if it is set to a percent or auto.
+	if(!core.isNumber(this.settings.width) ||
+		 !core.isNumber(this.settings.height) ) {
+		window.addEventListener("resize", func, false);
+	}
+
+};
+
+Stage.prototype.size = function(width, height){
+	var bounds;
+	// var width = _width || this.settings.width;
+	// var height = _height || this.settings.height;
+
+	// If width or height are set to false, inherit them from containing element
+	if(width === null) {
+		bounds = this.element.getBoundingClientRect();
+
+		if(bounds.width) {
+			width = bounds.width;
+			this.container.style.width = bounds.width + "px";
+		}
+	}
+
+	if(height === null) {
+		bounds = bounds || this.element.getBoundingClientRect();
+
+		if(bounds.height) {
+			height = bounds.height;
+			this.container.style.height = bounds.height + "px";
+		}
+
+	}
+
+	if(!core.isNumber(width)) {
+		bounds = this.container.getBoundingClientRect();
+		width = bounds.width;
+		//height = bounds.height;
+	}
+
+	if(!core.isNumber(height)) {
+		bounds = bounds || this.container.getBoundingClientRect();
+		//width = bounds.width;
+		height = bounds.height;
+	}
+
+
+	this.containerStyles = window.getComputedStyle(this.container);
+
+	this.containerPadding = {
+		left: parseFloat(this.containerStyles["padding-left"]) || 0,
+		right: parseFloat(this.containerStyles["padding-right"]) || 0,
+		top: parseFloat(this.containerStyles["padding-top"]) || 0,
+		bottom: parseFloat(this.containerStyles["padding-bottom"]) || 0
+	};
+
+	return {
+		width: width -
+						this.containerPadding.left -
+						this.containerPadding.right,
+		height: height -
+						this.containerPadding.top -
+						this.containerPadding.bottom
+	};
+
+};
+
+Stage.prototype.bounds = function(){
+
+	if(!this.container) {
+		return core.windowBounds();
+	} else {
+		return this.container.getBoundingClientRect();
+	}
+
+}
+
+Stage.prototype.getSheet = function(){
+	var style = document.createElement("style");
+
+	// WebKit hack --> https://davidwalsh.name/add-rules-stylesheets
+	style.appendChild(document.createTextNode(""));
+
+	document.head.appendChild(style);
+
+	return style.sheet;
+}
+
+Stage.prototype.addStyleRules = function(selector, rulesArray){
+	var scope = "#" + this.id + " ";
+	var rules = "";
+
+	if(!this.sheet){
+		this.sheet = this.getSheet();
+	}
+
+	rulesArray.forEach(function(set) {
+		for (var prop in set) {
+			if(set.hasOwnProperty(prop)) {
+				rules += prop + ":" + set[prop] + ";";
+			}
+		}
+	})
+
+	this.sheet.insertRule(scope + selector + " {" + rules + "}", 0);
+}
+
+
+
+module.exports = Stage;
+
+
+/***/ },
+/* 40 */
+/***/ function(module, exports) {
+
+function Views(container) {
+	this.container = container;
+	this._views = [];
+	this.length = 0;
+	this.hidden = false;
+};
+
+Views.prototype.all = function() {
+	return this._views;
+};
+
+Views.prototype.first = function() {
+	return this._views[0];
+};
+
+Views.prototype.last = function() {
+	return this._views[this._views.length-1];
+};
+
+Views.prototype.indexOf = function(view) {
+	return this._views.indexOf(view);
+};
+
+Views.prototype.slice = function() {
+	return this._views.slice.apply(this._views, arguments);
+};
+
+Views.prototype.get = function(i) {
+	return this._views[i];
+};
+
+Views.prototype.append = function(view){
+	this._views.push(view);
+	if(this.container){
+		this.container.appendChild(view.element);
+	}
+	this.length++;
+	return view;
+};
+
+Views.prototype.prepend = function(view){
+	this._views.unshift(view);
+	if(this.container){
+		this.container.insertBefore(view.element, this.container.firstChild);
+	}
+	this.length++;
+	return view;
+};
+
+Views.prototype.insert = function(view, index) {
+	this._views.splice(index, 0, view);
+
+	if(this.container){
+		if(index < this.container.children.length){
+			this.container.insertBefore(view.element, this.container.children[index]);
+		} else {
+			this.container.appendChild(view.element);
+		}
+	}
+
+	this.length++;
+	return view;
+};
+
+Views.prototype.remove = function(view) {
+	var index = this._views.indexOf(view);
+
+	if(index > -1) {
+		this._views.splice(index, 1);
+	}
+
+
+	this.destroy(view);
+
+	this.length--;
+};
+
+Views.prototype.destroy = function(view) {
+	if(view.displayed){
+		view.destroy();
+	}
+
+	if(this.container){
+		 this.container.removeChild(view.element);
+	}
+	view = null;
+};
+
+// Iterators
+
+Views.prototype.each = function() {
+	return this._views.forEach.apply(this._views, arguments);
+};
+
+Views.prototype.clear = function(){
+	// Remove all views
+	var view;
+	var len = this.length;
+
+	if(!this.length) return;
+
+	for (var i = 0; i < len; i++) {
+		view = this._views[i];
+		this.destroy(view);
+	}
+
+	this._views = [];
+	this.length = 0;
+};
+
+Views.prototype.find = function(section){
+
+	var view;
+	var len = this.length;
+
+	for (var i = 0; i < len; i++) {
+		view = this._views[i];
+		if(view.displayed && view.section.index == section.index) {
+			return view;
+		}
+	}
+
+};
+
+Views.prototype.displayed = function(){
+	var displayed = [];
+	var view;
+	var len = this.length;
+
+	for (var i = 0; i < len; i++) {
+		view = this._views[i];
+		if(view.displayed){
+			displayed.push(view);
+		}
+	}
+	return displayed;
+};
+
+Views.prototype.show = function(){
+	var view;
+	var len = this.length;
+
+	for (var i = 0; i < len; i++) {
+		view = this._views[i];
+		if(view.displayed){
+			view.show();
+		}
+	}
+	this.hidden = false;
+};
+
+Views.prototype.hide = function(){
+	var view;
+	var len = this.length;
+
+	for (var i = 0; i < len; i++) {
+		view = this._views[i];
+		if(view.displayed){
+			view.hide();
+		}
+	}
+	this.hidden = true;
+};
+
+module.exports = Views;
+
+
+/***/ },
+/* 41 */
+/***/ function(module, exports, __webpack_require__) {
+
+var core = __webpack_require__(0);
+var Parser = __webpack_require__(12);
+var path = __webpack_require__(3);
+
+function Navigation(_package, _request){
+	var navigation = this;
+	var parse = new Parser();
+	var request = _request || __webpack_require__(4);
+
+	this.package = _package;
+	this.toc = [];
+	this.tocByHref = {};
+	this.tocById = {};
+
+	if(_package.navPath) {
+		if (_package.baseUrl) {
+			this.navUrl = new URL(_package.navPath, _package.baseUrl).toString();
+		} else {
+			this.navUrl = path.resolve(_package.basePath, _package.navPath);
+		}
+		this.nav = {};
+
+		this.nav.load = function(_request){
+			var loading = new core.defer();
+			var loaded = loading.promise;
+
+			request(navigation.navUrl, 'xml').then(function(xml){
+				navigation.toc = parse.nav(xml);
+				navigation.loaded(navigation.toc);
+				loading.resolve(navigation.toc);
+			});
+
+			return loaded;
+		};
+
+	}
+
+	if(_package.ncxPath) {
+		if (_package.baseUrl) {
+			this.ncxUrl = new URL(_package.ncxPath, _package.baseUrl).toString();
+		} else {
+			this.ncxUrl = path.resolve(_package.basePath, _package.ncxPath);
+		}
+
+		this.ncx = {};
+
+		this.ncx.load = function(_request){
+			var loading = new core.defer();
+			var loaded = loading.promise;
+
+			request(navigation.ncxUrl, 'xml').then(function(xml){
+				navigation.toc = parse.toc(xml);
+				navigation.loaded(navigation.toc);
+				loading.resolve(navigation.toc);
+			});
+
+			return loaded;
+		};
+
+	}
+};
+
+// Load the navigation
+Navigation.prototype.load = function(_request) {
+	var request = _request || __webpack_require__(4);
+	var loading, loaded;
+
+	if(this.nav) {
+		loading = this.nav.load();
+	} else if(this.ncx) {
+		loading = this.ncx.load();
+	} else {
+		loaded = new core.defer();
+		loaded.resolve([]);
+		loading = loaded.promise;
+	}
+
+	return loading;
+
+};
+
+Navigation.prototype.loaded = function(toc) {
+	var item;
+
+	for (var i = 0; i < toc.length; i++) {
+		item = toc[i];
+		this.tocByHref[item.href] = i;
+		this.tocById[item.id] = i;
+	}
+
+};
+
+// Get an item from the navigation
+Navigation.prototype.get = function(target) {
+	var index;
+
+	if(!target) {
+		return this.toc;
+	}
+
+	if(target.indexOf("#") === 0) {
+		index = this.tocById[target.substring(1)];
+	} else if(target in this.tocByHref){
+		index = this.tocByHref[target];
+	}
+
+	return this.toc[index];
+};
+
+module.exports = Navigation;
+
+
+/***/ },
+/* 42 */
+/***/ function(module, exports, __webpack_require__) {
+
+var core = __webpack_require__(0);
+var EpubCFI = __webpack_require__(1);
+var Hook = __webpack_require__(6);
+
+function Section(item, hooks){
+		this.idref = item.idref;
+		this.linear = item.linear;
+		this.properties = item.properties;
+		this.index = item.index;
+		this.href = item.href;
+		this.url = item.url;
+		this.next = item.next;
+		this.prev = item.prev;
+
+		this.cfiBase = item.cfiBase;
+
+		if (hooks) {
+			this.hooks = hooks;
+		} else {
+			this.hooks = {};
+			this.hooks.serialize = new Hook(this);
+			this.hooks.content = new Hook(this);
+		}
+
+};
+
+
+Section.prototype.load = function(_request){
+	var request = _request || this.request || __webpack_require__(4);
+	var loading = new core.defer();
+	var loaded = loading.promise;
+
+	if(this.contents) {
+		loading.resolve(this.contents);
+	} else {
+		request(this.url)
+			.then(function(xml){
+				var base;
+				var directory = core.directory(this.url);
+
+				this.document = xml;
+				this.contents = xml.documentElement;
+
+				return this.hooks.content.trigger(this.document, this);
+			}.bind(this))
+			.then(function(){
+				loading.resolve(this.contents);
+			}.bind(this))
+			.catch(function(error){
+				loading.reject(error);
+			});
+	}
+
+	return loaded;
+};
+
+Section.prototype.base = function(_document){
+		var task = new core.defer();
+		var base = _document.createElement("base"); // TODO: check if exists
+		var head;
+		console.log(window.location.origin + "/" +this.url);
+
+		base.setAttribute("href", window.location.origin + "/" +this.url);
+
+		if(_document) {
+			head = _document.querySelector("head");
+		}
+		if(head) {
+			head.insertBefore(base, head.firstChild);
+			task.resolve();
+		} else {
+			task.reject(new Error("No head to insert into"));
+		}
+
+
+		return task.promise;
+};
+
+Section.prototype.beforeSectionLoad = function(){
+	// Stub for a hook - replace me for now
+};
+
+Section.prototype.render = function(_request){
+	var rendering = new core.defer();
+	var rendered = rendering.promise;
+	this.output; // TODO: better way to return this from hooks?
+
+	this.load(_request).
+		then(function(contents){
+			var serializer;
+
+			if (typeof XMLSerializer === "undefined") {
+				XMLSerializer = __webpack_require__(14).XMLSerializer;
+			}
+			serializer = new XMLSerializer();
+			this.output = serializer.serializeToString(contents);
+			return this.output;
+		}.bind(this)).
+		then(function(){
+			return this.hooks.serialize.trigger(this.output, this);
+		}.bind(this)).
+		then(function(){
+			rendering.resolve(this.output);
+		}.bind(this))
+		.catch(function(error){
+			rendering.reject(error);
+		});
+
+	return rendered;
+};
+
+Section.prototype.find = function(_query){
+
+};
+
+/*
 * Reconciles the current chapters layout properies with
 * the global layout properities.
 * Takes: global layout settings object, chapter properties string
 * Returns: Object with layout properties
 */
-EPUBJS.Renderer.prototype.reconcileLayoutSettings = function(global, chapter){
-	var settings = {};
-
+Section.prototype.reconcileLayoutSettings = function(global){
 	//-- Get the global defaults
-	for (var attr in global) {
-		if (global.hasOwnProperty(attr)){
-			settings[attr] = global[attr];
-		}
-	}
+	var settings = {
+		layout : global.layout,
+		spread : global.spread,
+		orientation : global.orientation
+	};
+
 	//-- Get the chapter's display type
-	chapter.forEach(function(prop){
+	this.properties.forEach(function(prop){
 		var rendition = prop.replace("rendition:", '');
 		var split = rendition.indexOf("-");
 		var property, value;
@@ -7382,1835 +9033,415 @@ EPUBJS.Renderer.prototype.reconcileLayoutSettings = function(global, chapter){
  return settings;
 };
 
-/**
-* Uses the settings to determine which Layout Method is needed
-* Triggers events based on the method choosen
-* Takes: Layout settings object
-* Returns: String of appropriate for EPUBJS.Layout function
-*/
-EPUBJS.Renderer.prototype.determineLayout = function(settings){
-	// Default is layout: reflowable & spread: auto
-	var spreads = this.determineSpreads(this.minSpreadWidth);
-	var layoutMethod = spreads ? "ReflowableSpreads" : "Reflowable";
-	var scroll = false;
-
-	if(settings.layout === "pre-paginated") {
-		layoutMethod = "Fixed";
-		scroll = true;
-		spreads = false;
-	}
-
-	if(settings.layout === "reflowable" && settings.spread === "none") {
-		layoutMethod = "Reflowable";
-		scroll = false;
-		spreads = false;
-	}
-
-	if(settings.layout === "reflowable" && settings.spread === "both") {
-		layoutMethod = "ReflowableSpreads";
-		scroll = false;
-		spreads = true;
-	}
-
-	this.spreads = spreads;
-	this.render.scroll(scroll);
-	this.trigger("renderer:spreads", spreads);
-	return layoutMethod;
+Section.prototype.cfiFromRange = function(_range) {
+	return new EpubCFI(_range, this.cfiBase).toString();
 };
 
-// Shortcut to trigger the hook before displaying the chapter
-EPUBJS.Renderer.prototype.beforeDisplay = function(callback, renderer){
-	this.triggerHooks("beforeChapterDisplay", callback, this);
+Section.prototype.cfiFromElement = function(el) {
+	return new EpubCFI(el, this.cfiBase).toString();
 };
 
-// Update the renderer with the information passed by the layout
-EPUBJS.Renderer.prototype.updatePages = function(layout){
-	this.pageMap = this.mapPage();
-	// this.displayedPages = layout.displayedPages;
+module.exports = Section;
 
-	if (this.spreads) {
-		this.displayedPages = Math.ceil(this.pageMap.length / 2);
-	} else {
-		this.displayedPages = this.pageMap.length;
-	}
 
-	this.currentChapter.pages = this.pageMap.length;
+/***/ },
+/* 43 */
+/***/ function(module, exports, __webpack_require__) {
 
-	this._q.flush();
+var core = __webpack_require__(0);
+var EpubCFI = __webpack_require__(1);
+var Hook = __webpack_require__(6);
+var Section = __webpack_require__(42);
+var replacements = __webpack_require__(13);
+
+function Spine(_request){
+	this.request = _request;
+	this.spineItems = [];
+	this.spineByHref = {};
+	this.spineById = {};
+
+	this.hooks = {};
+	this.hooks.serialize = new Hook();
+	this.hooks.content = new Hook();
+
+	// Register replacements
+	this.hooks.content.register(replacements.base);
+	this.hooks.content.register(replacements.canonical);
+
+	this.epubcfi = new EpubCFI();
+
+	this.loaded = false;
 };
 
-// Apply the layout again and jump back to the previous cfi position
-EPUBJS.Renderer.prototype.reformat = function(){
-	var renderer = this;
-	var formated, pages;
-	var spreads;
+Spine.prototype.load = function(_package) {
 
-	if(!this.contents) return;
+	this.items = _package.spine;
+	this.manifest = _package.manifest;
+	this.spineNodeIndex = _package.spineNodeIndex;
+	this.baseUrl = _package.baseUrl || _package.basePath || '';
+	this.length = this.items.length;
 
-	spreads = this.determineSpreads(this.minSpreadWidth);
+	this.items.forEach(function(item, index){
+		var href, url;
+		var manifestItem = this.manifest[item.idref];
+		var spineItem;
 
-	// Only re-layout if the spreads have switched
-	if(spreads != this.spreads){
-		this.spreads = spreads;
-		this.layoutMethod = this.determineLayout(this.layoutSettings);
-		this.layout = new EPUBJS.Layout[this.layoutMethod]();
-	}
+		item.cfiBase = this.epubcfi.generateChapterComponent(this.spineNodeIndex, item.index, item.idref);
 
-	// Reset pages
-	this.chapterPos = 1;
+		if(manifestItem) {
+			item.href = manifestItem.href;
+			item.url = this.baseUrl + item.href;
 
-	this.render.page(this.chapterPos);
-	// Give the css styles time to update
-	// clearTimeout(this.timeoutTillCfi);
-	// this.timeoutTillCfi = setTimeout(function(){
-	renderer.formated = renderer.layout.format(renderer.render.docEl, renderer.render.width, renderer.render.height, renderer.gap);
-	renderer.render.setPageDimensions(renderer.formated.pageWidth, renderer.formated.pageHeight);
-
-	pages = renderer.layout.calculatePages();
-	renderer.updatePages(pages);
-
-	//-- Go to current page after formating
-	if(renderer.currentLocationCfi){
-		renderer.gotoCfi(renderer.currentLocationCfi);
-	}
-		// renderer.timeoutTillCfi = null;
-
-};
-
-// Hide and show the render's container .
-EPUBJS.Renderer.prototype.visible = function(bool){
-	if(typeof(bool) === "undefined") {
-		return this.element.style.visibility;
-	}
-
-	if(bool === true && !this.hidden){
-		this.element.style.visibility = "visible";
-	}else if(bool === false){
-		this.element.style.visibility = "hidden";
-	}
-};
-
-// Remove the render element and clean up listeners
-EPUBJS.Renderer.prototype.remove = function() {
-	if(this.render.window) {
-		this.render.unload();
-		this.render.window.removeEventListener("resize", this.resized);
-		this.removeEventListeners();
-		this.removeSelectionListeners();
-	}
-
-	// clean container content
-	//this.container.innerHtml = ""; // not safe
-	this.container.removeChild(this.element);
-};
-
-//-- STYLES
-
-EPUBJS.Renderer.prototype.applyStyles = function(styles) {
-	for (var style in styles) {
-		this.render.setStyle(style, styles[style]);
-	}
-};
-
-EPUBJS.Renderer.prototype.setStyle = function(style, val, prefixed){
-	this.render.setStyle(style, val, prefixed);
-};
-
-EPUBJS.Renderer.prototype.removeStyle = function(style){
-	this.render.removeStyle(style);
-};
-
-EPUBJS.Renderer.prototype.setClasses = function(classes){
-  this.render.setClasses(classes);
-};
-
-//-- HEAD TAGS
-EPUBJS.Renderer.prototype.applyHeadTags = function(headTags) {
-	for ( var headTag in headTags ) {
-		this.render.addHeadTag(headTag, headTags[headTag]);
-	}
-};
-
-//-- NAVIGATION
-
-EPUBJS.Renderer.prototype.page = function(pg){
-	if(!this.pageMap) {
-		console.warn("pageMap not set, queuing");
-		this._q.enqueue("page", arguments);
-		return true;
-	}
-
-	if(pg >= 1 && pg <= this.displayedPages){
-		this.chapterPos = pg;
-
-		this.render.page(pg);
-		this.visibleRangeCfi = this.getVisibleRangeCfi();
-		this.currentLocationCfi = this.visibleRangeCfi.start;
-		this.trigger("renderer:locationChanged", this.currentLocationCfi);
-		this.trigger("renderer:visibleRangeChanged", this.visibleRangeCfi);
-
-		return true;
-	}
-	//-- Return false if page is greater than the total
-	return false;
-};
-
-// Short cut to find next page's cfi starting at the last visible element
-/*
-EPUBJS.Renderer.prototype.nextPage = function(){
-	var pg = this.chapterPos + 1;
-	if(pg <= this.displayedPages){
-		this.chapterPos = pg;
-
-		this.render.page(pg);
-
-		this.currentLocationCfi = this.getPageCfi(this.visibileEl);
-		this.trigger("renderer:locationChanged", this.currentLocationCfi);
-
-		return true;
-	}
-	//-- Return false if page is greater than the total
-	return false;
-};
-*/
-EPUBJS.Renderer.prototype.nextPage = function(){
-	return this.page(this.chapterPos + 1);
-};
-
-EPUBJS.Renderer.prototype.prevPage = function(){
-	return this.page(this.chapterPos - 1);
-};
-
-//-- Show the page containing an Element
-EPUBJS.Renderer.prototype.pageByElement = function(el){
-	var pg;
-	if(!el) return;
-
-	pg = this.render.getPageNumberByElement(el);
-	this.page(pg);
-};
-
-// Jump to the last page of the chapter
-EPUBJS.Renderer.prototype.lastPage = function(){
-	if(this._moving) {
-		return this._q.enqueue("lastPage", arguments);
-	}
-
-	this.page(this.displayedPages);
-};
-
-// Jump to the first page of the chapter
-EPUBJS.Renderer.prototype.firstPage = function(){
-	if(this._moving) {
-		return this._q.enqueue("firstPage", arguments);
-	}
-
-	this.page(1);
-};
-
-//-- Find a section by fragement id
-EPUBJS.Renderer.prototype.section = function(fragment){
-	var el = this.doc.getElementById(fragment);
-
-	if(el){
-		this.pageByElement(el);
-	}
-
-};
-
-EPUBJS.Renderer.prototype.firstElementisTextNode = function(node) {
-	var children = node.childNodes;
-	var leng = children.length;
-
-	if(leng &&
-		children[0] && // First Child
-		children[0].nodeType === 3 && // This is a textNodes
-		children[0].textContent.trim().length) { // With non whitespace or return characters
-		return true;
-	}
-	return false;
-};
-
-EPUBJS.Renderer.prototype.isGoodNode = function(node) {
-	var embeddedElements = ["audio", "canvas", "embed", "iframe", "img", "math", "object", "svg", "video"];
-	if (embeddedElements.indexOf(node.tagName.toLowerCase()) !== -1) {
-		// Embedded elements usually do not have a text node as first element, but are also good nodes
-		return true;
-	}
-	return this.firstElementisTextNode(node);
-};
-
-// Walk the node tree from a start element to next visible element
-EPUBJS.Renderer.prototype.walk = function(node, x, y) {
-	var r, children, leng,
-		startNode = node,
-		prevNode,
-		stack = [startNode];
-
-	var STOP = 10000, ITER=0;
-
-	while(!r && stack.length) {
-		node = stack.shift();
-		if( this.containsPoint(node, x, y) && this.isGoodNode(node)) {
-			r = node;
-		}
-
-		if(!r && node && node.childElementCount > 0){
-			children = node.children;
-			if (children && children.length) {
-				leng = children.length ? children.length : 0;
-			} else {
-				return r;
-			}
-			for (var i = leng-1; i >= 0; i--) {
-				if(children[i] != prevNode) stack.unshift(children[i]);
+			if(manifestItem.properties.length){
+				item.properties.push.apply(item.properties, manifestItem.properties);
 			}
 		}
 
-		if(!r && stack.length === 0 && startNode && startNode.parentNode !== null){
-			stack.push(startNode.parentNode);
-			prevNode = startNode;
-			startNode = startNode.parentNode;
-		}
+		// if(index > 0) {
+			item.prev = function(){ return this.get(index-1); }.bind(this);
+		// }
+
+		// if(index+1 < this.items.length) {
+			item.next = function(){ return this.get(index+1); }.bind(this);
+		// }
+
+		spineItem = new Section(item, this.hooks);
+
+		this.append(spineItem);
 
 
-		ITER++;
-		if(ITER > STOP) {
-			console.error("ENDLESS LOOP");
-			break;
-		}
+	}.bind(this));
 
-	}
-
-	return r;
+	this.loaded = true;
 };
 
-// Checks if an element is on the screen
-EPUBJS.Renderer.prototype.containsPoint = function(el, x, y){
-	var rect;
-	var left;
-	if(el && typeof el.getBoundingClientRect === 'function'){
-		rect = el.getBoundingClientRect();
-		// console.log(el, rect, x, y);
+// book.spine.get();
+// book.spine.get(1);
+// book.spine.get("chap1.html");
+// book.spine.get("#id1234");
+Spine.prototype.get = function(target) {
+	var index = 0;
 
-		if( rect.width !== 0 &&
-				rect.height !== 0 && // Element not visible
-				rect.left >= x &&
-				x <= rect.left + rect.width) {
-			return true;
-		}
+	if(this.epubcfi.isCfiString(target)) {
+		cfi = new EpubCFI(target);
+		index = cfi.spinePos;
+	} else if(target && (typeof target === "number" || isNaN(target) === false)){
+		index = target;
+	} else if(target && target.indexOf("#") === 0) {
+		index = this.spineById[target.substring(1)];
+	} else if(target) {
+		// Remove fragments
+		target = target.split("#")[0];
+		index = this.spineByHref[target];
 	}
 
-	return false;
+	return this.spineItems[index] || null;
 };
 
-EPUBJS.Renderer.prototype.textSprint = function(root, func) {
-	var filterEmpty = function(node){
-		if ( ! /^\s*$/.test(node.data) ) {
-			return NodeFilter.FILTER_ACCEPT;
-		} else {
-			return NodeFilter.FILTER_REJECT;
-		}
-	};
-	var treeWalker;
-	var node;
+Spine.prototype.append = function(section) {
+	var index = this.spineItems.length;
+	section.index = index;
 
+	this.spineItems.push(section);
+
+	this.spineByHref[section.href] = index;
+	this.spineById[section.idref] = index;
+
+	return index;
+};
+
+Spine.prototype.prepend = function(section) {
+	var index = this.spineItems.unshift(section);
+	this.spineByHref[section.href] = 0;
+	this.spineById[section.idref] = 0;
+
+	// Re-index
+	this.spineItems.forEach(function(item, index){
+		item.index = index;
+	});
+
+	return 0;
+};
+
+Spine.prototype.insert = function(section, index) {
+
+};
+
+Spine.prototype.remove = function(section) {
+	var index = this.spineItems.indexOf(section);
+
+	if(index > -1) {
+		delete this.spineByHref[section.href];
+		delete this.spineById[section.idref];
+
+		return this.spineItems.splice(index, 1);
+	}
+};
+
+Spine.prototype.each = function() {
+	return this.spineItems.forEach.apply(this.spineItems, arguments);
+};
+
+module.exports = Spine;
+
+
+/***/ },
+/* 44 */
+/***/ function(module, exports, __webpack_require__) {
+
+var core = __webpack_require__(0);
+var request = __webpack_require__(4);
+var mime = __webpack_require__(20);
+
+function Unarchive() {
+
+	this.checkRequirements();
+	this.urlCache = {};
+
+}
+
+Unarchive.prototype.checkRequirements = function(callback){
 	try {
-		treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
-			acceptNode: filterEmpty
-		}, false);
-		while ((node = treeWalker.nextNode())) {
-			func(node);
+		if (typeof JSZip === 'undefined') {
+			JSZip = __webpack_require__(45);
 		}
+		this.zip = new JSZip();
 	} catch (e) {
-		// IE doesn't accept the object, just wants a function
-		// https://msdn.microsoft.com/en-us/library/ff974820(v=vs.85).aspx
-		treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, filterEmpty, false);
-		while ((node = treeWalker.nextNode())) {
-			func(node);
-		}
+		console.error("JSZip lib not loaded");
 	}
-
-
-
 };
 
-EPUBJS.Renderer.prototype.sprint = function(root, func) {
-	var treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT, null, false);
-	var node;
-	while ((node = treeWalker.nextNode())) {
-		func(node);
-	}
-
-};
-
-EPUBJS.Renderer.prototype.mapPage = function(){
-	var renderer = this;
-	var map = [];
-	var root = this.render.getBaseElement();
-	var page = 1;
-	var width = this.layout.colWidth + this.layout.gap;
-	var offset = this.formated.pageWidth * (this.chapterPos-1);
-	var limit = (width * page) - offset;// (width * page) - offset;
-	var elLimit = 0;
-	var prevRange;
-	var prevRanges;
-	var cfi;
-	var lastChildren = null;
-	var prevElement;
-	var startRange, endRange;
-	var startCfi, endCfi;
-	var check = function(node) {
-		var elPos;
-		var elRange;
-		var found;
-		if (node.nodeType == Node.TEXT_NODE) {
-
-			elRange = document.createRange();
-			elRange.selectNodeContents(node);
-			elPos = elRange.getBoundingClientRect();
-
-			if(!elPos || (elPos.width === 0 && elPos.height === 0)) {
-				return;
-			}
-
-			//-- Element starts new Col
-			if(elPos.left > elLimit) {
-				found = checkText(node);
-			}
-
-			//-- Element Spans new Col
-			if(elPos.right > elLimit) {
-				found = checkText(node);
-			}
-
-			prevElement = node;
-
-			if (found) {
-				prevRange = null;
-			}
-		}
-
-	};
-	var checkText = function(node){
-		var result;
-		var ranges = renderer.splitTextNodeIntoWordsRanges(node);
-
-		ranges.forEach(function(range){
-			var pos = range.getBoundingClientRect();
-
-			if(!pos || (pos.width === 0 && pos.height === 0)) {
-				return;
-			}
-			if(pos.left + pos.width < limit) {
-				if(!map[page-1]){
-					range.collapse(true);
-					cfi = renderer.currentChapter.cfiFromRange(range);
-					// map[page-1].start = cfi;
-					result = map.push({ start: cfi, end: null });
-				}
-			} else {
-				// Previous Range is null since we already found our last map pair
-				// Use that last walked textNode
-				if(!prevRange && prevElement) {
-					prevRanges = renderer.splitTextNodeIntoWordsRanges(prevElement);
-					prevRange = prevRanges[prevRanges.length-1];
-				}
-
-				if(prevRange && map.length){
-					prevRange.collapse(false);
-					cfi = renderer.currentChapter.cfiFromRange(prevRange);
-					if (map[map.length-1]) {
-						map[map.length-1].end = cfi;
-					}
-				}
-
-				range.collapse(true);
-				cfi = renderer.currentChapter.cfiFromRange(range);
-				result = map.push({
-						start: cfi,
-						end: null
-				});
-
-				page += 1;
-				limit = (width * page) - offset;
-				elLimit = limit;
-			}
-
-			prevRange = range;
-		});
-
-		return result;
-	};
-	var docEl = this.render.getDocumentElement();
-	var dir = docEl.dir;
-
-	// Set back to ltr before sprinting to get correct order
-	if(dir == "rtl") {
-		docEl.dir = "ltr";
-		if (this.layoutSettings.layout !== "pre-paginated") {
-			docEl.style.position = "static";
-		}
-	}
-
-	this.textSprint(root, check);
-
-	// Reset back to previous RTL settings
-	if(dir == "rtl") {
-		docEl.dir = dir;
-		if (this.layoutSettings.layout !== "pre-paginated") {
-			docEl.style.left = "auto";
-			docEl.style.right = "0";
-		}
-	}
-
-	// Check the remaining children that fit on this page
-	// to ensure the end is correctly calculated
-	if(!prevRange && prevElement) {
-		prevRanges = renderer.splitTextNodeIntoWordsRanges(prevElement);
-		prevRange = prevRanges[prevRanges.length-1];
-	}
-
-	if(prevRange){
-		prevRange.collapse(false);
-		cfi = renderer.currentChapter.cfiFromRange(prevRange);
-		map[map.length-1].end = cfi;
-	}
-
-	// Handle empty map
-	if(!map.length) {
-		startRange = this.doc.createRange();
-		startRange.selectNodeContents(root);
-		startRange.collapse(true);
-		startCfi = renderer.currentChapter.cfiFromRange(startRange);
-
-		endRange = this.doc.createRange();
-		endRange.selectNodeContents(root);
-		endRange.collapse(false);
-		endCfi = renderer.currentChapter.cfiFromRange(endRange);
-
-
-		map.push({ start: startCfi, end: endCfi });
-
-	}
-
-	// clean up
-	prevRange = null;
-	prevRanges = undefined;
-	startRange = null;
-	endRange = null;
-	root = null;
-
-	return map;
-};
-
-
-EPUBJS.Renderer.prototype.indexOfBreakableChar = function (text, startPosition) {
-	var whiteCharacters = "\x2D\x20\t\r\n\b\f";
-	// '-' \x2D
-	// ' ' \x20
-
-	if (! startPosition) {
-		startPosition = 0;
-	}
-
-	for (var i = startPosition; i < text.length; i++) {
-		if (whiteCharacters.indexOf(text.charAt(i)) != -1) {
-			return i;
-		}
-	}
-
-	return -1;
-};
-
-
-EPUBJS.Renderer.prototype.splitTextNodeIntoWordsRanges = function(node){
-	var ranges = [];
-	var text = node.textContent.trim();
-	var range;
-	var rect;
-	var list;
-
-	// Usage of indexOf() function for space character as word delimiter
-	// is not sufficient in case of other breakable characters like \r\n- etc
-	var pos = this.indexOfBreakableChar(text);
-
-	if(pos === -1) {
-		range = this.doc.createRange();
-		range.selectNodeContents(node);
-		return [range];
-	}
-
-	range = this.doc.createRange();
-	range.setStart(node, 0);
-	range.setEnd(node, pos);
-	ranges.push(range);
-
-	// there was a word miss in case of one letter words
-	range = this.doc.createRange();
-	range.setStart(node, pos+1);
-
-	while ( pos != -1 ) {
-
-		pos = this.indexOfBreakableChar(text, pos + 1);
-		if(pos > 0) {
-
-			if(range) {
-				range.setEnd(node, pos);
-				ranges.push(range);
-			}
-
-			range = this.doc.createRange();
-			range.setStart(node, pos+1);
-		}
-	}
-
-	if(range) {
-		range.setEnd(node, text.length);
-		ranges.push(range);
-	}
-
-	return ranges;
-};
-
-EPUBJS.Renderer.prototype.rangePosition = function(range){
-	var rect;
-	var list;
-
-	list = range.getClientRects();
-
-	if(list.length) {
-		rect = list[0];
-		return rect;
-	}
-
-	return null;
-};
-
-/*
-// Get the cfi of the current page
-EPUBJS.Renderer.prototype.getPageCfi = function(prevEl){
-	var range = this.doc.createRange();
-	var position;
-	// TODO : this might need to take margin / padding into account?
-	var x = 1;//this.formated.pageWidth/2;
-	var y = 1;//;this.formated.pageHeight/2;
-
-	range = this.getRange(x, y);
-
-	// var test = this.doc.defaultView.getSelection();
-	// var r = this.doc.createRange();
-	// test.removeAllRanges();
-	// r.setStart(range.startContainer, range.startOffset);
-	// r.setEnd(range.startContainer, range.startOffset + 1);
-	// test.addRange(r);
-
-	return this.currentChapter.cfiFromRange(range);
-};
-*/
-
-// Get the cfi of the current page
-EPUBJS.Renderer.prototype.getPageCfi = function(){
-	var pg = (this.chapterPos * 2)-1;
-	return this.pageMap[pg].start;
-};
-
-EPUBJS.Renderer.prototype.getRange = function(x, y, forceElement){
-	var range = this.doc.createRange();
-	var position;
-	forceElement = true; // temp override
-	if(typeof document.caretPositionFromPoint !== "undefined" && !forceElement){
-		position = this.doc.caretPositionFromPoint(x, y);
-		range.setStart(position.offsetNode, position.offset);
-	} else if(typeof document.caretRangeFromPoint !== "undefined" && !forceElement){
-		range = this.doc.caretRangeFromPoint(x, y);
+Unarchive.prototype.open = function(zipUrl, isBase64){
+	if (zipUrl instanceof ArrayBuffer || isBase64) {
+		return this.zip.loadAsync(zipUrl, {"base64": isBase64});
 	} else {
-		this.visibileEl = this.findElementAfter(x, y);
-		range.setStart(this.visibileEl, 1);
-	}
-
-	// var test = this.doc.defaultView.getSelection();
-	// var r = this.doc.createRange();
-	// test.removeAllRanges();
-	// r.setStart(range.startContainer, range.startOffset);
-	// r.setEnd(range.startContainer, range.startOffset + 1);
-	// test.addRange(r);
-	return range;
-};
-
-/*
-EPUBJS.Renderer.prototype.getVisibleRangeCfi = function(prevEl){
-	var startX = 0;
-	var startY = 0;
-	var endX = this.width-1;
-	var endY = this.height-1;
-	var startRange = this.getRange(startX, startY);
-	var endRange = this.getRange(endX, endY); //fix if carret not avail
-	var startCfi = this.currentChapter.cfiFromRange(startRange);
-	var endCfi;
-	if(endRange) {
-		endCfi = this.currentChapter.cfiFromRange(endRange);
-	}
-
-	return {
-		start: startCfi,
-		end: endCfi || false
-	};
-};
-*/
-
-EPUBJS.Renderer.prototype.pagesInCurrentChapter = function() {
-	var pgs;
-	var length;
-
-	if(!this.pageMap) {
-		console.warn("page map not loaded");
-		return false;
-	}
-
-	length = this.pageMap.length;
-
-	// if(this.spreads){
-	// 	pgs = Math.ceil(length / 2);
-	// } else {
-	// 	pgs = length;
-	// }
-
-	return length;
-};
-
-EPUBJS.Renderer.prototype.currentRenderedPage = function(){
-	var pg;
-
-	if(!this.pageMap) {
-		console.warn("page map not loaded");
-		return false;
-	}
-
-	if (this.spreads && this.pageMap.length > 1) {
-		pg = (this.chapterPos*2) - 1;
-	} else {
-		pg = this.chapterPos;
-	}
-
-	return pg;
-};
-
-EPUBJS.Renderer.prototype.getRenderedPagesLeft = function(){
-	var pg;
-	var lastPage;
-	var pagesLeft;
-
-	if(!this.pageMap) {
-		console.warn("page map not loaded");
-		return false;
-	}
-
-	lastPage = this.pageMap.length;
-
-	if (this.spreads) {
-		pg = (this.chapterPos*2) - 1;
-	} else {
-		pg = this.chapterPos;
-	}
-
-	pagesLeft = lastPage - pg;
-	return pagesLeft;
-
-};
-
-EPUBJS.Renderer.prototype.getVisibleRangeCfi = function(){
-	var pg;
-	var startRange, endRange;
-
-	if(!this.pageMap) {
-		console.warn("page map not loaded");
-		return false;
-	}
-
-	if (this.spreads) {
-		pg = this.chapterPos*2;
-		startRange = this.pageMap[pg-2];
-		endRange = startRange;
-
-		if(this.pageMap.length > 1 && this.pageMap.length > pg-1) {
-			endRange = this.pageMap[pg-1];
-		}
-	} else {
-		pg = this.chapterPos;
-		startRange = this.pageMap[pg-1];
-		endRange = startRange;
-	}
-
-	if(!startRange) {
-		console.warn("page range miss:", pg, this.pageMap);
-		startRange = this.pageMap[this.pageMap.length-1];
-		endRange = startRange;
-	}
-
-	return {
-		start: startRange.start,
-		end: endRange.end
-	};
-};
-
-// Goto a cfi position in the current chapter
-EPUBJS.Renderer.prototype.gotoCfi = function(cfi){
-	var pg;
-	var marker;
-	var range;
-
-	if(this._moving){
-		return this._q.enqueue("gotoCfi", arguments);
-	}
-
-	if(EPUBJS.core.isString(cfi)){
-		cfi = this.epubcfi.parse(cfi);
-	}
-
-	if(typeof document.evaluate === 'undefined') {
-		marker = this.epubcfi.addMarker(cfi, this.doc);
-		if(marker) {
-			pg = this.render.getPageNumberByElement(marker);
-			// Must Clean up Marker before going to page
-			this.epubcfi.removeMarker(marker, this.doc);
-			this.page(pg);
-		}
-	} else {
-		range = this.epubcfi.generateRangeFromCfi(cfi, this.doc);
-		if(range) {
-			// jaroslaw.bielski@7bulls.com
-			// It seems that sometimes getBoundingClientRect() returns null for first page CFI in chapter.
-			// It is always reproductible if few consecutive chapters have only one page.
-			// NOTE: This is only workaround and the issue needs an deeper investigation.
-			// NOTE: Observed on Android 4.2.1 using WebView widget as HTML renderer (Asus TF300T).
-			var rect = range.getBoundingClientRect();
-			if (rect) {
-				pg = this.render.getPageNumberByRect(rect);
-
-			} else {
-				// Goto first page in chapter
-				pg = 1;
-			}
-
-			this.page(pg);
-
-			// Reset the current location cfi to requested cfi
-			this.currentLocationCfi = cfi.str;
-		} else {
-			// Failed to find a range, go to first page
-			this.page(1);
-		}
-	}
-};
-
-//  Walk nodes until a visible element is found
-EPUBJS.Renderer.prototype.findFirstVisible = function(startEl){
-	var el = startEl || this.render.getBaseElement();
-	var	found;
-	// kgolunski@7bulls.com
-	// Looks like an old API usage
-	// Set x and y as 0 to fullfill walk method API.
-	found = this.walk(el, 0, 0);
-
-	if(found) {
-		return found;
-	}else{
-		return startEl;
-	}
-
-};
-// TODO: remove me - unsused
-EPUBJS.Renderer.prototype.findElementAfter = function(x, y, startEl){
-	var el = startEl || this.render.getBaseElement();
-	var	found;
-	found = this.walk(el, x, y);
-	if(found) {
-		return found;
-	}else{
-		return el;
-	}
-
-};
-
-/*
-EPUBJS.Renderer.prototype.route = function(hash, callback){
-	var location = window.location.hash.replace('#/', '');
-	if(this.useHash && location.length && location != this.prevLocation){
-		this.show(location, callback);
-		this.prevLocation = location;
-		return true;
-	}
-	return false;
-}
-
-EPUBJS.Renderer.prototype.hideHashChanges = function(){
-	this.useHash = false;
-}
-
-*/
-
-EPUBJS.Renderer.prototype.resize = function(width, height, setSize){
-	var spreads;
-
-	this.width = width;
-	this.height = height;
-
-	if(setSize !== false) {
-		this.render.resize(this.width, this.height);
-	}
-
-
-
-	if(this.contents){
-		this.reformat();
-	}
-
-	this.trigger("renderer:resized", {
-		width: this.width,
-		height: this.height
-	});
-};
-
-//-- Listeners for events in the frame
-
-EPUBJS.Renderer.prototype.onResized = function(e) {
-	this.trigger('renderer:beforeResize');
-
-	var width = this.container.clientWidth;
-	var height = this.container.clientHeight;
-
-	this.resize(width, height, false);
-};
-
-EPUBJS.Renderer.prototype.addEventListeners = function(){
-	if(!this.render.document) {
-		return;
-	}
-	this.listenedEvents.forEach(function(eventName){
-		this.render.document.addEventListener(eventName, this.triggerEvent.bind(this), false);
-	}, this);
-
-};
-
-EPUBJS.Renderer.prototype.removeEventListeners = function(){
-	if(!this.render.document) {
-		return;
-	}
-	this.listenedEvents.forEach(function(eventName){
-		this.render.document.removeEventListener(eventName, this.triggerEvent, false);
-	}, this);
-
-};
-
-// Pass browser events
-EPUBJS.Renderer.prototype.triggerEvent = function(e){
-	this.trigger("renderer:"+e.type, e);
-};
-
-EPUBJS.Renderer.prototype.addSelectionListeners = function(){
-	this.render.document.addEventListener("selectionchange", this.onSelectionChange.bind(this), false);
-};
-
-EPUBJS.Renderer.prototype.removeSelectionListeners = function(){
-	if(!this.render.document) {
-		return;
-	}
-	this.doc.removeEventListener("selectionchange", this.onSelectionChange, false);
-};
-
-EPUBJS.Renderer.prototype.onSelectionChange = function(e){
-	if (this.selectionEndTimeout) {
-		clearTimeout(this.selectionEndTimeout);
-	}
-	this.selectionEndTimeout = setTimeout(function() {
-		this.selectedRange = this.render.window.getSelection();
-		this.trigger("renderer:selected", this.selectedRange);
-	}.bind(this), 500);
-};
-
-
-//-- Spreads
-
-EPUBJS.Renderer.prototype.setMinSpreadWidth = function(width){
-	this.minSpreadWidth = width;
-	this.spreads = this.determineSpreads(width);
-};
-
-EPUBJS.Renderer.prototype.determineSpreads = function(cutoff){
-	if(this.isForcedSingle || !cutoff || this.width < cutoff) {
-		return false; //-- Single Page
-	}else{
-		return true; //-- Double Page
-	}
-};
-
-EPUBJS.Renderer.prototype.forceSingle = function(bool){
-	if(bool) {
-		this.isForcedSingle = true;
-		// this.spreads = false;
-	} else {
-		this.isForcedSingle = false;
-		// this.spreads = this.determineSpreads(this.minSpreadWidth);
-	}
-};
-
-EPUBJS.Renderer.prototype.setGap = function(gap){
-	this.gap = gap; //-- False == auto gap
-};
-
-EPUBJS.Renderer.prototype.setDirection = function(direction){
-	this.direction = direction;
-	this.render.setDirection(this.direction);
-};
-
-//-- Content Replacements
-
-EPUBJS.Renderer.prototype.replace = function(query, func, finished, progress){
-	var items = this.contents.querySelectorAll(query),
-		resources = Array.prototype.slice.call(items),
-		count = resources.length;
-
-
-	if(count === 0) {
-		finished(false);
-		return;
-	}
-	resources.forEach(function(item){
-		var called = false;
-		var after = function(result, full){
-			if(called === false) {
-				count--;
-				if(progress) progress(result, full, count);
-				if(count <= 0 && finished) finished(true);
-				called = true;
-			}
-		};
-
-		func(item, after);
-
-	}.bind(this));
-
-};
-
-//-- Enable binding events to Renderer
-RSVP.EventTarget.mixin(EPUBJS.Renderer.prototype);
-
-var EPUBJS = EPUBJS || {};
-EPUBJS.replace = {};
-
-//-- Replaces the relative links within the book to use our internal page changer
-EPUBJS.replace.hrefs = function(callback, renderer){
-	var book = this;
-	var replacments = function(link, done){
-		var href = link.getAttribute("href"),
-				isRelative = href.search("://"),
-				directory,
-				relative,
-				location,
-				base,
-				uri,
-				url;
-
-		if(href.indexOf("mailto:") === 0){
-			done();
-			return;
-		}
-
-		if(isRelative != -1){
-
-			link.setAttribute("target", "_blank");
-
-		}else{
-			// Links may need to be resolved, such as ../chp1.xhtml
-			base = renderer.render.docEl.querySelector('base');
-			url = base.getAttribute("href");
-			uri = EPUBJS.core.uri(url);
-			directory = uri.directory;
-
-			if (href.indexOf("#") === 0) {
-				href = uri.filename + href;
-			}
-
-			if(directory) {
-				// We must ensure that the file:// protocol is preserved for
-				// local file links, as in certain contexts (such as under
-				// Titanium), file links without the file:// protocol will not
-				// work
-				if (uri.protocol === "file") {
-					relative = EPUBJS.core.resolveUrl(uri.base, href);
-				} else {
-					relative = EPUBJS.core.resolveUrl(directory, href);
-				}
-			} else {
-				relative = href;
-			}
-
-			link.onclick = function(){
-                                book.trigger("book:linkClicked", href);
-				book.goto(relative);
-				return false;
-			};
-
-		}
-		done();
-
-	};
-
-	renderer.replace("a[href]", replacments, callback);
-
-};
-
-EPUBJS.replace.head = function(callback, renderer) {
-
-	renderer.replaceWithStored("link[href]", "href", EPUBJS.replace.links, callback);
-
-};
-
-
-//-- Replaces assets src's to point to stored version if browser is offline
-EPUBJS.replace.resources = function(callback, renderer){
-	//srcs = this.doc.querySelectorAll('[src]');
-	renderer.replaceWithStored("[src]", "src", EPUBJS.replace.srcs, callback);
-
-};
-
-EPUBJS.replace.posters = function(callback, renderer){
-
-	renderer.replaceWithStored("[poster]", "poster", EPUBJS.replace.srcs, callback);
-
-};
-
-EPUBJS.replace.svg = function(callback, renderer) {
-
-	renderer.replaceWithStored("svg image", "xlink:href", function(_store, full, done){
-		_store.getUrl(full).then(done);
-	}, callback);
-
-};
-
-EPUBJS.replace.srcs = function(_store, full, done){
-
-	var isRelative = (full.search("://") === -1);
-
-	if (isRelative) {
-		_store.getUrl(full).then(done);
-	} else {
-		done();
-	}
-
-};
-
-//-- Replaces links in head, such as stylesheets - link[href]
-EPUBJS.replace.links = function(_store, full, done, link){
-	//-- Handle replacing urls in CSS
-	if(link.getAttribute("rel") === "stylesheet") {
-		EPUBJS.replace.stylesheets(_store, full).then(function(url, full){
-			// done
-			done(url, full);
-		},  function(reason) {
-			// we were unable to replace the style sheets
-			done(null);
-		});
-	}else{
-		_store.getUrl(full).then(done, function(reason) {
-			// we were unable to get the url, signal to upper layer
-			done(null);
-		});
-	}
-};
-
-EPUBJS.replace.stylesheets = function(_store, full) {
-	var deferred = new RSVP.defer();
-
-	if(!_store) return;
-
-	_store.getText(full).then(function(text){
-		var url;
-
-		 EPUBJS.replace.cssImports(_store, full, text).then(function (importText) {
-
-          text = importText + text;
-
-			EPUBJS.replace.cssUrls(_store, full, text).then(function(newText){
-				var _URL = window.URL || window.webkitURL || window.mozURL;
-
-				var blob = new Blob([newText], { "type" : "text\/css" }),
-						url = _URL.createObjectURL(blob);
-
-				deferred.resolve(url);
-
-			}, function(reason) {
-				deferred.reject(reason);
-			});
-
-		},function(reason) {
-			deferred.reject(reason);
-		});
-
-	}, function(reason) {
-		deferred.reject(reason);
-	});
-
-	return deferred.promise;
-};
-
-EPUBJS.replace.cssImports = function (_store, base, text) {
-  var deferred = new RSVP.defer();
-  if(!_store) return;
-
-  // check for css @import
-  var importRegex = /@import\s+(?:url\()?\'?\"?((?!data:)[^\'|^\"^\)]*)\'?\"?\)?/gi;
-  var importMatches, importFiles = [], allImportText =  '';
-
-  while (importMatches = importRegex.exec(text)) {
-      importFiles.push(importMatches[1]);
-  }
-
-  if (importFiles.length === 0) {
-    deferred.resolve(allImportText);
-  }
-
-  importFiles.forEach(function (fileUrl) {
-      var full = EPUBJS.core.resolveUrl(base, fileUrl);
-      full = EPUBJS.core.uri(full).path;
-      _store.getText(full).then(function(importText){
-        allImportText += importText;
-        if (importFiles.indexOf(fileUrl) === importFiles.length - 1) {
-          deferred.resolve(allImportText);
-        }
-      }, function(reason) {
-        deferred.reject(reason);
-      });
-  });
-
-  return deferred.promise;
-
-};
-
-
-EPUBJS.replace.cssUrls = function(_store, base, text){
-	var deferred = new RSVP.defer(),
-		matches = text.match(/url\(\'?\"?((?!data:)[^\'|^\"^\)]*)\'?\"?\)/g);
-
-	if(!_store) return;
-
-	if(!matches){
-		deferred.resolve(text);
-		return deferred.promise;
-	}
-
-	var promises = matches.map(function(str) {
-		var full = EPUBJS.core.resolveUrl(base, str.replace(/url\(|[|\)|\'|\"]|\?.*$/g, ''));
-		return _store.getUrl(full).then(function(url) {
-			text = text.replace(str, 'url("'+url+'")');
-		}, function(reason) {
-			deferred.reject(reason);
-		});
-	});
-
-	RSVP.all(promises).then(function(){
-		deferred.resolve(text);
-	});
-
-	return deferred.promise;
-};
-
-
-EPUBJS.Storage = function(withCredentials){
-
-	this.checkRequirements();
-	this.urlCache = {};
-	this.withCredentials = withCredentials;
-	this.URL = window.URL || window.webkitURL || window.mozURL;
-	this.offline = false;
-};
-
-//-- Load the zip lib and set the workerScriptsPath
-EPUBJS.Storage.prototype.checkRequirements = function(callback){
-	if(typeof(localforage) == "undefined") console.error("localForage library not loaded");
-};
-
-EPUBJS.Storage.prototype.put = function(assets, store) {
-	var deferred = new RSVP.defer();
-	var count = assets.length;
-	var current = 0;
-	var next = function(deferred){
-		var done = deferred || new RSVP.defer();
-		var url;
-		var encodedUrl;
-
-		if(current >= count) {
-			done.resolve();
-		} else {
-			url = assets[current].url;
-			encodedUrl = window.encodeURIComponent(url);
-
-			EPUBJS.core.request(url, "binary")
-			.then(function (data) {
-				return localforage.setItem(encodedUrl, data);
-			})
+		return request(zipUrl, "binary")
 			.then(function(data){
-				current++;
-        // Load up the next
-				setTimeout(function(){
-					next(done);
-				}, 1);
-
-      });
-		}
-		return done.promise;
-	}.bind(this);
-
-	if(!Array.isArray(assets)) {
-		assets = [assets];
-	}
-
-	next().then(function(){
-		deferred.resolve();
-	}.bind(this));
-
-	return deferred.promise;
-};
-
-EPUBJS.Storage.prototype.token = function(url, value){
-	var encodedUrl = window.encodeURIComponent(url);
-	return localforage.setItem(encodedUrl, value)
-		.then(function (result) {
-			if (result === null) {
-				return false;
-			} else {
-				return true;
-			}
-		});
-};
-
-EPUBJS.Storage.prototype.isStored = function(url){
-	var encodedUrl = window.encodeURIComponent(url);
-	return localforage.getItem(encodedUrl)
-		.then(function (result) {
-			if (result === null) {
-				return false;
-			} else {
-				return true;
-			}
-		});
-};
-
-EPUBJS.Storage.prototype.getText = function(url){
-	var encodedUrl = window.encodeURIComponent(url);
-
-	return EPUBJS.core.request(url, 'arraybuffer', this.withCredentials)
-		.then(function(buffer){
-
-			if(this.offline){
-				this.offline = false;
-				this.trigger("offline", false);
-			}
-			localforage.setItem(encodedUrl, buffer);
-			return buffer;
-		}.bind(this))
-		.then(function(data) {
-			var deferred = new RSVP.defer();
-			var mimeType = EPUBJS.core.getMimeType(url);
-			var blob = new Blob([data], {type : mimeType});
-			var reader = new FileReader();
-			reader.addEventListener("loadend", function() {
-				deferred.resolve(reader.result);
-			});
-			reader.readAsText(blob, mimeType);
-			return deferred.promise;
-		})
-		.catch(function() {
-
-			var deferred = new RSVP.defer();
-			var entry = localforage.getItem(encodedUrl);
-
-			if(!this.offline){
-				this.offline = true;
-				this.trigger("offline", true);
-			}
-
-			if(!entry) {
-				deferred.reject({
-					message : "File not found in the storage: " + url,
-					stack : new Error().stack
-				});
-				return deferred.promise;
-			}
-
-			entry.then(function(data) {
-				var mimeType = EPUBJS.core.getMimeType(url);
-				var blob = new Blob([data], {type : mimeType});
-				var reader = new FileReader();
-				reader.addEventListener("loadend", function() {
-					deferred.resolve(reader.result);
-				});
-				reader.readAsText(blob, mimeType);
-			});
-
-			return deferred.promise;
-		}.bind(this));
-};
-
-EPUBJS.Storage.prototype.getUrl = function(url){
-	var encodedUrl = window.encodeURIComponent(url);
-
-	return EPUBJS.core.request(url, 'arraybuffer', this.withCredentials)
-		.then(function(buffer){
-			if(this.offline){
-				this.offline = false;
-				this.trigger("offline", false);
-			}
-			localforage.setItem(encodedUrl, buffer);
-			return url;
-		}.bind(this))
-		.catch(function() {
-			var deferred = new RSVP.defer();
-			var entry;
-			var _URL = window.URL || window.webkitURL || window.mozURL;
-			var tempUrl;
-
-			if(!this.offline){
-				this.offline = true;
-				this.trigger("offline", true);
-			}
-
-			if(encodedUrl in this.urlCache) {
-				deferred.resolve(this.urlCache[encodedUrl]);
-				return deferred.promise;
-			}
-
-			entry = localforage.getItem(encodedUrl);
-
-			if(!entry) {
-				deferred.reject({
-					message : "File not found in the storage: " + url,
-					stack : new Error().stack
-				});
-				return deferred.promise;
-			}
-
-			entry.then(function(data) {
-				var blob = new Blob([data], {type : EPUBJS.core.getMimeType(url)});
-				tempUrl = _URL.createObjectURL(blob);
-				deferred.resolve(tempUrl);
-				this.urlCache[encodedUrl] = tempUrl;
+				return this.zip.loadAsync(data);
 			}.bind(this));
-
-
-			return deferred.promise;
-	}.bind(this));
-};
-
-EPUBJS.Storage.prototype.getXml = function(url){
-	var encodedUrl = window.encodeURIComponent(url);
-
-	return EPUBJS.core.request(url, 'arraybuffer', this.withCredentials)
-		.then(function(buffer){
-			if(this.offline){
-				this.offline = false;
-				this.trigger("offline", false);
-			}
-			localforage.setItem(encodedUrl, buffer);
-			return buffer;
-		}.bind(this))
-		.then(function(data) {
-			var deferred = new RSVP.defer();
-			var mimeType = EPUBJS.core.getMimeType(url);
-			var blob = new Blob([data], {type : mimeType});
-			var reader = new FileReader();
-			reader.addEventListener("loadend", function() {
-				var parser = new DOMParser();
-				var doc = parser.parseFromString(reader.result, "text/xml");
-				deferred.resolve(doc);
-			});
-			reader.readAsText(blob, mimeType);
-			return deferred.promise;
-		})
-		.catch(function() {
-			var deferred = new RSVP.defer();
-			var entry = localforage.getItem(encodedUrl);
-
-			if(!this.offline){
-				this.offline = true;
-				this.trigger("offline", true);
-			}
-
-			if(!entry) {
-				deferred.reject({
-					message : "File not found in the storage: " + url,
-					stack : new Error().stack
-				});
-				return deferred.promise;
-			}
-
-			entry.then(function(data) {
-				var mimeType = EPUBJS.core.getMimeType(url);
-				var blob = new Blob([data], {type : mimeType});
-				var reader = new FileReader();
-				reader.addEventListener("loadend", function() {
-					var parser = new DOMParser();
-					var doc = parser.parseFromString(reader.result, "text/xml");
-					deferred.resolve(doc);
-				});
-				reader.readAsText(blob, mimeType);
-			});
-
-			return deferred.promise;
-		}.bind(this));
-};
-
-EPUBJS.Storage.prototype.revokeUrl = function(url){
-	var _URL = window.URL || window.webkitURL || window.mozURL;
-	var fromCache = this.urlCache[url];
-	if(fromCache) _URL.revokeObjectURL(fromCache);
-};
-
-EPUBJS.Storage.prototype.failed = function(error){
-	console.error(error);
-};
-
-RSVP.EventTarget.mixin(EPUBJS.Storage.prototype);
-
-EPUBJS.Unarchiver = function(url){
-
-	this.checkRequirements();
-	this.urlCache = {};
-
-};
-
-//-- Load the zip lib and set the workerScriptsPath
-EPUBJS.Unarchiver.prototype.checkRequirements = function(callback){
-	if(typeof(JSZip) == "undefined") console.error("JSZip lib not loaded");
-};
-
-EPUBJS.Unarchiver.prototype.open = function(zipUrl, callback){
-	if (zipUrl instanceof ArrayBuffer) {
-		this.zip = new JSZip(zipUrl);
-		var deferred = new RSVP.defer();
-		deferred.resolve();
-		return deferred.promise;
-	} else {
-		return EPUBJS.core.request(zipUrl, "binary").then(function(data){
-			this.zip = new JSZip(data);
-		}.bind(this));
 	}
 };
 
-EPUBJS.Unarchiver.prototype.getXml = function(url, encoding){
-	var decodededUrl = window.decodeURIComponent(url);
-	return this.getText(decodededUrl, encoding).
-			then(function(text){
-				var parser = new DOMParser();
-				var mimeType = EPUBJS.core.getMimeType(url);
+Unarchive.prototype.request = function(url, type){
+	var deferred = new core.defer();
+	var response;
+	var r;
 
-				// Remove byte order mark before parsing
-				// https://www.w3.org/International/questions/qa-byte-order-mark
-				if(text.charCodeAt(0) === 0xFEFF) {
-					text = text.slice(1);
-				}
+	// If type isn't set, determine it from the file extension
+	if(!type) {
+		type = core.extension(url);
+	}
 
-				return parser.parseFromString(text, mimeType);
-			});
+	if(type == 'blob'){
+		response = this.getBlob(url);
+	} else {
+		response = this.getText(url);
+	}
 
-};
-
-EPUBJS.Unarchiver.prototype.getUrl = function(url, mime){
-	var unarchiver = this;
-	var deferred = new RSVP.defer();
-	var decodededUrl = window.decodeURIComponent(url);
-	var entry = this.zip.file(decodededUrl);
-	var _URL = window.URL || window.webkitURL || window.mozURL;
-	var tempUrl;
-	var blob;
-
-	if(!entry) {
+	if (response) {
+		response.then(function (r) {
+			result = this.handleResponse(r, type);
+			deferred.resolve(result);
+		}.bind(this));
+	} else {
 		deferred.reject({
 			message : "File not found in the epub: " + url,
 			stack : new Error().stack
 		});
-		return deferred.promise;
 	}
+	return deferred.promise;
+};
+
+Unarchive.prototype.handleResponse = function(response, type){
+	var r;
+
+	if(type == "json") {
+		r = JSON.parse(response);
+	}
+	else
+	if(core.isXml(type)) {
+		r = core.parse(response, "text/xml");
+	}
+	else
+	if(type == 'xhtml') {
+		r = core.parse(response, "application/xhtml+xml");
+	}
+	else
+	if(type == 'html' || type == 'htm') {
+		r = core.parse(response, "text/html");
+	 } else {
+		 r = response;
+	 }
+
+	return r;
+};
+
+Unarchive.prototype.getBlob = function(url, _mimeType){
+	var decodededUrl = window.decodeURIComponent(url.substr(1)); // Remove first slash
+	var entry = this.zip.file(decodededUrl);
+	var mimeType;
+
+	if(entry) {
+		mimeType = _mimeType || mime.lookup(entry.name);
+		return entry.async("uint8array").then(function(uint8array) {
+			return new Blob([uint8array], {type : mimeType});
+		});
+	}
+};
+
+Unarchive.prototype.getText = function(url, encoding){
+	var decodededUrl = window.decodeURIComponent(url.substr(1)); // Remove first slash
+	var entry = this.zip.file(decodededUrl);
+
+	if(entry) {
+		return entry.async("string").then(function(text) {
+			return text;
+		});
+	}
+};
+
+Unarchive.prototype.getBase64 = function(url, _mimeType){
+	var decodededUrl = window.decodeURIComponent(url.substr(1)); // Remove first slash
+	var entry = this.zip.file(decodededUrl);
+	var mimeType;
+
+	if(entry) {
+		mimeType = _mimeType || mime.lookup(entry.name);
+		return entry.async("base64").then(function(data) {
+			return "data:" + mimeType + ";base64," + data;
+		});
+	}
+};
+
+Unarchive.prototype.createUrl = function(url, options){
+	var deferred = new core.defer();
+	var _URL = window.URL || window.webkitURL || window.mozURL;
+	var tempUrl;
+	var blob;
+	var response;
+	var useBase64 = options && options.base64;
 
 	if(url in this.urlCache) {
 		deferred.resolve(this.urlCache[url]);
 		return deferred.promise;
 	}
 
-	blob = new Blob([entry.asUint8Array()], {type : EPUBJS.core.getMimeType(entry.name)});
+	if (useBase64) {
+		response = this.getBase64(url);
 
-	tempUrl = _URL.createObjectURL(blob);
-	deferred.resolve(tempUrl);
-	unarchiver.urlCache[url] = tempUrl;
+		if (response) {
+			response.then(function(tempUrl) {
 
-	return deferred.promise;
-};
+				this.urlCache[url] = tempUrl;
+				deferred.resolve(tempUrl);
 
-EPUBJS.Unarchiver.prototype.getText = function(url, encoding){
-	var unarchiver = this;
-	var deferred = new RSVP.defer();
-	var decodededUrl = window.decodeURIComponent(url);
-	var entry = this.zip.file(decodededUrl);
-	var text;
+			}.bind(this));
 
-	if(!entry) {
+		}
+
+	} else {
+
+		response = this.getBlob(url);
+
+		if (response) {
+			response.then(function(blob) {
+
+				tempUrl = _URL.createObjectURL(blob);
+				this.urlCache[url] = tempUrl;
+				deferred.resolve(tempUrl);
+
+			}.bind(this));
+
+		}
+	}
+
+
+	if (!response) {
 		deferred.reject({
 			message : "File not found in the epub: " + url,
 			stack : new Error().stack
 		});
-		return deferred.promise;
 	}
-
-	text = entry.asText();
-	deferred.resolve(text);
 
 	return deferred.promise;
 };
 
-EPUBJS.Unarchiver.prototype.revokeUrl = function(url){
+Unarchive.prototype.revokeUrl = function(url){
 	var _URL = window.URL || window.webkitURL || window.mozURL;
 	var fromCache = this.urlCache[url];
 	if(fromCache) _URL.revokeObjectURL(fromCache);
 };
 
-EPUBJS.Unarchiver.prototype.failed = function(error){
-	console.error(error);
-};
+module.exports = Unarchive;
 
-EPUBJS.Unarchiver.prototype.afterSaved = function(error){
-	this.callback();
-};
 
-EPUBJS.Unarchiver.prototype.toStorage = function(entries){
-	var timeout = 0,
-		delay = 20,
-		that = this,
-		count = entries.length;
+/***/ },
+/* 45 */
+/***/ function(module, exports) {
 
-	function callback(){
-		count--;
-		if(count === 0) that.afterSaved();
-	}
+if(typeof __WEBPACK_EXTERNAL_MODULE_45__ === 'undefined') {var e = new Error("Cannot find module \"JSZip\""); e.code = 'MODULE_NOT_FOUND'; throw e;}
+module.exports = __WEBPACK_EXTERNAL_MODULE_45__;
 
-	entries.forEach(function(entry){
+/***/ },
+/* 46 */,
+/* 47 */
+/***/ function(module, exports, __webpack_require__) {
 
-		setTimeout(function(entry){
-			that.saveEntryFileToStorage(entry, callback);
-		}, timeout, entry);
+var Book = __webpack_require__(17);
+var EpubCFI = __webpack_require__(1);
+var Rendition = __webpack_require__(11);
+var Contents = __webpack_require__(9);
 
-		timeout += delay;
-	});
-
-	console.log("time", timeout);
-
-	//entries.forEach(this.saveEntryFileToStorage.bind(this));
-};
-
-// EPUBJS.Unarchiver.prototype.saveEntryFileToStorage = function(entry, callback){
-// 	var that = this;
-// 	entry.getData(new zip.BlobWriter(), function(blob) {
-// 		EPUBJS.storage.save(entry.filename, blob, callback);
-// 	});
-// };
-
-/*
- From Zip.js, by Gildas Lormeau
+/**
+ * Creates a new Book
+ * @param {string|ArrayBuffer} url URL, Path or ArrayBuffer
+ * @param {object} options to pass to the book
+ * @param options.requestMethod the request function to use
+ * @returns {Book} a new Book object
+ * @example ePub("/path/to/book.epub", {})
  */
+function ePub(url, options) {
+	return new Book(url, options);
+};
 
-(function() {
-	"use strict";
-	var table = {
-		"application" : {
-			"ecmascript" : [ "es", "ecma" ],
-			"javascript" : "js",
-			"ogg" : "ogx",
-			"pdf" : "pdf",
-			"postscript" : [ "ps", "ai", "eps", "epsi", "epsf", "eps2", "eps3" ],
-			"rdf+xml" : "rdf",
-			"smil" : [ "smi", "smil" ],
-			"xhtml+xml" : [ "xhtml", "xht" ],
-			"xml" : [ "xml", "xsl", "xsd", "opf", "ncx" ],
-			"zip" : "zip",
-			"x-httpd-eruby" : "rhtml",
-			"x-latex" : "latex",
-			"x-maker" : [ "frm", "maker", "frame", "fm", "fb", "book", "fbdoc" ],
-			"x-object" : "o",
-			"x-shockwave-flash" : [ "swf", "swfl" ],
-			"x-silverlight" : "scr",
-			"epub+zip" : "epub",
-			"font-tdpfr" : "pfr",
-			"inkml+xml" : [ "ink", "inkml" ],
-			"json" : "json",
-			"jsonml+json" : "jsonml",
-			"mathml+xml" : "mathml",
-			"metalink+xml" : "metalink",
-			"mp4" : "mp4s",
-			// "oebps-package+xml" : "opf",
-			"omdoc+xml" : "omdoc",
-			"oxps" : "oxps",
-			"vnd.amazon.ebook" : "azw",
-			"widget" : "wgt",
-			// "x-dtbncx+xml" : "ncx",
-			"x-dtbook+xml" : "dtb",
-			"x-dtbresource+xml" : "res",
-			"x-font-bdf" : "bdf",
-			"x-font-ghostscript" : "gsf",
-			"x-font-linux-psf" : "psf",
-			"x-font-otf" : "otf",
-			"x-font-pcf" : "pcf",
-			"x-font-snf" : "snf",
-			"x-font-ttf" : [ "ttf", "ttc" ],
-			"x-font-type1" : [ "pfa", "pfb", "pfm", "afm" ],
-			"x-font-woff" : "woff",
-			"x-mobipocket-ebook" : [ "prc", "mobi" ],
-			"x-mspublisher" : "pub",
-			"x-nzb" : "nzb",
-			"x-tgif" : "obj",
-			"xaml+xml" : "xaml",
-			"xml-dtd" : "dtd",
-			"xproc+xml" : "xpl",
-			"xslt+xml" : "xslt",
-			"internet-property-stream" : "acx",
-			"x-compress" : "z",
-			"x-compressed" : "tgz",
-			"x-gzip" : "gz",
-		},
-		"audio" : {
-			"flac" : "flac",
-			"midi" : [ "mid", "midi", "kar", "rmi" ],
-			"mpeg" : [ "mpga", "mpega", "mp2", "mp3", "m4a", "mp2a", "m2a", "m3a" ],
-			"mpegurl" : "m3u",
-			"ogg" : [ "oga", "ogg", "spx" ],
-			"x-aiff" : [ "aif", "aiff", "aifc" ],
-			"x-ms-wma" : "wma",
-			"x-wav" : "wav",
-			"adpcm" : "adp",
-			"mp4" : "mp4a",
-			"webm" : "weba",
-			"x-aac" : "aac",
-			"x-caf" : "caf",
-			"x-matroska" : "mka",
-			"x-pn-realaudio-plugin" : "rmp",
-			"xm" : "xm",
-			"mid" : [ "mid", "rmi" ]
-		},
-		"image" : {
-			"gif" : "gif",
-			"ief" : "ief",
-			"jpeg" : [ "jpeg", "jpg", "jpe" ],
-			"pcx" : "pcx",
-			"png" : "png",
-			"svg+xml" : [ "svg", "svgz" ],
-			"tiff" : [ "tiff", "tif" ],
-			"x-icon" : "ico",
-			"bmp" : "bmp",
-			"webp" : "webp",
-			"x-pict" : [ "pic", "pct" ],
-			"x-tga" : "tga",
-			"cis-cod" : "cod",
-		},
-		"message" : {
-			"rfc822" : [ "eml", "mime", "mht", "mhtml", "nws" ]
-		},
-		"text" : {
-			"cache-manifest" : [ "manifest", "appcache" ],
-			"calendar" : [ "ics", "icz", "ifb" ],
-			"css" : "css",
-			"csv" : "csv",
-			"h323" : "323",
-			"html" : [ "html", "htm", "shtml", "stm" ],
-			"iuls" : "uls",
-			"mathml" : "mml",
-			"plain" : [ "txt", "text", "brf", "conf", "def", "list", "log", "in", "bas" ],
-			"richtext" : "rtx",
-			"tab-separated-values" : "tsv",
-			"x-bibtex" : "bib",
-			"x-dsrc" : "d",
-			"x-diff" : [ "diff", "patch" ],
-			"x-haskell" : "hs",
-			"x-java" : "java",
-			"x-literate-haskell" : "lhs",
-			"x-moc" : "moc",
-			"x-pascal" : [ "p", "pas" ],
-			"x-pcs-gcd" : "gcd",
-			"x-perl" : [ "pl", "pm" ],
-			"x-python" : "py",
-			"x-scala" : "scala",
-			"x-setext" : "etx",
-			"x-tcl" : [ "tcl", "tk" ],
-			"x-tex" : [ "tex", "ltx", "sty", "cls" ],
-			"x-vcard" : "vcf",
-			"sgml" : [ "sgml", "sgm" ],
-			"x-c" : [ "c", "cc", "cxx", "cpp", "h", "hh", "dic" ],
-			"x-fortran" : [ "f", "for", "f77", "f90" ],
-			"x-opml" : "opml",
-			"x-nfo" : "nfo",
-			"x-sfv" : "sfv",
-			"x-uuencode" : "uu",
-			"webviewhtml" : "htt"
-		},
-		"video" : {
-			"mpeg" : [ "mpeg", "mpg", "mpe", "m1v", "m2v", "mp2", "mpa", "mpv2" ],
-			"mp4" : [ "mp4", "mp4v", "mpg4" ],
-			"quicktime" : [ "qt", "mov" ],
-			"ogg" : "ogv",
-			"vnd.mpegurl" : [ "mxu", "m4u" ],
-			"x-flv" : "flv",
-			"x-la-asf" : [ "lsf", "lsx" ],
-			"x-mng" : "mng",
-			"x-ms-asf" : [ "asf", "asx", "asr" ],
-			"x-ms-wm" : "wm",
-			"x-ms-wmv" : "wmv",
-			"x-ms-wmx" : "wmx",
-			"x-ms-wvx" : "wvx",
-			"x-msvideo" : "avi",
-			"x-sgi-movie" : "movie",
-			"x-matroska" : [ "mpv", "mkv", "mk3d", "mks" ],
-			"3gpp2" : "3g2",
-			"h261" : "h261",
-			"h263" : "h263",
-			"h264" : "h264",
-			"jpeg" : "jpgv",
-			"jpm" : [ "jpm", "jpgm" ],
-			"mj2" : [ "mj2", "mjp2" ],
-			"vnd.ms-playready.media.pyv" : "pyv",
-			"vnd.uvvu.mp4" : [ "uvu", "uvvu" ],
-			"vnd.vivo" : "viv",
-			"webm" : "webm",
-			"x-f4v" : "f4v",
-			"x-m4v" : "m4v",
-			"x-ms-vob" : "vob",
-			"x-smv" : "smv"
-		}
-	};
+ePub.VERSION = "0.3.0";
 
-	var mimeTypes = (function() {
-		var type, subtype, val, index, mimeTypes = {};
-		for (type in table) {
-			if (table.hasOwnProperty(type)) {
-				for (subtype in table[type]) {
-					if (table[type].hasOwnProperty(subtype)) {
-						val = table[type][subtype];
-						if (typeof val == "string") {
-							mimeTypes[val] = type + "/" + subtype;
-						} else {
-							for (index = 0; index < val.length; index++) {
-								mimeTypes[val[index]] = type + "/" + subtype;
-							}
-						}
-					}
-				}
-			}
-		}
-		return mimeTypes;
-	})();
+ePub.CFI = EpubCFI;
+ePub.Rendition = Rendition;
+ePub.Contents = Contents;
 
-	EPUBJS.core.getMimeType = function(filename) {
-		var defaultValue = "text/plain";//"application/octet-stream";
-		return filename && mimeTypes[filename.split(".").pop().toLowerCase()] || defaultValue;
-	};
+ePub.ViewManagers = {};
+ePub.Views = {};
+/**
+ * register plugins
+ */
+ePub.register = {
+	/**
+	 * register a new view manager
+	 */
+	manager : function(name, manager){
+		return ePub.ViewManagers[name] = manager;
+	},
+	/**
+	 * register a new view
+	 */
+	view : function(name, view){
+		return ePub.Views[name] = view;
+	}
+};
 
-})();
+// Default Views
+ePub.register.view("iframe", __webpack_require__(19));
 
+// Default View Managers
+ePub.register.manager("default", __webpack_require__(10));
+ePub.register.manager("continuous", __webpack_require__(18));
+
+module.exports = ePub;
+
+
+/***/ }
+/******/ ])
+});
+;
 //# sourceMappingURL=epub.js.map

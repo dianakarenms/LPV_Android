@@ -19,7 +19,7 @@ import java.util.List;
  * Created by Karencita on 13/05/2017.
  */
 
-public class InternationalizationAdapter extends RecyclerView.Adapter<InternationalizationAdapter.ViewHolder> {
+public class  InternationalizationAdapter extends RecyclerView.Adapter<InternationalizationAdapter.ViewHolder> {
     private static Context mContext;
     private static List<Internationalization> mBookList;
 

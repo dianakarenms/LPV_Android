@@ -22,7 +22,8 @@
             android:layout_marginRight="@dimen/small_padding"
             android:background="@null"
             android:adjustViewBounds="true"
-            android:scaleType="centerInside"/>
+            android:scaleType="centerInside"
+            android:visibility="gone"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

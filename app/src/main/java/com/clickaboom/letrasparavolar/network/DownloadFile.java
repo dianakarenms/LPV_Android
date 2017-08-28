@@ -87,6 +87,7 @@ public class DownloadFile extends AsyncTask<String, Void, Void> {
         //folder = new File(extStorageDirectory, "LPV_eBooks");
         folder = new File(extStorageDirectory, "LPV_eBooks/epub_reader/epubs/" + fileFolder);
 
+        //<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         if(isStoragePermissionGranted(activity)) {
             if (folder.exists()) {
                 pdfFile = new File(folder, fileName);

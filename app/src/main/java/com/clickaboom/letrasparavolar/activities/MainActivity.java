@@ -909,7 +909,8 @@ public class MainActivity extends AppCompatActivity
         File file = new File(basePath);
         if(!file.exists()) {
             DownloadFile downloadFile = new DownloadFile(mDownloadsListener, mContext, MainActivity.this, false, ePub);
-            downloadFile.execute(url, fileName, fileName);
+            String fileFolder = fileName.replace(".epub", "");
+            downloadFile.execute(url, fileFolder, fileName);
         } else {
             // if localStored
             if(db.getBookByePub(ePub.epub).isEmpty()) {
