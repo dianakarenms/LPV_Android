@@ -1,7 +1,6 @@
 package com.clickaboom.letrasparavolar.adapters;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,8 +17,6 @@ import com.clickaboom.letrasparavolar.network.ApiConfig;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
-
-import static android.icu.lang.UCharacter.GraphemeClusterBreak.L;
 
 /**
  * Created by Karencita on 13/05/2017.

@@ -4,7 +4,9 @@ import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -190,6 +192,7 @@ public class JuegosInGameActivity extends AppCompatActivity
         for (Map.Entry<Integer, Integer> entry : mCurioAnswers.entrySet()) {
             if (maxEntry == null || entry.getValue().compareTo(maxEntry.getValue()) > 0) {
                 maxEntry = entry;
+                Log.d(String.valueOf(entry.getKey()), String.valueOf(entry.getValue()));
             }
         }
         return  maxEntry.getKey();
@@ -293,7 +296,6 @@ public class JuegosInGameActivity extends AppCompatActivity
                 holder.mCheckImg.setImageResource(R.drawable.checked);
             }
         } else if(mGame.gameType.equals(JuegosMenuActivity.JUEGO_B)) {
-            //mCorrectCounter += res.resultados.get(0).valor;
             for(Resultado answer: res.resultados) {
                 int newValue = 0;
                 if(mCurioAnswers.get(answer.resultadosCurioseandoId) != null)
@@ -311,10 +313,9 @@ public class JuegosInGameActivity extends AppCompatActivity
         else
             view = findViewById(R.id.curioseando_result);
 
+        findViewById(R.id.back_btn).setVisibility(View.GONE);
         view.setDrawingCacheEnabled(true);
         Bitmap icon = Bitmap.createBitmap(view.getDrawingCache());
-        Intent share = new Intent(Intent.ACTION_SEND);
-        share.setType("image/jpeg");
 
         ContentValues values = new ContentValues();
         values.put(MediaStore.Images.Media.TITLE, "title");
@@ -330,9 +331,45 @@ public class JuegosInGameActivity extends AppCompatActivity
         } catch (Exception e) {
             System.err.println(e.toString());
         }
+        findViewById(R.id.back_btn).setVisibility(View.VISIBLE);
 
-        share.putExtra(Intent.EXTRA_STREAM, uri);
-        startActivity(Intent.createChooser(share, "Compartir resultado"));
+        Intent shareIntent = new Intent(android.content.Intent.ACTION_SEND);
+        shareIntent.setType("text/plain");
+        shareIntent.putExtra(android.content.Intent.EXTRA_STREAM, uri);
+        PackageManager pm = getApplicationContext().getPackageManager();
+        List<ResolveInfo> activityList = pm.queryIntentActivities(shareIntent, 0);
+        for (final ResolveInfo app : activityList) {
+            if ((app.activityInfo.name).contains("facebook")) {
+                final ActivityInfo activity = app.activityInfo;
+                final ComponentName name = new ComponentName(
+                        activity.applicationInfo.packageName,
+                        activity.name);
+                shareIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+                shareIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
+                        | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                shareIntent.setComponent(name);
+                startActivity(shareIntent);
+            }
+        }
+
+        /*try {
+            Intent share = new Intent(Intent.ACTION_SEND);
+            share.setType("image/jpeg");
+            share.setPackage("com.facebook.katana");
+            share.putExtra(Intent.EXTRA_STREAM, uri);
+            startActivity(share);
+        } catch (Exception e) {
+            // If we failed (not native FB app installed), try share through SEND
+            Intent share = new Intent(Intent.ACTION_SEND);
+            share.setType("image/jpeg");
+            share.putExtra(Intent.EXTRA_STREAM, uri);
+//            startActivity(Intent.createChooser(share, "Compartir resultado"));
+            startActivity(share);
+        }*/
+
+
+//        share.putExtra(Intent.EXTRA_STREAM, uri);
+//        startActivity(Intent.createChooser(share, "Compartir resultado"));
     }
 
     @Override

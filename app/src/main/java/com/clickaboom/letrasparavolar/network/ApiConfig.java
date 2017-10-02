@@ -40,7 +40,7 @@ public class ApiConfig {
     public static final String nahuatlismosGame = baseUrl + "/api/nahuatlismos/";
     public static final String curioseandoTests = baseUrl + "/api/curioseando/tests/";
     public static final String curioseandoTestQuestions = baseUrl + "/api/curioseando/preguntas/";
-    public static final String curioseandoTestResult = baseUrl + "/api/curioseando/resultado/";
+    public static final String curioseandoTestResult = baseUrl + "/api/curioseando/resultado";
 
     // Participa
     public static final String participa = baseUrl + "/api/participa/save/";

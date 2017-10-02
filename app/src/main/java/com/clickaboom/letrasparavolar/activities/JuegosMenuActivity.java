@@ -73,23 +73,23 @@ public class JuegosMenuActivity extends AppCompatActivity
         mRecyclerView = (RecyclerView) findViewById(R.id.games_recycler);
         mRecyclerView.setLayoutManager(mManager);
 
-        // Nahuatlismos
-        mGamesList.add(new Game(
-                -1,
-                "Nahuatlismos",
-                "Relaciona las palabras de origen prehispánico con su significado.",
-                R.drawable.juego_1,
-                JUEGO_A,
-                R.color.nahuatlismos_btn));
+            // Nahuatlismos
+            mGamesList.add(new Game(
+                    -1,
+                    "Nahuatlismos",
+                    "Relaciona las palabras de origen prehispánico con su significado.",
+                    R.drawable.juego_1,
+                    JUEGO_A,
+                    R.color.nahuatlismos_btn));
 
-        // Curioseando
-         mGamesList.add(new Game(
-                 -1,
-                 "Curioseando",
-                 "Contesta los diferentes tests que tenemos para ti.",
-                 R.drawable.juego_2,
-                 JUEGO_B,
-                 R.color.curioseando_btn));
+            // Curioseando
+             mGamesList.add(new Game(
+                     -1,
+                     "Curioseando",
+                     "Contesta los diferentes tests que tenemos para ti.",
+                     R.drawable.juego_2,
+                     JUEGO_B,
+                     R.color.curioseando_btn));
 
         // specify an adapter (see also next example)
         mAdapter = new GamesListAdapter(mGamesList, mContext);
