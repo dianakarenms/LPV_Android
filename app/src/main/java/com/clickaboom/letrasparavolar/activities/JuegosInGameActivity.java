@@ -1,12 +1,14 @@
 package com.clickaboom.letrasparavolar.activities;
 
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -17,8 +19,10 @@ import android.support.v4.content.IntentCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -31,6 +35,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.adapters.InGameAdapter;
+import com.clickaboom.letrasparavolar.models.ImgUrlResponse;
 import com.clickaboom.letrasparavolar.models.game.Game;
 import com.clickaboom.letrasparavolar.models.game.Pregunta;
 import com.clickaboom.letrasparavolar.models.game.ResNahuatlismos;
@@ -43,6 +48,8 @@ import com.clickaboom.letrasparavolar.network.ApiSingleton;
 import com.clickaboom.letrasparavolar.network.GsonRequest;
 import com.squareup.picasso.Picasso;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -50,6 +57,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static android.R.attr.data;
 import static com.clickaboom.letrasparavolar.network.DownloadFile.isStoragePermissionGranted;
 
 public class JuegosInGameActivity extends AppCompatActivity
@@ -308,10 +316,11 @@ public class JuegosInGameActivity extends AppCompatActivity
 
     private void shareImage(){
         View view;
-        if(mGame.gameType.equals(JuegosMenuActivity.JUEGO_A))
+        /*if(mGame.gameType.equals(JuegosMenuActivity.JUEGO_A))
             view = findViewById(R.id.nahuatlismos_result);
         else
-            view = findViewById(R.id.curioseando_result);
+            view = findViewById(R.id.curioseando_result);*/
+        view  = findViewById(R.id.main_container);
 
         findViewById(R.id.back_btn).setVisibility(View.GONE);
         view.setDrawingCacheEnabled(true);
@@ -334,12 +343,13 @@ public class JuegosInGameActivity extends AppCompatActivity
         findViewById(R.id.back_btn).setVisibility(View.VISIBLE);
 
         Intent shareIntent = new Intent(android.content.Intent.ACTION_SEND);
-        shareIntent.setType("text/plain");
+        shareIntent.setType("image/jpeg");
         shareIntent.putExtra(android.content.Intent.EXTRA_STREAM, uri);
         PackageManager pm = getApplicationContext().getPackageManager();
         List<ResolveInfo> activityList = pm.queryIntentActivities(shareIntent, 0);
+        boolean isFacebookAppInstalled = false;
         for (final ResolveInfo app : activityList) {
-            if ((app.activityInfo.name).contains("facebook")) {
+            if ((app.activityInfo.name).contains("com.facebook.composer.shareintent")) {
                 final ActivityInfo activity = app.activityInfo;
                 final ComponentName name = new ComponentName(
                         activity.applicationInfo.packageName,
@@ -349,7 +359,16 @@ public class JuegosInGameActivity extends AppCompatActivity
                         | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
                 shareIntent.setComponent(name);
                 startActivity(shareIntent);
+                isFacebookAppInstalled = true;
             }
+        }
+
+        if(!isFacebookAppInstalled) {
+//            dataImgToImgUrl(uploadImages(mContext, uri));
+//            String sharerUrl = "https://www.facebook.com/sharer/sharer.php?u=" + "https://beebom-redkapmedia.netdna-ssl.com/wp-content/uploads/2016/01/Reverse-Image-Search-Engines-Apps-And-Its-Uses-2016.jpg";
+//            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(sharerUrl));
+//            startActivity(intent);
+            Toast.makeText(mContext, "Necesitas instalar la aplicación de Facebook para compartir", Toast.LENGTH_LONG).show();
         }
 
         /*try {
@@ -370,6 +389,89 @@ public class JuegosInGameActivity extends AppCompatActivity
 
 //        share.putExtra(Intent.EXTRA_STREAM, uri);
 //        startActivity(Intent.createChooser(share, "Compartir resultado"));
+    }
+
+    private void dataImgToImgUrl(String uri) {
+        Map<String, String> params = new HashMap<>();
+        params.put("image", uri);
+
+        // Access the RequestQueue through your singleton class.
+        ApiSingleton.getInstance(mContext)
+                .addToRequestQueue(new GsonRequest("http://data-uri-to-img-url.herokuapp.com/images.json",
+                        ImgUrlResponse.class,
+                        Request.Method.POST,
+                        null, params,
+                        new Response.Listener() {
+                            @Override
+                            public void onResponse(Object response) {
+                                Log.d(TAG, response.toString());
+                                String url = ((ImgUrlResponse) response).url;
+                                String sharerUrl = "https://www.facebook.com/sharer/sharer.php?u=" + url;
+                                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(sharerUrl));
+                                startActivity(intent);
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Log.d(TAG, error.toString());
+                    }
+                }));
+    }
+
+    private String uploadImages(Context context, Uri filePath) {
+        String imageString = "", imgType;
+        imgType = getMimeType(context, filePath);
+
+        try {
+            //Getting the Bitmap from Gallery
+            Bitmap bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), filePath);
+            imageString = getBase64StringImage(bitmap);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return "data:" + imgType + ";base64," + imageString;
+    }
+
+    public static String getBase64StringImage(Bitmap bmp) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] imageBytes = baos.toByteArray();
+        String encodedImage = Base64.encodeToString(imageBytes, Base64.DEFAULT);
+        return encodedImage;
+    }
+
+    public static String getMimeType(Context context, Uri uriImage) {
+        String strMimeType = "";
+        Cursor cursor = context.getContentResolver().query(uriImage,
+                new String[]{MediaStore.MediaColumns.MIME_TYPE},
+                null, null, null);
+
+        if (cursor != null && cursor.moveToNext()) {
+            strMimeType = cursor.getString(0);
+        }
+
+        if (strMimeType.isEmpty()) {
+            String type = null;
+            String extension = MimeTypeMap.getFileExtensionFromUrl(String.valueOf(uriImage));
+            if (extension != null) {
+                type = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+            }
+            return type;
+        }
+
+        if (strMimeType.isEmpty()) {
+            if (uriImage.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
+                ContentResolver cr = context.getContentResolver();
+                strMimeType = cr.getType(uriImage);
+            } else {
+                String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uriImage
+                        .toString());
+                strMimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(
+                        fileExtension.toLowerCase());
+            }
+        }
+        return strMimeType;
     }
 
     @Override
