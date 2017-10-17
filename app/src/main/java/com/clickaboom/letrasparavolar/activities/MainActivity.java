@@ -446,7 +446,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public void recyclerNavOnClick(View v) {
+    public void arrowsNavOnClick(View v) {
         int scrollPos = 0;
         switch (v.getId()) {
             case R.id.leyendas_next_btn:
