@@ -15,6 +15,8 @@ import com.clickaboom.letrasparavolar.R;
 import com.clickaboom.letrasparavolar.models.noticias.Noticia;
 import com.squareup.picasso.Picasso;
 
+import org.jsoup.Jsoup;
+
 /**
  * Created by Karencita on 15/05/2017.
  */
@@ -94,10 +96,14 @@ public class NoticiasDetailActivity extends AppCompatActivity implements View.On
         //text = text.replaceAll("\u00a0","");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             text = Html.fromHtml(text,  Html.FROM_HTML_MODE_COMPACT).toString().replaceAll("&nbsp;"," ");
-            textView.setText(text);
         } else {
             text = Html.fromHtml(text).toString().replaceAll("&nbsp;"," ");
-            textView.setText(text);
         }
+            text = html2text(text);
+            textView.setText(text);
+    }
+
+    public static String html2text(String html) {
+        return Jsoup.parse(html).text();
     }
 }
